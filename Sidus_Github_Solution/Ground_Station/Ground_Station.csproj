@@ -61,6 +61,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="cConfig.cs" />
+    <Compile Include="cUdpSniffer.cs" />
     <Compile Include="Ground_Station_Form.cs">
       <SubType>Form</SubType>
     </Compile>
