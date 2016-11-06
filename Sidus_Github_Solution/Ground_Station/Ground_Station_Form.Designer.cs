@@ -34,7 +34,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1314, 503);
+            this.ClientSize = new System.Drawing.Size(1267, 503);
             this.Name = "Ground_Station";
             this.Text = "Ground Station v0.1";
             this.ResumeLayout(false);
