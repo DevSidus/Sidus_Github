@@ -47,6 +47,8 @@ namespace Ground_Station
         }
         private void Ground_Station_Load(object sender, EventArgs e)
         {
+
+            //Bugun tum ekipce skype uzerinden görüntülü görüşme yaptık.
             bwUdpSniffer.RunWorkerAsync();
         }
     }
