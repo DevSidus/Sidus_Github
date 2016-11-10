@@ -34,7 +34,7 @@ contract, strict liability, or tort (including negligence or otherwise)
 arising in any way out of the use of this software, even if advised of
 the possibility of such damage. */
 
-#include "Agenda2.h"
+#include "Local_Agenda.h"
 
 struct tasks_struct {
 	void(*execution)(void);
@@ -47,12 +47,12 @@ struct tasks_struct {
 
 tasks_struct _tasks[MAX_TASKS];
 
-Agenda2::Agenda2() {
+Agenda::Agenda() {
 	for (int i = 0; i < MAX_TASKS; i++)
 		_tasks[i].empty = true;
 }
 
-int Agenda2::insert(void(*task)(void), unsigned long timing, boolean once) {
+int Agenda::insert(void(*task)(void), unsigned long timing, boolean once) {
 	for (byte i = 0; i < MAX_TASKS; i++)
 		if (_tasks[i].empty) {
 			_tasks[i].active = true;
@@ -66,20 +66,20 @@ int Agenda2::insert(void(*task)(void), unsigned long timing, boolean once) {
 	return -1;
 }
 
-void Agenda2::activate(int id) {
+void Agenda::activate(int id) {
 	_tasks[id].active = true;
 }
 
-void Agenda2::deactivate(int id) {
+void Agenda::deactivate(int id) {
 	_tasks[id].active = false;
 }
 
-void Agenda2::remove(int id) {
+void Agenda::remove(int id) {
 	_tasks[id].active = NULL;
 	_tasks[id].empty = true;
 }
 
-void Agenda2::update() {
+void Agenda::update() {
 	// Save time once to reduce execution time
 	unsigned long time = micros();
 	for (byte i = 0; i < MAX_TASKS; i++)
@@ -95,7 +95,7 @@ void Agenda2::update() {
 			}
 }
 
-void Agenda2::delay(unsigned long delay) {
+void Agenda::delay(unsigned long delay) {
 	unsigned long time = millis();
 	while ((unsigned long)(delay + time) > millis()) {
 		this->update();
@@ -103,7 +103,7 @@ void Agenda2::delay(unsigned long delay) {
 	}
 }
 
-void Agenda2::delay_microseconds(unsigned long delay) {
+void Agenda::delay_microseconds(unsigned long delay) {
 	unsigned long time = micros();
 	while ((unsigned long)(delay + time) > micros()) {
 		this->update();

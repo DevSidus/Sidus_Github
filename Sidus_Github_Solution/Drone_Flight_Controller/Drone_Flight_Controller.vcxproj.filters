@@ -21,12 +21,12 @@
     <ClInclude Include="__vm\.Drone_Flight_Controller.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Agenda2.h">
+    <ClInclude Include="Local_Agenda.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Agenda2.cpp">
+    <ClCompile Include="Local_Agenda.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

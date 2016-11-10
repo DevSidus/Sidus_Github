@@ -82,11 +82,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Agenda2.h" />
+    <ClInclude Include="Local_Agenda.h" />
     <ClInclude Include="__vm\.Drone_Flight_Controller.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Agenda2.cpp" />
+    <ClCompile Include="Local_Agenda.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

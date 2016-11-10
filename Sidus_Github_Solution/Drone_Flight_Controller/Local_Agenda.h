@@ -47,9 +47,9 @@ the possibility of such damage. */
 
 #define MAX_TASKS 20
 
-class Agenda2 {
+class Agenda {
 public:
-	Agenda2();
+	Agenda();
 	int insert(void(*task)(void), unsigned long timing, boolean once = false);
 	void remove(int id);
 	void activate(int id);

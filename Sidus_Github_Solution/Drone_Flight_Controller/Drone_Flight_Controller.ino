@@ -4,9 +4,10 @@
  Author:	SIDUS
 */
 
-#include "Agenda2.h"
+#include "Local_Agenda.h"
+
 //Global Declarations
-Agenda2 scheduler;
+Agenda scheduler;
 int counter = 0;
 int ledPin = 5;
 
