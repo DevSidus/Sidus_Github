@@ -24,9 +24,24 @@
     <ClInclude Include="Local_Agenda.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cMsgT01.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cMsgR01.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Local_Agenda.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cMsgT01.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cMsgR01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
