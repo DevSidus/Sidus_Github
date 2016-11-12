@@ -10,12 +10,14 @@ This header file define all the configurable variables including constants, pin 
 
 
 
+
 //Pin Definitions
 #define PIN_LED		5
 
 
 
 //Constant Variables
+#define SERIAL_PACKET_SIZE	10
 
 
 //Global Variable Declarations

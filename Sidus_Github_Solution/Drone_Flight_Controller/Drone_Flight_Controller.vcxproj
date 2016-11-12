@@ -85,12 +85,14 @@
     <ClInclude Include="cMsgR01.h" />
     <ClInclude Include="cMsgT01.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="cSerialParse.h" />
     <ClInclude Include="Local_Agenda.h" />
     <ClInclude Include="__vm\.Drone_Flight_Controller.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cMsgR01.cpp" />
     <ClCompile Include="cMsgT01.cpp" />
+    <ClCompile Include="cSerialParse.cpp" />
     <ClCompile Include="Local_Agenda.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

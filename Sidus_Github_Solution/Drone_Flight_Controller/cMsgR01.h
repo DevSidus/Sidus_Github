@@ -14,7 +14,7 @@ class cMsgR01
 public:
 	cMsgR01();
 	structMsgR01 message;
-	char dataBytes[sizeof(message)];
+	unsigned char dataBytes[sizeof(message)];
 	void getPacket();
 	void setPacket();
 	~cMsgR01();

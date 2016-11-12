@@ -33,6 +33,9 @@
     <ClInclude Include="cMsgR01.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cSerialParse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Local_Agenda.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cMsgR01.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cSerialParse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

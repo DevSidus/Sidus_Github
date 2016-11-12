@@ -10,15 +10,17 @@
 #include "Local_Agenda.h"
 #include "Config.h"
 #include "cMsgT01.h"
+#include "cMsgR01.h"
+#include "cSerialParse.h"
 
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
+cSerialParse serialParse(SERIAL_PACKET_SIZE, 'A', 'X', 'Y');
 
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-
 	Serial.begin(921600);
 	initWifi();
 
@@ -27,6 +29,7 @@ void setup() {
 
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 500000);
+	scheduler.insert(serialCheck, 50000);
 
 }
 
@@ -46,7 +49,7 @@ void test_task()
 	}
 	else
 	{
-		digitalWrite(PIN_LED, LOW);			
+		digitalWrite(PIN_LED, LOW);
 	}
 }
 
@@ -65,4 +68,20 @@ void initWifi()
 	Serial.println(WiFi.localIP());
 	*/
 	WiFi.disconnect(true);
+}
+
+void serialCheck()
+{
+	int numberofbytes = Serial.available();
+	if (numberofbytes > 0)
+	{
+		unsigned char buffer[SERIAL_PACKET_SIZE];
+		Serial.readBytes(buffer, numberofbytes);
+		serialParse.Push(buffer, numberofbytes);
+		Serial.write(buffer, numberofbytes);
+		if (serialParse.getParsedData(buffer, SERIAL_PACKET_SIZE))
+		{
+			Serial.println("tamam");
+		}
+	}
 }
