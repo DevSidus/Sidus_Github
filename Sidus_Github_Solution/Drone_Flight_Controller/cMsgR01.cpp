@@ -1,9 +1,10 @@
 #include "cMsgR01.h"
-
 cMsgR01::cMsgR01()
 {
 	//If required message member initialization can be done here
-
+	message.startChar1 = '$';
+	message.startChar2 = '<';
+	message.endChar = '>';
 }
 
 //Class destructor

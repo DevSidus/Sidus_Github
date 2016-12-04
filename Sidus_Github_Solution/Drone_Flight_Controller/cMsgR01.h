@@ -5,6 +5,9 @@ using namespace std;
 #pragma pack(push, 1)
 struct structMsgR01
 {
+	char startChar1;
+	char startChar2;
+	char endChar;
 };
 #pragma pack(pop)
 
