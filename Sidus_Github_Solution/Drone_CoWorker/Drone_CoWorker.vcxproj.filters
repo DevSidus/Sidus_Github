@@ -36,6 +36,9 @@
     <ClInclude Include="..\Drone_Flight_Controller\cSerialParse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Drone_Flight_Controller\Local_MS5611.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Drone_Flight_Controller\cMsgR01.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Drone_Flight_Controller\Local_Agenda.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Drone_Flight_Controller\Local_MS5611.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -13,7 +13,7 @@ This header file define all the configurable variables including constants, pin 
 
 //Pin Definitions
 #define PIN_LED				5
-#define PIN_MPU_POWER_ON	15
+
 
 
 
@@ -26,4 +26,5 @@ This header file define all the configurable variables including constants, pin 
 
 //Global Variable Declarations
 int test_task_counter = 0;
+
 

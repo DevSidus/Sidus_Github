@@ -8,8 +8,12 @@ This header file define all the configurable variables including constants, pin 
 #define WIFI_PASS	"ahmet(12082004)"
 #define UDP_PORT	8080
 
-
-
+//MS5611 Barometer Definitions
+#define		BAROMETER_INIT_THRESHOLD	2000
+#define		BARO_TEMP_MIN				-20
+#define		BARO_TEMP_MAX				100
+#define		BARO_ALT_MIN				-100
+#define		BARO_ALT_MAX				4000
 
 //Pin Definitions
 #define PIN_LED				5
@@ -52,6 +56,23 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 
 unsigned long mpuProcessStartTime = 0;
 short mpuProcessTaskDuration = 0;
-
-
 double mpuPitchAngle, mpuRollAngle, mpuYawAngle;
+
+double barometerTemp, barometerAlt;
+int32_t barometerPress;
+
+
+
+//Enum Type Definitions, two mcu config files may be merged!
+typedef enum
+{
+	statusType_Normal = 0,
+	statusType_NotInitiated = 1,
+	statusType_InitFail = 2,
+	statusType_Fail = 3,
+	statusType_UnreliableData = 4
+}statusType;
+
+//StatusType Definitions
+unsigned char statusBaro;
+unsigned char statusMpu;

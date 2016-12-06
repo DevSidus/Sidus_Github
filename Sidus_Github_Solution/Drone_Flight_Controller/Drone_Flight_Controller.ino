@@ -22,11 +22,6 @@ HardwareSerial Serial2(2);
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(921600);
-	
-	pinMode(16, INPUT);
-	pinMode(17, OUTPUT);
-
-
 	Serial2.begin(921600);
 	
 	//Configure all PINs
@@ -64,14 +59,23 @@ void serialCheck()
 	int numberofbytes = Serial2.available();
 	if (numberofbytes > 0)
 	{
-		unsigned char buffer[sizeof(MsgT01.message)];
-		Serial2.readBytes(buffer, numberofbytes);
-		serialParse.Push(buffer, numberofbytes);
-		//Serial.write(buffer, numberofbytes);
-		if (serialParse.getParsedData(MsgT01.dataBytes, sizeof(MsgT01.message)))
+		//If available number of bytes is less than our buffer size, normal case
+		if (numberofbytes <= sizeof(MsgT01.message) * 3)
 		{
-			MsgT01.setPacket();
-			Serial.println(MsgT01.message.mpuPitch * 180 / M_PI);
+			unsigned char buffer[sizeof(MsgT01.message) * 3];
+			Serial2.readBytes(buffer, numberofbytes);
+			serialParse.Push(buffer, numberofbytes);
+			if (serialParse.getParsedData(MsgT01.dataBytes, sizeof(MsgT01.message)))
+			{
+				MsgT01.setPacket();
+			}
+		}
+		//Else if buffer overflow, abnormal case
+		else
+		{
+			//Just read it
+			unsigned char buffer[sizeof(MsgT01.message) * 3];
+			Serial2.readBytes(buffer, sizeof(MsgT01.message) * 3);
 		}
 	}
 }
