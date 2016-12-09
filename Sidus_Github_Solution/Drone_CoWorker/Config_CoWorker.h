@@ -15,6 +15,10 @@ This header file define all the configurable variables including constants, pin 
 #define		BARO_ALT_MIN				-100
 #define		BARO_ALT_MAX				4000
 
+//HMC5883L Compass Definitions
+#define		COMPASS_OFFSET_X_DEFAULT	304
+#define		COMPASS_OFFSET_Y_DEFAULT	-360
+
 //Pin Definitions
 #define PIN_LED				5
 #define PIN_MPU_POWER_ON	16
@@ -58,8 +62,10 @@ unsigned long mpuProcessStartTime = 0;
 short mpuProcessTaskDuration = 0;
 double mpuPitchAngle, mpuRollAngle, mpuYawAngle;
 
-double barometerTemp, barometerAlt;
+float barometerTemp, barometerAlt;
 int32_t barometerPress;
+
+float compassHdg;
 
 
 
@@ -76,3 +82,4 @@ typedef enum
 //StatusType Definitions
 unsigned char statusBaro;
 unsigned char statusMpu;
+unsigned char statusCompass;

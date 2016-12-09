@@ -86,6 +86,7 @@
     <ClInclude Include="..\Drone_Flight_Controller\cMsgT01.h" />
     <ClInclude Include="..\Drone_Flight_Controller\cSerialParse.h" />
     <ClInclude Include="..\Drone_Flight_Controller\Local_Agenda.h" />
+    <ClInclude Include="..\Drone_Flight_Controller\Local_HMC5883L.h" />
     <ClInclude Include="..\Drone_Flight_Controller\Local_MS5611.h" />
     <ClInclude Include="Config_CoWorker.h" />
     <ClInclude Include="__vm\.Drone_CoWorker.vsarduino.h" />
@@ -95,6 +96,7 @@
     <ClCompile Include="..\Drone_Flight_Controller\cMsgT01.cpp" />
     <ClCompile Include="..\Drone_Flight_Controller\cSerialParse.cpp" />
     <ClCompile Include="..\Drone_Flight_Controller\Local_Agenda.cpp" />
+    <ClCompile Include="..\Drone_Flight_Controller\Local_HMC5883L.cpp" />
     <ClCompile Include="..\Drone_Flight_Controller\Local_MS5611.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

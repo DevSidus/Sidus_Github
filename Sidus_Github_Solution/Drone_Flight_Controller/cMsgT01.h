@@ -30,6 +30,11 @@ struct structMsgT01
 	float mpuPitch;
 	float mpuRoll;
 
+	float baroTemp;
+	float baroAlt;
+
+	float compassHdg;
+
 	/*Not needed for now, to be implemented if required
 	//Euler Angles(psi, theta, phi) in Radians
 	float mpuEulerPsi;

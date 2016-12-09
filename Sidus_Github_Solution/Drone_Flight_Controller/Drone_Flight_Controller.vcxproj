@@ -47,7 +47,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\Arduino\hardware\espressif\esp32\libraries\Wire\src;D:\Arduino\hardware\espressif\esp32\libraries\Wire\src\utility;D:\Arduino\libraries;D:\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;D:\Arduino\hardware\espressif\esp32\cores\esp32;D:\Arduino\hardware\espressif\esp32\cores\esp32\libb64;D:\Arduino\hardware\espressif\esp32\variants\esp32;D:\SIDUS_GITHUB\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\xtensa-esp32-elf\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\4.8.5\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\4.8.5\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Arduino\hardware\espressif\esp32\libraries\Wire\src;D:\Arduino\libraries;D:\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;D:\Arduino\hardware\espressif\esp32\cores\esp32;D:\Arduino\hardware\espressif\esp32\cores\esp32\libb64;D:\Arduino\hardware\espressif\esp32\variants\esp32;D:\SIDUS_GITHUB\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\xtensa-esp32-elf\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\4.8.5\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\4.8.5\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>D:\SIDUS_GITHUB\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller\__vm\.Drone_Flight_Controller.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <PreprocessorDefinitions>__ESP32_ESp32__;__ESP32_ESP32__;ESP_PLATFORM;HAVE_CONFIG_H;F_CPU=240000000L;ARDUINO=10609;ARDUINO_ESP32_DEV;ARDUINO_ARCH_ESP32;ESP32;__cplusplus=201103L;GCC_VERSION=40805;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -87,6 +87,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="cSerialParse.h" />
     <ClInclude Include="Local_Agenda.h" />
+    <ClInclude Include="Local_HMC5883L.h" />
     <ClInclude Include="Local_MS5611.h" />
     <ClInclude Include="__vm\.Drone_Flight_Controller.vsarduino.h" />
   </ItemGroup>
@@ -95,6 +96,7 @@
     <ClCompile Include="cMsgT01.cpp" />
     <ClCompile Include="cSerialParse.cpp" />
     <ClCompile Include="Local_Agenda.cpp" />
+    <ClCompile Include="Local_HMC5883L.cpp" />
     <ClCompile Include="Local_MS5611.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

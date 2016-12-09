@@ -46,6 +46,14 @@ void test_task()
 	if (test_task_counter % 2 == 0)
 	{
 		digitalWrite(PIN_LED, HIGH);
+		Serial.print("Mpu Pitch:");
+		Serial.print(MsgT01.message.mpuPitch*180/M_PI);
+		Serial.print("   Compass Hdg:");
+		Serial.print(MsgT01.message.compassHdg*180/M_PI);
+		Serial.print("   Baro Alt:");
+		Serial.print(MsgT01.message.baroAlt);
+		Serial.print("   Baro Temp:");
+		Serial.println(MsgT01.message.baroTemp);
 		
 	}
 	else
