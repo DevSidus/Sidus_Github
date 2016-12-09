@@ -14,6 +14,10 @@ This header file define all the configurable variables including constants, pin 
 //Pin Definitions
 #define PIN_LED				5
 
+#define		PIN_THR			36	
+#define		PIN_PITCH		37	
+#define		PIN_ROLL		38
+#define		PIN_YAW			39
 
 
 
@@ -27,4 +31,9 @@ This header file define all the configurable variables including constants, pin 
 //Global Variable Declarations
 int test_task_counter = 0;
 
+uint32_t startTime_Thr, dutyCycle_Thr;
+uint32_t startTime_Pitch, dutyCycle_Pitch;
+uint32_t startTime_Roll, dutyCycle_Roll;
+uint32_t startTime_Yaw, dutyCycle_Yaw;
 
+uint32_t rxLastDataTime;

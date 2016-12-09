@@ -26,6 +26,16 @@ void setup() {
 	
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
+	pinMode(PIN_THR, INPUT);
+	pinMode(PIN_PITCH, INPUT);
+	pinMode(PIN_ROLL, INPUT);
+	pinMode(PIN_YAW, INPUT);
+
+
+	attachInterrupt(PIN_THR, isrTHR, CHANGE);
+	attachInterrupt(PIN_PITCH, isrPITCH, CHANGE);
+	attachInterrupt(PIN_ROLL, isrROLL, CHANGE);
+	attachInterrupt(PIN_YAW, isrYAW, CHANGE);
 	
 
 	//Insert all tasks into scheduler
@@ -46,6 +56,7 @@ void test_task()
 	if (test_task_counter % 2 == 0)
 	{
 		digitalWrite(PIN_LED, HIGH);
+		/*
 		Serial.print("Mpu Pitch:");
 		Serial.print(MsgT01.message.mpuPitch*180/M_PI);
 		Serial.print("   Compass Hdg:");
@@ -54,6 +65,15 @@ void test_task()
 		Serial.print(MsgT01.message.baroAlt);
 		Serial.print("   Baro Temp:");
 		Serial.println(MsgT01.message.baroTemp);
+		*/
+		Serial.print("Thr:");
+		Serial.print(dutyCycle_Thr);
+		Serial.print("   Pitch:");
+		Serial.print(dutyCycle_Pitch);
+		Serial.print("   Roll:");
+		Serial.print(dutyCycle_Roll);
+		Serial.print("   Yaw:");
+		Serial.println(dutyCycle_Yaw);
 		
 	}
 	else
@@ -85,5 +105,51 @@ void serialCheck()
 			unsigned char buffer[sizeof(MsgT01.message) * 3];
 			Serial2.readBytes(buffer, sizeof(MsgT01.message) * 3);
 		}
+	}
+}
+
+void isrTHR()
+{
+	if (digitalRead(PIN_THR) == HIGH)
+	{
+		startTime_Thr = micros();
+	}
+	else
+	{
+		dutyCycle_Thr = micros() - startTime_Thr;
+	}
+	rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
+}
+void isrPITCH()
+{
+	if (digitalRead(PIN_PITCH) == HIGH)
+	{
+		startTime_Pitch = micros();
+	}
+	else
+	{
+		dutyCycle_Pitch = micros() - startTime_Pitch;
+	}
+}
+void isrROLL()
+{
+	if (digitalRead(PIN_ROLL) == HIGH)
+	{
+		startTime_Roll = micros();
+	}
+	else
+	{
+		dutyCycle_Roll = micros() - startTime_Roll;
+	}
+}
+void isrYAW()
+{
+	if (digitalRead(PIN_YAW) == HIGH)
+	{
+		startTime_Yaw = micros();
+	}
+	else
+	{
+		dutyCycle_Yaw = micros() - startTime_Yaw;
 	}
 }
