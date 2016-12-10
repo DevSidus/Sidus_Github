@@ -4,21 +4,18 @@
  Author:	SIDUS
  Description: This is the main code for Drone_Flight_Controller Project
 */
-
 //Local include class and files
 #include "Local_Agenda.h"
 #include "Config.h"
 #include "cMsgT01.h"
 #include "cMsgR01.h"
 #include "cSerialParse.h"
-
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
 cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT01.message.startChar2, MsgT01.message.endChar);
 HardwareSerial Serial2(2);
-
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(921600);
@@ -66,6 +63,7 @@ void test_task()
 		Serial.print("   Baro Temp:");
 		Serial.println(MsgT01.message.baroTemp);
 		*/
+		/*
 		Serial.print("Thr:");
 		Serial.print(dutyCycle_Thr);
 		Serial.print("   Pitch:");
@@ -74,6 +72,12 @@ void test_task()
 		Serial.print(dutyCycle_Roll);
 		Serial.print("   Yaw:");
 		Serial.println(dutyCycle_Yaw);
+		*/
+		Serial.print("Gps Data:");
+		Serial.print(MsgT01.message.gpsData);
+		Serial.print("   Baro Temp");
+		Serial.println(MsgT01.message.baroTemp);
+
 		
 	}
 	else

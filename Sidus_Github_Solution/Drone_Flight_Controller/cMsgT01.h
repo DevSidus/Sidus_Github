@@ -34,6 +34,8 @@ struct structMsgT01
 	float baroAlt;
 
 	float compassHdg;
+	
+	int gpsData;
 
 	/*Not needed for now, to be implemented if required
 	//Euler Angles(psi, theta, phi) in Radians
