@@ -241,7 +241,7 @@ void setMpuDataFieldsOfMessage()
 void serialTransmit()
 {
 	MsgT01.getPacket();
-	Serial.write(&MsgT01.dataBytes, sizeof(MsgT01.dataBytes));
+	Serial.write(MsgT01.dataBytes, sizeof(MsgT01.dataBytes));
 }
 
 bool initBarometer()
