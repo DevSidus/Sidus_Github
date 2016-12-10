@@ -47,7 +47,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Wire;E:\Arduino Sketches\libraries\I2Cdev;E:\Arduino Sketches\libraries\MPU6050;E:\Arduino Sketches\libraries\I2Cdev\utility;E:\Arduino Sketches\libraries\MPU6050\utility;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Wire\utility;D:\Arduino\libraries;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries;E:\Arduino Sketches\libraries;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\libb64;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\spiffs;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\umm_malloc;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu;D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_CoWorker;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2\xtensa-lx106-elf;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\lib\gcc\xtensa-lx106-elf\4.8.2\include;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\tools\sdk\include;D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Wire;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Wire\utility;D:\Arduino\libraries;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries;E:\Arduino Sketches\libraries;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\libb64;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\spiffs;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\umm_malloc;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu;D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_CoWorker;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2\xtensa-lx106-elf;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\lib\gcc\xtensa-lx106-elf\4.8.2\include;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\tools\sdk\include;D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>D:\SIDUS_GITHUB\Sidus_Github\Sidus_Github_Solution\Drone_CoWorker\__vm\.Drone_CoWorker.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <PreprocessorDefinitions>__ESP8266_ESp8266__;__ESP8266_ESP8266__;__ets__;ICACHE_FLASH;F_CPU=160000000L;LWIP_OPEN_SRC;ARDUINO=10609;ARDUINO_ESP8266_NODEMCU;ARDUINO_ARCH_ESP8266;ESP8266;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -86,7 +86,11 @@
     <ClInclude Include="..\Drone_Flight_Controller\cMsgT01.h" />
     <ClInclude Include="..\Drone_Flight_Controller\cSerialParse.h" />
     <ClInclude Include="..\Drone_Flight_Controller\Local_Agenda.h" />
+    <ClInclude Include="..\Drone_Flight_Controller\Local_helper_3dmath.h" />
     <ClInclude Include="..\Drone_Flight_Controller\Local_HMC5883L.h" />
+    <ClInclude Include="..\Drone_Flight_Controller\Local_I2Cdev.h" />
+    <ClInclude Include="..\Drone_Flight_Controller\Local_MPU6050.h" />
+    <ClInclude Include="..\Drone_Flight_Controller\Local_MPU6050_6Axis_MotionApps20.h" />
     <ClInclude Include="..\Drone_Flight_Controller\Local_MS5611.h" />
     <ClInclude Include="Config_CoWorker.h" />
     <ClInclude Include="__vm\.Drone_CoWorker.vsarduino.h" />
@@ -97,6 +101,8 @@
     <ClCompile Include="..\Drone_Flight_Controller\cSerialParse.cpp" />
     <ClCompile Include="..\Drone_Flight_Controller\Local_Agenda.cpp" />
     <ClCompile Include="..\Drone_Flight_Controller\Local_HMC5883L.cpp" />
+    <ClCompile Include="..\Drone_Flight_Controller\Local_I2Cdev.cpp" />
+    <ClCompile Include="..\Drone_Flight_Controller\Local_MPU6050.cpp" />
     <ClCompile Include="..\Drone_Flight_Controller\Local_MS5611.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -5,11 +5,10 @@
 */
 
 #include <Wire.h>
-#include <I2Cdev.h>
-#include <MPU6050_6Axis_MotionApps20.h>
-
 
 //Local include class and files
+#include "Local_I2Cdev.h"
+#include "Local_MPU6050_6Axis_MotionApps20.h"
 #include "Config_CoWorker.h"
 #include "cMsgR01.h"
 #include "cMsgT01.h"
@@ -56,7 +55,6 @@ void setup() {
 	initBarometer();
 	initCompass();
 }
-
 // the loop function runs over and over again until power down or reset
 void loop() {
 	//Just call scheduler update and let it do all the process

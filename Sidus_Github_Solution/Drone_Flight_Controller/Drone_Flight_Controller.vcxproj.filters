@@ -42,6 +42,18 @@
     <ClInclude Include="Local_HMC5883L.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Local_MPU6050.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Local_helper_3dmath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Local_MPU6050_6Axis_MotionApps20.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Local_I2Cdev.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Local_Agenda.cpp">
@@ -60,6 +72,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Local_HMC5883L.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Local_MPU6050.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Local_I2Cdev.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
