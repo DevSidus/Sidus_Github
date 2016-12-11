@@ -20,10 +20,11 @@ This header file define all the configurable variables including constants, pin 
 #define		COMPASS_OFFSET_Y_DEFAULT	-360
 
 //Pin Definitions
-#define PIN_LED				5
+#define PIN_LED				4
 #define PIN_MPU_POWER_ON	16
 #define PIN_MCU_SDA			12
 #define PIN_MCU_SCL			14
+
 
 
 

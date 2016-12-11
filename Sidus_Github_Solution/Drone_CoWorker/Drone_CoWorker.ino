@@ -22,7 +22,6 @@ Agenda scheduler;
 cMsgT01 MsgT01;
 cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgR01.message), MsgR01.message.startChar1, MsgR01.message.startChar2, MsgR01.message.endChar);
-
 MPU6050 mpu;
 MS5611 barometer;
 HMC5883L compass;
@@ -42,10 +41,9 @@ void setup() {
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
 
-
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 500000);
-	scheduler.insert(serialCheck, 50000);
+	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(processMpuTask, 17000);
 	scheduler.insert(serialTransmit, 20000);
 	scheduler.insert(updateBarometerData, 19000);
@@ -71,13 +69,23 @@ void serialCheck()
 	int numberofbytes = Serial.available();
 	if (numberofbytes > 0)
 	{
-		unsigned char buffer[sizeof(MsgR01.message)];
-		Serial.readBytes(buffer, numberofbytes);
-		serialParse.Push(buffer, numberofbytes);
-		Serial.write(buffer, numberofbytes);
-		if (serialParse.getParsedData(buffer, sizeof(MsgR01.message)))
+		//If available number of bytes is less than our buffer size, normal case
+		if (numberofbytes <= sizeof(MsgR01.message) * 3)
 		{
-			//Serial.println("tamam");
+			unsigned char buffer[sizeof(MsgR01.message) * 3];
+			Serial.readBytes(buffer, numberofbytes);
+			serialParse.Push(buffer, numberofbytes);
+			if (serialParse.getParsedData(MsgR01.dataBytes, sizeof(MsgR01.message)))
+			{
+				MsgR01.setPacket();
+			}
+		}
+		//Else if buffer overflow, abnormal case
+		else
+		{
+			//Just read it
+			unsigned char buffer[sizeof(MsgR01.message) * 3];
+			Serial.readBytes(buffer, sizeof(MsgR01.message) * 3);
 		}
 	}
 }
@@ -161,7 +169,6 @@ void processMpuTask()
 	{
 		initMPU();
 	}
-
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
 
@@ -197,7 +204,7 @@ void processMpuTask()
 		
 		//Set Mpu Data Fields of Message with Fresh Received Data
 		setMpuDataFieldsOfMessage();
-
+		analogWrite(4, 400);
 		mpuProcessTaskDuration = micros() - mpuProcessStartTime;
 	}
 }

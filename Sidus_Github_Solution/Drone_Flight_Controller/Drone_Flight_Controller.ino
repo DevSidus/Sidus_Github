@@ -4,6 +4,11 @@
  Author:	SIDUS
  Description: This is the main code for Drone_Flight_Controller Project
 */
+
+
+//Use ledc functions for motor pwm usage
+#include "esp32-hal-ledc.h"
+
 //Local include class and files
 #include "Local_Agenda.h"
 #include "Config.h"
@@ -16,6 +21,8 @@ cMsgT01 MsgT01;
 cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT01.message.startChar2, MsgT01.message.endChar);
 HardwareSerial Serial2(2);
+
+
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(921600);
@@ -27,20 +34,24 @@ void setup() {
 	pinMode(PIN_PITCH, INPUT);
 	pinMode(PIN_ROLL, INPUT);
 	pinMode(PIN_YAW, INPUT);
+	
+	ledcSetup(M1_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcAttachPin(PIN_M1, M1_CHANNEL);
 
 
 	attachInterrupt(PIN_THR, isrTHR, CHANGE);
 	attachInterrupt(PIN_PITCH, isrPITCH, CHANGE);
 	attachInterrupt(PIN_ROLL, isrROLL, CHANGE);
-	attachInterrupt(PIN_YAW, isrYAW, CHANGE);
-	
+	attachInterrupt(PIN_YAW, isrYAW, CHANGE);	
+
 
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
+	scheduler.insert(transmitSerialMessage, 18000);
+	scheduler.insert(runMotors, 20000);
 
 }
-
 // the loop function runs over and over again until power down or reset
 void loop() {
 	//Just call scheduler update and let it do all the process
@@ -73,10 +84,10 @@ void test_task()
 		Serial.print("   Yaw:");
 		Serial.println(dutyCycle_Yaw);
 		*/
-		Serial.print("Gps Data:");
-		Serial.print(MsgT01.message.gpsData);
-		Serial.print("   Baro Temp");
-		Serial.println(MsgT01.message.baroTemp);
+		Serial.print("Thr:");
+		Serial.print(MsgR01.message.rxThrottle);
+		Serial.print("   Pitch");
+		Serial.println(MsgR01.message.rxPitch);
 
 		
 	}
@@ -156,4 +167,22 @@ void isrYAW()
 	{
 		dutyCycle_Yaw = micros() - startTime_Yaw;
 	}
+}
+
+void transmitSerialMessage()
+{
+	MsgR01.message.rxThrottle = dutyCycle_Thr;
+	MsgR01.message.rxPitch = dutyCycle_Pitch;
+	MsgR01.message.rxRoll = dutyCycle_Roll;
+	MsgR01.message.rxYaw = dutyCycle_Yaw;
+
+	MsgR01.getPacket();
+	Serial2.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
+
+
+}
+
+void runMotors()
+{
+	ledcWrite(M1_CHANNEL, dutyCycle_Thr*3.3);
 }

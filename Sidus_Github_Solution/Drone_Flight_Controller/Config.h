@@ -19,7 +19,12 @@ This header file define all the configurable variables including constants, pin 
 #define		PIN_ROLL		38
 #define		PIN_YAW			39
 
+#define		PIN_M1			32
 
+#define		PWM_FREQ		50
+#define		PWM_DEPTH		16
+
+#define		M1_CHANNEL		1
 
 //Constant Variables
 #define SERIAL_PACKET_SIZE	103

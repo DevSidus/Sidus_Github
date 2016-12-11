@@ -7,6 +7,10 @@ struct structMsgR01
 {
 	char startChar1;
 	char startChar2;
+	short rxThrottle;
+	short rxPitch;
+	short rxRoll;
+	short rxYaw;
 	char endChar;
 };
 #pragma pack(pop)
