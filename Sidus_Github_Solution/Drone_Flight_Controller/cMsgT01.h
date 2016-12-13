@@ -1,5 +1,6 @@
 #pragma once
 #include <string.h>
+#include "cMsgUdpT01.h"
 using namespace std;
 
 #pragma pack(push, 1)
@@ -7,6 +8,8 @@ struct structMsgT01
 {
 	char startChar1;
 	char startChar2;
+
+	structMsgUdpT01 udpT01RelayPacket;
 
 	unsigned char mpuStatus;
 

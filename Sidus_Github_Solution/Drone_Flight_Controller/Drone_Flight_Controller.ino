@@ -12,6 +12,7 @@
 //Local include class and files
 #include "Local_Agenda.h"
 #include "Config.h"
+#include "cMsgUdpT01.h"
 #include "cMsgT01.h"
 #include "cMsgR01.h"
 #include "cSerialParse.h"
@@ -30,25 +31,22 @@ void setup() {
 	
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
-	pinMode(PIN_THR, INPUT);
-	pinMode(PIN_PITCH, INPUT);
-	pinMode(PIN_ROLL, INPUT);
-	pinMode(PIN_YAW, INPUT);
+	pinMode(PIN_RX_THR, INPUT);
+	pinMode(PIN_RX_PITCH, INPUT);
+	pinMode(PIN_RX_ROLL, INPUT);
+	pinMode(PIN_RX_YAW, INPUT);
 	
-	ledcSetup(M1_CHANNEL, PWM_FREQ, PWM_DEPTH);
-	ledcAttachPin(PIN_M1, M1_CHANNEL);
+	setupMotorPins();
 
-
-	attachInterrupt(PIN_THR, isrTHR, CHANGE);
-	attachInterrupt(PIN_PITCH, isrPITCH, CHANGE);
-	attachInterrupt(PIN_ROLL, isrROLL, CHANGE);
-	attachInterrupt(PIN_YAW, isrYAW, CHANGE);	
-
+	attachInterrupt(PIN_RX_THR, isrTHR, CHANGE);
+	attachInterrupt(PIN_RX_PITCH, isrPITCH, CHANGE);
+	attachInterrupt(PIN_RX_ROLL, isrROLL, CHANGE);
+	attachInterrupt(PIN_RX_YAW, isrYAW, CHANGE);	
 
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
-	scheduler.insert(transmitSerialMessage, 18000);
+	scheduler.insert(serialTransmit, 18000);
 	scheduler.insert(runMotors, 20000);
 
 }
@@ -56,6 +54,70 @@ void setup() {
 void loop() {
 	//Just call scheduler update and let it do all the process
 	scheduler.update();	
+}
+
+void setupMotorPins()
+{
+	ledcSetup(M1_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcSetup(M2_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcSetup(M3_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcSetup(M4_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcAttachPin(PIN_M1, M1_CHANNEL);
+	ledcAttachPin(PIN_M2, M2_CHANNEL);
+	ledcAttachPin(PIN_M3, M3_CHANNEL);
+	ledcAttachPin(PIN_M4, M4_CHANNEL);
+}
+
+void pwmMicroSeconds(int _pwm_channel, int _microseconds)
+{
+	ledcWrite(_pwm_channel, _microseconds*PWM_MICROSECONDS_TO_BITS);
+}
+
+//Interrupt Service Routine Functions, used for rx pwm inputs
+void isrTHR()
+{
+	if (digitalRead(PIN_RX_THR) == HIGH)
+	{
+		startTime_Thr = micros();
+	}
+	else
+	{
+		dutyCycle_Thr = micros() - startTime_Thr;
+	}
+	rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
+}
+void isrPITCH()
+{
+	if (digitalRead(PIN_RX_PITCH) == HIGH)
+	{
+		startTime_Pitch = micros();
+	}
+	else
+	{
+		dutyCycle_Pitch = micros() - startTime_Pitch;
+	}
+}
+void isrROLL()
+{
+	if (digitalRead(PIN_RX_ROLL) == HIGH)
+	{
+		startTime_Roll = micros();
+	}
+	else
+	{
+		dutyCycle_Roll = micros() - startTime_Roll;
+	}
+}
+void isrYAW()
+{
+	if (digitalRead(PIN_RX_YAW) == HIGH)
+	{
+		startTime_Yaw = micros();
+	}
+	else
+	{
+		dutyCycle_Yaw = micros() - startTime_Yaw;
+	}
 }
 
 void test_task()
@@ -89,7 +151,7 @@ void test_task()
 		Serial.print("   Pitch");
 		Serial.println(MsgR01.message.rxPitch);
 
-		
+
 	}
 	else
 	{
@@ -123,53 +185,7 @@ void serialCheck()
 	}
 }
 
-void isrTHR()
-{
-	if (digitalRead(PIN_THR) == HIGH)
-	{
-		startTime_Thr = micros();
-	}
-	else
-	{
-		dutyCycle_Thr = micros() - startTime_Thr;
-	}
-	rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
-}
-void isrPITCH()
-{
-	if (digitalRead(PIN_PITCH) == HIGH)
-	{
-		startTime_Pitch = micros();
-	}
-	else
-	{
-		dutyCycle_Pitch = micros() - startTime_Pitch;
-	}
-}
-void isrROLL()
-{
-	if (digitalRead(PIN_ROLL) == HIGH)
-	{
-		startTime_Roll = micros();
-	}
-	else
-	{
-		dutyCycle_Roll = micros() - startTime_Roll;
-	}
-}
-void isrYAW()
-{
-	if (digitalRead(PIN_YAW) == HIGH)
-	{
-		startTime_Yaw = micros();
-	}
-	else
-	{
-		dutyCycle_Yaw = micros() - startTime_Yaw;
-	}
-}
-
-void transmitSerialMessage()
+void serialTransmit()
 {
 	MsgR01.message.rxThrottle = dutyCycle_Thr;
 	MsgR01.message.rxPitch = dutyCycle_Pitch;
@@ -184,5 +200,11 @@ void transmitSerialMessage()
 
 void runMotors()
 {
-	ledcWrite(M1_CHANNEL, dutyCycle_Thr*3.3);
+	pwmMicroSeconds(M1_CHANNEL, dutyCycle_Thr);
+	pwmMicroSeconds(M2_CHANNEL, dutyCycle_Thr);
+	pwmMicroSeconds(M3_CHANNEL, dutyCycle_Thr);
+	pwmMicroSeconds(M4_CHANNEL, dutyCycle_Thr);
+
+
 }
+

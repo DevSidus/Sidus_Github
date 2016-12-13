@@ -54,6 +54,15 @@
     <ClInclude Include="..\Drone_Flight_Controller\Local_I2Cdev.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cUdpInterfaceClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Drone_Flight_Controller\cMsgUdpR01.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Drone_Flight_Controller\cMsgUdpT01.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Drone_Flight_Controller\cMsgR01.cpp">
@@ -78,6 +87,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Drone_Flight_Controller\Local_I2Cdev.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cUdpInterfaceClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Drone_Flight_Controller\cMsgUdpR01.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Drone_Flight_Controller\cMsgUdpT01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

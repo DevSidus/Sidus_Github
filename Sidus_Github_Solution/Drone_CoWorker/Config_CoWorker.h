@@ -7,6 +7,7 @@ This header file define all the configurable variables including constants, pin 
 #define WIFI_SSID	"AAGCA"
 #define WIFI_PASS	"ahmet(12082004)"
 #define UDP_PORT	8080
+#define DEFAULT_GROUND_STATION_IP	"192.168.1.41"
 
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000

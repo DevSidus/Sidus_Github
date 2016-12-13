@@ -5,6 +5,9 @@
 */
 
 #include <Wire.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
 
 //Local include class and files
 #include "Local_I2Cdev.h"
@@ -12,19 +15,25 @@
 #include "Config_CoWorker.h"
 #include "cMsgR01.h"
 #include "cMsgT01.h"
+#include "cMsgUdpR01.h"
+#include "cMsgUdpT01.h"
 #include "Local_Agenda.h"
 #include "cSerialParse.h"
 #include "Local_MS5611.h"
 #include "Local_HMC5883L.h"
+#include "cUdpInterfaceClass.h"
 
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
 cMsgR01 MsgR01;
+cMsgUdpR01 MsgUdpR01;
+cMsgUdpT01 MsgUdpT01;
 cSerialParse serialParse(sizeof(MsgR01.message), MsgR01.message.startChar1, MsgR01.message.startChar2, MsgR01.message.endChar);
 MPU6050 mpu;
 MS5611 barometer;
 HMC5883L compass;
+UdpInterfaceClass myUdp(WIFI_SSID, WIFI_PASS, UDP_PORT, DEFAULT_GROUND_STATION_IP);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -45,13 +54,20 @@ void setup() {
 	scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(processMpuTask, 17000);
+	scheduler.insert(setSerialTransmitDataFields, 20000);
 	scheduler.insert(serialTransmit, 20000);
 	scheduler.insert(updateBarometerData, 19000);
 	scheduler.insert(updateCompassData, 37000);
+	scheduler.insert(setUdpTransmitDataFields, 33000);
+	scheduler.insert(udpTransmit, 33000);
+	scheduler.insert(udpCheck, 25000);
 
 	initMPU();
 	initBarometer();
 	initCompass();
+
+
+	myUdp.initConnection(10000, false);
 }
 // the loop function runs over and over again until power down or reset
 void loop() {
@@ -62,32 +78,6 @@ void loop() {
 void test_task()
 {
 	//Serial.println(compassHdg);
-}
-
-void serialCheck()
-{
-	int numberofbytes = Serial.available();
-	if (numberofbytes > 0)
-	{
-		//If available number of bytes is less than our buffer size, normal case
-		if (numberofbytes <= sizeof(MsgR01.message) * 3)
-		{
-			unsigned char buffer[sizeof(MsgR01.message) * 3];
-			Serial.readBytes(buffer, numberofbytes);
-			serialParse.Push(buffer, numberofbytes);
-			if (serialParse.getParsedData(MsgR01.dataBytes, sizeof(MsgR01.message)))
-			{
-				MsgR01.setPacket();
-			}
-		}
-		//Else if buffer overflow, abnormal case
-		else
-		{
-			//Just read it
-			unsigned char buffer[sizeof(MsgR01.message) * 3];
-			Serial.readBytes(buffer, sizeof(MsgR01.message) * 3);
-		}
-	}
 }
 
 bool initMPU()
@@ -202,14 +192,11 @@ void processMpuTask()
 		mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 		mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 		
-		//Set Mpu Data Fields of Message with Fresh Received Data
-		setMpuDataFieldsOfMessage();
-		analogWrite(4, 400);
 		mpuProcessTaskDuration = micros() - mpuProcessStartTime;
 	}
 }
 
-void setMpuDataFieldsOfMessage()
+void setSerialTransmitDataFields()
 {
 	MsgT01.message.mpuGyroX = gg[0];
 	MsgT01.message.mpuGyroY = gg[1];
@@ -243,10 +230,59 @@ void setMpuDataFieldsOfMessage()
 
 }
 
+void serialCheck()
+{
+	int numberofbytes = Serial.available();
+	if (numberofbytes > 0)
+	{
+		//If available number of bytes is less than our buffer size, normal case
+		if (numberofbytes <= sizeof(MsgR01.message) * 3)
+		{
+			unsigned char buffer[sizeof(MsgR01.message) * 3];
+			Serial.readBytes(buffer, numberofbytes);
+			serialParse.Push(buffer, numberofbytes);
+			if (serialParse.getParsedData(MsgR01.dataBytes, sizeof(MsgR01.message)))
+			{
+				MsgR01.setPacket();
+			}
+		}
+		//Else if buffer overflow, abnormal case
+		else
+		{
+			//Just read it
+			unsigned char buffer[sizeof(MsgR01.message) * 3];
+			Serial.readBytes(buffer, sizeof(MsgR01.message) * 3);
+		}
+	}
+}
+
 void serialTransmit()
 {
 	MsgT01.getPacket();
 	Serial.write(MsgT01.dataBytes, sizeof(MsgT01.dataBytes));
+
+}
+
+void setUdpTransmitDataFields()
+{
+	MsgUdpR01.message.serialR01RelayPacket = MsgR01.message;
+
+}
+
+void udpTransmit()
+{
+	MsgUdpR01.getPacket();
+	myUdp.sendPacket(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+}
+
+void udpCheck()
+{
+	if (myUdp.udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
+	{
+		myUdp.udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
+		MsgUdpT01.setPacket();
+	}
+
 }
 
 bool initBarometer()
