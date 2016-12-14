@@ -54,6 +54,9 @@
     <ClInclude Include="Local_I2Cdev.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NewPing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Local_Agenda.cpp">

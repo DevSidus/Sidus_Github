@@ -5,11 +5,15 @@
  Description: This is the main code for Drone_Flight_Controller Project
 */
 //Local include class and files
+#include "Ultrasonic_Sensor.h"
 #include "Local_Agenda.h"
 #include "Config.h"
 #include "cMsgT01.h"
 #include "cMsgR01.h"
 #include "cSerialParse.h"
+#include "NewPing.h"
+
+
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
@@ -17,6 +21,13 @@ cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT01.message.startChar2, MsgT01.message.endChar);
 HardwareSerial Serial2(2);
 // the setup function runs once when you press reset or power the board
+
+//Definitions for USensor
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+unsigned int pingSpeed = 50; // How frequently are we going to send out a ping (in milliseconds). 50ms would be 20 times a second.
+unsigned long pingTimer;     // Holds the next ping time.
+
+
 void setup() {
 	Serial.begin(921600);
 	Serial2.begin(921600);
@@ -28,6 +39,13 @@ void setup() {
 	pinMode(PIN_ROLL, INPUT);
 	pinMode(PIN_YAW, INPUT);
 
+	//uSonic -AKÝF-
+	pinMode(TRIGGER_PIN, OUTPUT);  //sets trigger as output
+	pinMode(ECHO_PIN, INPUT);      //sets echo as input
+	pingTimer = millis(); // Start now.
+	
+	
+
 
 	attachInterrupt(PIN_THR, isrTHR, CHANGE);
 	attachInterrupt(PIN_PITCH, isrPITCH, CHANGE);
@@ -38,7 +56,7 @@ void setup() {
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
-
+	scheduler.insert(uSonic, 15000);
 }
 
 // the loop function runs over and over again until power down or reset
@@ -108,6 +126,8 @@ void serialCheck()
 			//Just read it
 			unsigned char buffer[sizeof(MsgT01.message) * 3];
 			Serial2.readBytes(buffer, sizeof(MsgT01.message) * 3);
+
+		
 		}
 	}
 }
@@ -155,5 +175,25 @@ void isrYAW()
 	else
 	{
 		dutyCycle_Yaw = micros() - startTime_Yaw;
+	}
+}
+
+void uSonic()
+{
+	
+	if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.
+		pingTimer += pingSpeed;      // Set the next ping time.
+		sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
+	}
+}
+
+void echoCheck()
+{ // Timer2 interrupt calls this function every 24uS where you can check the ping status.
+				  
+	if (sonar.check_timer()) { // This is how you check to see if the ping was received.
+							   // Here's where you can add code.
+		Serial.print("Ping: ");
+		Serial.print(sonar.ping_result / US_ROUNDTRIP_CM); // Ping returned, uS result in ping_result, convert to cm with US_ROUNDTRIP_CM.
+		Serial.println("cm");
 	}
 }
