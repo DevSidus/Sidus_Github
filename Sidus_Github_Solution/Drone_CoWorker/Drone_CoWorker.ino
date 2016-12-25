@@ -44,12 +44,12 @@ void setup() {
 
 
 	//Insert all tasks into scheduler
-	scheduler.insert(test_task, 500000);
-	scheduler.insert(serialCheck, 50000);
+	//scheduler.insert(test_task, 500000);
+	//scheduler.insert(serialCheck, 50000);
 	scheduler.insert(processMpuTask, 17000);
-	scheduler.insert(serialTransmit, 20000);
-	scheduler.insert(updateBarometerData, 19000);
-	scheduler.insert(updateCompassData, 37000);
+	//scheduler.insert(serialTransmit, 20000);
+	//scheduler.insert(updateBarometerData, 19000);
+	//scheduler.insert(updateCompassData, 37000);
 
 	initMPU();
 	initBarometer();
@@ -152,9 +152,12 @@ bool initMPU()
 
 void processMpuTask()
 {
+	Serial.write("processMPUTask Baþlatýldý (bykif)");
 
 	//get INT_STATUS byte
 	mpuIntStatus = mpu.getIntStatus();
+
+	Serial.write("in status (bykif)");
 
 	//If mpu connection is lost, re initialize mpu, check the code mpuIntStatus statement again!
 	if (mpuIntStatus == 0 || !mpuStatus)
