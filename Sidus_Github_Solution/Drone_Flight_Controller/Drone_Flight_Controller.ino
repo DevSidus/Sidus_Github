@@ -178,7 +178,7 @@ void isrYAW()
 	}
 }
 
-void uSonic()
+void uSonic()  // ultrasonic sensör için
 {
 	
 	if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.
