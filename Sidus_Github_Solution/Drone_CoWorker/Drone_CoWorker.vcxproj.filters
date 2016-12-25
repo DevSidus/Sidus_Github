@@ -63,6 +63,9 @@
     <ClInclude Include="..\Drone_Flight_Controller\cMsgUdpT01.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Drone_Flight_Controller\structMsgCoWorkerTx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Drone_Flight_Controller\cMsgR01.cpp">

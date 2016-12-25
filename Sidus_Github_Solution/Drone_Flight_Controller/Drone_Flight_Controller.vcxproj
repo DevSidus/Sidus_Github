@@ -95,6 +95,7 @@
     <ClInclude Include="Local_MPU6050.h" />
     <ClInclude Include="Local_MPU6050_6Axis_MotionApps20.h" />
     <ClInclude Include="Local_MS5611.h" />
+    <ClInclude Include="structMsgCoWorkerTx.h" />
     <ClInclude Include="__vm\.Drone_Flight_Controller.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>

@@ -60,6 +60,9 @@
     <ClInclude Include="cMsgUdpT01.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="structMsgCoWorkerTx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Local_Agenda.cpp">

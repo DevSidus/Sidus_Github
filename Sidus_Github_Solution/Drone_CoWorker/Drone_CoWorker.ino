@@ -3,7 +3,6 @@
  Created:	12/2/2016 6:37:46 PM
  Author:	SIDUS
 */
-
 #include <Wire.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
@@ -13,6 +12,7 @@
 #include "Local_I2Cdev.h"
 #include "Local_MPU6050_6Axis_MotionApps20.h"
 #include "Config_CoWorker.h"
+#include "structMsgCoWorkerTx.h"
 #include "cMsgR01.h"
 #include "cMsgT01.h"
 #include "cMsgUdpR01.h"
@@ -25,6 +25,7 @@
 
 //Global Class Definitions
 Agenda scheduler;
+structMsgCoWorkerTx MsgCoWorkerTx;
 cMsgT01 MsgT01;
 cMsgR01 MsgR01;
 cMsgUdpR01 MsgUdpR01;
@@ -198,35 +199,31 @@ void processMpuTask()
 
 void setSerialTransmitDataFields()
 {
-	MsgT01.message.mpuGyroX = gg[0];
-	MsgT01.message.mpuGyroY = gg[1];
-	MsgT01.message.mpuGyroZ = gg[2];
+	MsgCoWorkerTx.mpuGyroX = gg[0];
+	MsgCoWorkerTx.mpuGyroY = gg[1];
+	MsgCoWorkerTx.mpuGyroZ = gg[2];
 
-	MsgT01.message.mpuAccX = aa.x;
-	MsgT01.message.mpuAccY = aa.y;
-	MsgT01.message.mpuAccZ = aa.z;
+	MsgCoWorkerTx.mpuAccX = aa.x;
+	MsgCoWorkerTx.mpuAccY = aa.y;
+	MsgCoWorkerTx.mpuAccZ = aa.z;
 
-	MsgT01.message.mpuAccRealX = aaReal.x;
-	MsgT01.message.mpuAccRealY = aaReal.y;
-	MsgT01.message.mpuAccRealZ = aaReal.z;
+	MsgCoWorkerTx.mpuAccRealX = aaReal.x;
+	MsgCoWorkerTx.mpuAccRealY = aaReal.y;
+	MsgCoWorkerTx.mpuAccRealZ = aaReal.z;
 
-	MsgT01.message.mpuYaw = ypr[0];
-	MsgT01.message.mpuPitch = ypr[1];
-	MsgT01.message.mpuRoll = ypr[2];
+	MsgCoWorkerTx.mpuYaw = ypr[0];
+	MsgCoWorkerTx.mpuPitch = ypr[1];
+	MsgCoWorkerTx.mpuRoll = ypr[2];
 
-	MsgT01.message.baroTemp = barometerTemp;
-	MsgT01.message.baroAlt = barometerAlt;
+	MsgCoWorkerTx.baroTemp = barometerTemp;
+	MsgCoWorkerTx.baroAlt = barometerAlt;
 
-	MsgT01.message.compassHdg = compassHdg;
+	MsgCoWorkerTx.compassHdg = compassHdg;
 
-	MsgT01.message.gpsData = 7777;
+	MsgCoWorkerTx.gpsData = 7777;
 
-	//Not needed for now, to be implemented if required
-	/*
-	MsgT01.message.mpuEulerPsi = 0;
-	MsgT01.message.mpuEulerTheta = 0;
-	MsgT01.message.mpuEulerPhi = 0;
-	*/
+	MsgT01.message.coWorkerTxPacket = MsgCoWorkerTx;
+	MsgT01.message.udpT01RelayPacket = MsgUdpT01.message;
 
 }
 

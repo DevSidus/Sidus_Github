@@ -12,9 +12,10 @@
 //Local include class and files
 #include "Local_Agenda.h"
 #include "Config.h"
-#include "cMsgUdpT01.h"
+#include "structMsgCoWorkerTx.h"
 #include "cMsgT01.h"
 #include "cMsgR01.h"
+#include "cMsgUdpT01.h"
 #include "cSerialParse.h"
 //Global Class Definitions
 Agenda scheduler;
@@ -126,16 +127,16 @@ void test_task()
 	if (test_task_counter % 2 == 0)
 	{
 		digitalWrite(PIN_LED, HIGH);
-		/*
+		
 		Serial.print("Mpu Pitch:");
-		Serial.print(MsgT01.message.mpuPitch*180/M_PI);
+		Serial.print(MsgT01.message.coWorkerTxPacket.mpuPitch*180/M_PI);
 		Serial.print("   Compass Hdg:");
-		Serial.print(MsgT01.message.compassHdg*180/M_PI);
+		Serial.print(MsgT01.message.coWorkerTxPacket.compassHdg*180/M_PI);
 		Serial.print("   Baro Alt:");
-		Serial.print(MsgT01.message.baroAlt);
+		Serial.print(MsgT01.message.coWorkerTxPacket.baroAlt);
 		Serial.print("   Baro Temp:");
-		Serial.println(MsgT01.message.baroTemp);
-		*/
+		Serial.println(MsgT01.message.coWorkerTxPacket.baroTemp);
+		
 		/*
 		Serial.print("Thr:");
 		Serial.print(dutyCycle_Thr);
@@ -146,11 +147,12 @@ void test_task()
 		Serial.print("   Yaw:");
 		Serial.println(dutyCycle_Yaw);
 		*/
+		/*
 		Serial.print("Thr:");
 		Serial.print(MsgR01.message.rxThrottle);
 		Serial.print("   Pitch");
 		Serial.println(MsgR01.message.rxPitch);
-
+		*/
 
 	}
 	else
