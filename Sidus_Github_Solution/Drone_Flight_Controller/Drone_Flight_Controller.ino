@@ -46,15 +46,31 @@ void setup() {
 
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 500000);
+	scheduler.insert(mapRxDCtoCmd, 20000);
 	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(serialTransmit, 18000);
 	scheduler.insert(runMotors, 20000);
+	scheduler.insert(checkRxStatus, 1000000);
+
+	initVariables();
 
 }
 // the loop function runs over and over again until power down or reset
 void loop() {
 	//Just call scheduler update and let it do all the process
 	scheduler.update();	
+}
+
+void initVariables()
+{
+	statusQuad = modeQuadSAFE;
+	statusRx = statusType_NotInitiated;
+
+	startTime_Thr = micros();
+	startTime_Pitch = micros();
+	startTime_Roll = micros();
+	startTime_Yaw = micros();
+
 }
 
 void setupMotorPins()
@@ -74,6 +90,20 @@ void pwmMicroSeconds(int _pwm_channel, int _microseconds)
 	ledcWrite(_pwm_channel, _microseconds*PWM_MICROSECONDS_TO_BITS);
 }
 
+float mapping(float input, float inputMin, float inputMax, float outputMin, float outputMax)
+{
+	float result = 0;
+
+	if (input < inputMin)
+		input = inputMin;
+	else if (input>inputMax)
+		input = inputMax;
+	else
+	{
+		result = outputMin + (input - inputMin) / (inputMax - inputMin) * (outputMax - outputMin);
+	}
+	return result;
+}
 //Interrupt Service Routine Functions, used for rx pwm inputs
 void isrTHR()
 {
@@ -189,10 +219,18 @@ void serialCheck()
 
 void serialTransmit()
 {
+	MsgR01.message.statusQuad = statusQuad;
+	MsgR01.message.statusRx = statusRx;
+	/*
 	MsgR01.message.rxThrottle = dutyCycle_Thr;
 	MsgR01.message.rxPitch = dutyCycle_Pitch;
 	MsgR01.message.rxRoll = dutyCycle_Roll;
 	MsgR01.message.rxYaw = dutyCycle_Yaw;
+	*/
+	MsgR01.message.rxThrottle = cmdThr;
+	MsgR01.message.rxPitch = cmdPitch;
+	MsgR01.message.rxRoll = cmdRoll;
+	MsgR01.message.rxYaw = cmdYaw;
 
 	MsgR01.getPacket();
 	Serial2.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
@@ -207,6 +245,35 @@ void runMotors()
 	pwmMicroSeconds(M3_CHANNEL, dutyCycle_Thr);
 	pwmMicroSeconds(M4_CHANNEL, dutyCycle_Thr);
 
+}
 
+void checkRxStatus()
+{
+	if (millis() - rxLastDataTime > RX_DATATIME_THESHOLD)
+	{
+		statusRx = statusType_Fail;
+	}
+	else
+	{
+		statusRx = statusType_Normal;
+	}
+}
+
+void mapRxDCtoCmd()
+{
+	if (statusRx == statusType_Normal)
+	{
+		cmdPitch = mapping(dutyCycle_Pitch, DC_PITCH_MIN, DC_PITCH_MAX, CMD_PITCH_MIN, CMD_PITCH_MAX);
+		cmdRoll = mapping(dutyCycle_Roll, DC_ROLL_MIN, DC_ROLL_MAX, CMD_ROLL_MIN, CMD_ROLL_MAX);
+		cmdYaw = mapping(dutyCycle_Yaw, DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
+		cmdThr = mapping(dutyCycle_Thr, DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
+	}
+	else
+	{
+		cmdPitch = 0;
+		cmdRoll = 0;
+		cmdYaw = 0;
+		cmdThr = CMD_THR_MIN;
+	}
 }
 

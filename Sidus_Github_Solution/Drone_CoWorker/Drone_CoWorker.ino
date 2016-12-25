@@ -51,7 +51,7 @@ void setup() {
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
 	
-	initData();
+	initVariables();
 	initUdp();
 	initMPU();
 	initBarometer();
@@ -82,7 +82,7 @@ void test_task()
 	//Serial.println(compassHdg);
 }
 
-void initData()
+void initVariables()
 {
 	statusBaro = statusType_NotInitiated;
 	statusMpu = statusType_NotInitiated;

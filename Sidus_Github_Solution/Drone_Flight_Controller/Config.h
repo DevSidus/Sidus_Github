@@ -36,11 +36,49 @@ This header file define all the configurable variables including constants, pin 
 #define		M3_CHANNEL		3
 #define		M4_CHANNEL		4
 
-//Constant Variables
-#define SERIAL_PACKET_SIZE	103
-#define SERIAL_START_CHAR_1	'$'
-#define SERIAL_START_CHAR_2	'<'
-#define SERIAL_END_CHAR		'>'
+#define		RX_DATATIME_THESHOLD		1000
+
+#define		CMD_PITCH_MIN	-45.0
+#define		CMD_PITCH_MAX	+45.0
+#define		DC_PITCH_MIN	1100.0
+#define		DC_PITCH_MAX	1900.0
+
+#define		CMD_ROLL_MIN	-45.0
+#define		CMD_ROLL_MAX	+45.0
+#define		DC_ROLL_MIN		1100.0
+#define		DC_ROLL_MAX		1900.0
+
+#define		CMD_THR_MIN		1000.0
+#define		CMD_THR_MAX		1900.0
+#define		DC_THR_MIN		1100.0
+#define		DC_THR_MAX		1900.0
+
+#define		CMD_YAW_MIN		-45.0
+#define		CMD_YAW_MAX		+45.0
+#define		DC_YAW_MIN		1100.0
+#define		DC_YAW_MAX		1900.0
+
+
+
+
+//Enum Type Definitions, two mcu config files may be merged!
+typedef enum
+{
+	statusType_Normal = 0,
+	statusType_NotInitiated = 1,
+	statusType_InitFail = 2,
+	statusType_Fail = 3,
+	statusType_UnreliableData = 4
+}statusType;
+
+typedef enum
+{
+	modeQuadSAFE = 0,
+	modeQuadDirCmd = 1,
+	modeQuadARMED = 2,
+	modeQuadCmpClb = 3,
+
+}modeQuadType;
 
 
 //Global Variable Declarations
@@ -52,3 +90,9 @@ uint32_t startTime_Roll, dutyCycle_Roll;
 uint32_t startTime_Yaw, dutyCycle_Yaw;
 
 uint32_t rxLastDataTime;
+
+float cmdPitch = 0, cmdRoll = 0, cmdThr = 0, cmdYaw = 0;
+
+//Status related declarations
+unsigned char statusQuad;
+unsigned char statusRx;

@@ -7,6 +7,8 @@ struct structMsgR01
 {
 	char startChar1;
 	char startChar2;
+	unsigned char statusQuad;
+	unsigned char statusRx;
 	short rxThrottle;
 	short rxPitch;
 	short rxRoll;
