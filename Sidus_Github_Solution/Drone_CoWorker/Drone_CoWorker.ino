@@ -50,25 +50,26 @@ void setup() {
 	//Configure all PINs
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
+	
+	initData();
+	initUdp();
+	initMPU();
+	initBarometer();
+	initCompass();
 
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(processMpuTask, 17000);
-	scheduler.insert(setSerialTransmitDataFields, 20000);
+	scheduler.insert(setCoWorkerTxDataFields, 20000);
 	scheduler.insert(serialTransmit, 20000);
 	scheduler.insert(updateBarometerData, 19000);
 	scheduler.insert(updateCompassData, 37000);
-	scheduler.insert(setUdpTransmitDataFields, 33000);
 	scheduler.insert(udpTransmit, 33000);
 	scheduler.insert(udpCheck, 25000);
+	scheduler.insert(checkMpuHealth, 1000000);
+	scheduler.insert(checkBaroDataReliability, 1000000);
 
-	initMPU();
-	initBarometer();
-	initCompass();
-
-
-	myUdp.initConnection(10000, false);
 }
 // the loop function runs over and over again until power down or reset
 void loop() {
@@ -79,6 +80,15 @@ void loop() {
 void test_task()
 {
 	//Serial.println(compassHdg);
+}
+
+void initData()
+{
+	statusBaro = statusType_NotInitiated;
+	statusMpu = statusType_NotInitiated;
+	statusCompass = statusType_NotInitiated;
+	statusUdp = statusType_NotInitiated;
+	
 }
 
 bool initMPU()
@@ -95,11 +105,12 @@ bool initMPU()
 	delay(200);
 	if (mpu.testConnection())
 	{
+		statusMpu = statusType_Normal;
 		Serial.println("MPU6050 connection successful");
 	}
 	else
 	{
-		mpuStatus = false;
+		statusMpu = statusType_Fail;
 		Serial.println("MPU6050 connection failed");
 		return false;
 	}
@@ -133,19 +144,33 @@ bool initMPU()
 		// get expected DMP packet size for later comparison
 		packetSize = mpu.dmpGetFIFOPacketSize();
 
-		mpuStatus = true;
+
+		mpuLastDataTime = millis();
+
 	}
 	else
 	{
-
-		mpuStatus = false;
 		// ERROR!
 		// 1 = initial memory load failed
 		// 2 = DMP configuration updates failed
 		// (if it's going to break, usually the code will be 1)
+
+		statusMpu = statusType_Fail;
 		Serial.print(F("DMP Initialization failed (code "));
 		Serial.print(devStatus);
 		Serial.println(F(")"));
+	}
+}
+
+void initUdp()
+{
+	if (myUdp.initConnection(10000, false))
+	{
+		statusUdp = statusType_Normal;
+	}
+	else
+	{
+		statusUdp = statusType_InitFail;
 	}
 }
 
@@ -156,7 +181,7 @@ void processMpuTask()
 	mpuIntStatus = mpu.getIntStatus();
 
 	//If mpu connection is lost, re initialize mpu, check the code mpuIntStatus statement again!
-	if (mpuIntStatus == 0 || !mpuStatus)
+	if (mpuIntStatus == 0)
 	{
 		initMPU();
 	}
@@ -192,13 +217,33 @@ void processMpuTask()
 		mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
 		mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 		mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-		
+
+		mpuLastDataTime = millis();
+
 		mpuProcessTaskDuration = micros() - mpuProcessStartTime;
 	}
 }
 
-void setSerialTransmitDataFields()
+void checkMpuHealth()
 {
+	if (millis() - mpuLastDataTime> MPU_DATATIME_THESHOLD)
+	{
+		statusMpu = statusType_Fail;
+		//try to restart MPU
+		initMPU();
+	}
+	else
+	{
+		statusMpu = statusType_Normal;
+	}
+}
+
+void setCoWorkerTxDataFields()
+{
+	MsgCoWorkerTx.statusMpu = statusMpu;
+	MsgCoWorkerTx.statusBaro = statusBaro;
+	MsgCoWorkerTx.statusCompass = statusCompass;
+
 	MsgCoWorkerTx.mpuGyroX = gg[0];
 	MsgCoWorkerTx.mpuGyroY = gg[1];
 	MsgCoWorkerTx.mpuGyroZ = gg[2];
@@ -219,12 +264,6 @@ void setSerialTransmitDataFields()
 	MsgCoWorkerTx.baroAlt = barometerAlt;
 
 	MsgCoWorkerTx.compassHdg = compassHdg;
-
-	MsgCoWorkerTx.gpsData = 7777;
-
-	MsgT01.message.coWorkerTxPacket = MsgCoWorkerTx;
-	MsgT01.message.udpT01RelayPacket = MsgUdpT01.message;
-
 }
 
 void serialCheck()
@@ -255,19 +294,18 @@ void serialCheck()
 
 void serialTransmit()
 {
+	MsgT01.message.coWorkerTxPacket = MsgCoWorkerTx;
+	MsgT01.message.udpT01RelayPacket = MsgUdpT01.message;
+
 	MsgT01.getPacket();
 	Serial.write(MsgT01.dataBytes, sizeof(MsgT01.dataBytes));
-
-}
-
-void setUdpTransmitDataFields()
-{
-	MsgUdpR01.message.serialR01RelayPacket = MsgR01.message;
-
 }
 
 void udpTransmit()
 {
+	MsgUdpR01.message.coWorkerTxPacket = MsgCoWorkerTx;
+	MsgUdpR01.message.serialR01RelayPacket = MsgR01.message;
+
 	MsgUdpR01.getPacket();
 	myUdp.sendPacket(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
 }
@@ -313,6 +351,18 @@ void updateBarometerData()
 	barometerTemp = barometer.readTemperature(true);
 	barometerPress = barometer.readPressure(true);
 	barometerAlt = barometer.getAltitude(barometerPress);
+}
+
+void checkBaroDataReliability()
+{
+	if ((barometerTemp > BARO_TEMP_MIN) && (barometerTemp < BARO_TEMP_MAX) && (barometerAlt > BARO_ALT_MIN) && (barometerAlt < BARO_ALT_MAX))
+	{
+		statusBaro = statusType_Normal;
+	}
+	else
+	{
+		statusBaro = statusType_UnreliableData;
+	}
 }
 
 bool initCompass()

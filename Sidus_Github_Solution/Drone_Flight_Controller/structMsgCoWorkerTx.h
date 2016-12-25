@@ -5,7 +5,10 @@ using namespace std;
 #pragma pack(push, 1)
 struct structMsgCoWorkerTx
 {
-	unsigned char mpuStatus;
+	unsigned char statusMpu;
+	unsigned char statusBaro;
+	unsigned char statusCompass;
+	unsigned char statusUdp;
 
 	//Gyro Measurements
 	short mpuGyroX;
@@ -31,8 +34,6 @@ struct structMsgCoWorkerTx
 	float baroAlt;
 
 	float compassHdg;
-
-	int gpsData;
 
 	/*Not needed for now, to be implemented if required
 	//Euler Angles(psi, theta, phi) in Radians

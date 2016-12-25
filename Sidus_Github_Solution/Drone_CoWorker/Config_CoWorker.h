@@ -4,10 +4,10 @@ This header file define all the configurable variables including constants, pin 
 */
 
 //Wifi, UDP Definitions
-#define WIFI_SSID	"AAGCA"
-#define WIFI_PASS	"ahmet(12082004)"
-#define UDP_PORT	8080
-#define DEFAULT_GROUND_STATION_IP	"192.168.1.41"
+#define		WIFI_SSID	"AAGCA"
+#define		WIFI_PASS	"ahmet(12082004)"
+#define		UDP_PORT	8080
+#define		DEFAULT_GROUND_STATION_IP	"192.168.1.41"
 
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
@@ -21,10 +21,12 @@ This header file define all the configurable variables including constants, pin 
 #define		COMPASS_OFFSET_Y_DEFAULT	-360
 
 //Pin Definitions
-#define PIN_LED				4
-#define PIN_MPU_POWER_ON	16
-#define PIN_MCU_SDA			12
-#define PIN_MCU_SCL			14
+#define		PIN_LED				4
+#define		PIN_MPU_POWER_ON	16
+#define		PIN_MCU_SDA			12
+#define		PIN_MCU_SCL			14
+
+#define		MPU_DATATIME_THESHOLD		1000
 
 
 
@@ -41,7 +43,6 @@ int test_task_counter = 0;
 
 
 // MPU control/status vars
-bool mpuStatus;
 bool dmpReady = false;  // set true if DMP init was successful
 uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
 uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
@@ -63,6 +64,8 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 unsigned long mpuProcessStartTime = 0;
 short mpuProcessTaskDuration = 0;
 double mpuPitchAngle, mpuRollAngle, mpuYawAngle;
+uint32_t mpuLastDataTime, mpuFirstDataTime;
+bool mpuFirstDataCheck;
 
 float barometerTemp, barometerAlt;
 int32_t barometerPress;
@@ -85,3 +88,4 @@ typedef enum
 unsigned char statusBaro;
 unsigned char statusMpu;
 unsigned char statusCompass;
+unsigned char statusUdp;

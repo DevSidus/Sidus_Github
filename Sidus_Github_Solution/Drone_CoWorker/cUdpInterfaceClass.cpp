@@ -35,15 +35,21 @@ bool UdpInterfaceClass::initConnection(int timeoutInMillis, bool _isAP)
 			Serial.println(WiFi.localIP());
 			Serial.print("Starting UDP at Port:");
 			Serial.println(udpPort);
-			udp.begin(udpPort);
-
-			//Send a welcome packet
-			delay(200);
-			udp.beginPacket(remoteIP, udpPort);
-			udp.write("Welcome Message", 15);
-			udp.endPacket();
-
-			return true;
+			
+			if (udp.begin(udpPort) == 1)
+			{
+				//Send a welcome packet
+				delay(200);
+				udp.beginPacket(remoteIP, udpPort);
+				udp.write("Welcome Message", 15);
+				udp.endPacket();
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
 		}
 		else
 		{
