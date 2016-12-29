@@ -51,6 +51,7 @@ void setup() {
 	scheduler.insert(serialTransmit, 18000);
 	scheduler.insert(runMotors, 20000);
 	scheduler.insert(checkRxStatus, 1000000);
+	scheduler.insert(checkMode, 310000);
 
 	initVariables();
 
@@ -63,7 +64,7 @@ void loop() {
 
 void initVariables()
 {
-	statusQuad = modeQuadSAFE;
+	modeQuad = modeQuadSAFE;
 	statusRx = statusType_NotInitiated;
 
 	startTime_Thr = micros();
@@ -219,7 +220,7 @@ void serialCheck()
 
 void serialTransmit()
 {
-	MsgR01.message.statusQuad = statusQuad;
+	MsgR01.message.modeQuad = modeQuad;
 	MsgR01.message.statusRx = statusRx;
 	/*
 	MsgR01.message.rxThrottle = dutyCycle_Thr;
@@ -240,11 +241,38 @@ void serialTransmit()
 
 void runMotors()
 {
-	pwmMicroSeconds(M1_CHANNEL, dutyCycle_Thr);
-	pwmMicroSeconds(M2_CHANNEL, dutyCycle_Thr);
-	pwmMicroSeconds(M3_CHANNEL, dutyCycle_Thr);
-	pwmMicroSeconds(M4_CHANNEL, dutyCycle_Thr);
 
+	if (modeQuad == modeQuadARMED)
+	{
+		if (cmdThr > CMD_THR_ARM_START)
+		{
+			pwmMicroSeconds(M1_CHANNEL, cmdThr);
+			pwmMicroSeconds(M2_CHANNEL, cmdThr);
+			pwmMicroSeconds(M3_CHANNEL, cmdThr);
+			pwmMicroSeconds(M4_CHANNEL, cmdThr);
+		}
+		else
+		{
+			pwmMicroSeconds(M1_CHANNEL, CMD_THR_MIN);
+			pwmMicroSeconds(M2_CHANNEL, CMD_THR_MIN);
+			pwmMicroSeconds(M3_CHANNEL, CMD_THR_MIN);
+			pwmMicroSeconds(M4_CHANNEL, CMD_THR_MIN);
+		}
+	}
+	else if (modeQuad == modeQuadDirCmd)
+	{ 
+		pwmMicroSeconds(M1_CHANNEL, cmdThr);
+		pwmMicroSeconds(M2_CHANNEL, cmdThr);
+		pwmMicroSeconds(M3_CHANNEL, cmdThr);
+		pwmMicroSeconds(M4_CHANNEL, cmdThr);
+	}
+	else
+	{
+		pwmMicroSeconds(M1_CHANNEL, CMD_THR_MIN);
+		pwmMicroSeconds(M2_CHANNEL, CMD_THR_MIN);
+		pwmMicroSeconds(M3_CHANNEL, CMD_THR_MIN);
+		pwmMicroSeconds(M4_CHANNEL, CMD_THR_MIN);
+	}
 }
 
 void checkRxStatus()
@@ -277,3 +305,39 @@ void mapRxDCtoCmd()
 	}
 }
 
+void checkMode()
+{
+
+	if (statusRx != statusType_Normal)
+	{
+		modeQuad = modeQuadSAFE;
+		cmdPitch = 0;
+		cmdRoll = 0;
+		cmdYaw = 0;
+		cmdThr = CMD_THR_MIN;
+		//Serial.println("QUAD is in SAFE Mode");
+		return;
+	}
+
+	if (cmdThr < CMD_THR_MIN + 50 && cmdYaw<CMD_YAW_MIN + 10 && cmdRoll > CMD_ROLL_MAX - 10 && cmdPitch>CMD_PITCH_MAX - 10)
+	{
+		modeQuad = modeQuadARMED;
+		//Serial.println("QUAD is ARMED");
+	}
+	else if (cmdThr < CMD_THR_MIN + 50 && cmdYaw < CMD_YAW_MIN + 10 && cmdRoll < CMD_ROLL_MIN + 10 && cmdPitch>CMD_PITCH_MAX - 10)
+	{
+		modeQuad = modeQuadSAFE;
+		//Serial.println("QUAD is in SAFE Mode");
+	}
+	else if (cmdThr < CMD_THR_MIN + 50 && cmdYaw < CMD_YAW_MIN + 10 && cmdRoll < CMD_ROLL_MIN + 10 && cmdPitch<CMD_PITCH_MIN + 10)
+	{
+		//Left for spare usage
+	}
+	else if (cmdThr < CMD_THR_MIN + 50 && cmdYaw < CMD_YAW_MIN + 10 && cmdRoll>CMD_ROLL_MAX - 10 && cmdPitch<CMD_PITCH_MIN + 10)
+	{
+		modeQuad = modeQuadDirCmd;
+	}
+
+
+
+}

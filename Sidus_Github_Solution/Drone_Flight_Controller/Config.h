@@ -4,15 +4,10 @@ This header file define all the configurable variables including constants, pin 
 */
 
 //Wifi, UDP Definitions
-#define WIFI_SSID	"AAGCA"
-#define WIFI_PASS	"ahmet(12082004)"
-#define UDP_PORT	8080
-
-
 
 
 //Pin Definitions
-#define PIN_LED				5
+#define		PIN_LED				5
 
 #define		PIN_RX_THR			36	
 #define		PIN_RX_PITCH		37	
@@ -58,6 +53,8 @@ This header file define all the configurable variables including constants, pin 
 #define		DC_YAW_MIN		1100.0
 #define		DC_YAW_MAX		1900.0
 
+#define		CMD_THR_ARM_START	CMD_THR_MIN+(CMD_THR_MAX-CMD_THR_MIN)/10
+
 
 
 
@@ -76,7 +73,7 @@ typedef enum
 	modeQuadSAFE = 0,
 	modeQuadDirCmd = 1,
 	modeQuadARMED = 2,
-	modeQuadCmpClb = 3,
+	modeQuadSpare = 3,
 
 }modeQuadType;
 
@@ -94,5 +91,5 @@ uint32_t rxLastDataTime;
 float cmdPitch = 0, cmdRoll = 0, cmdThr = 0, cmdYaw = 0;
 
 //Status related declarations
-unsigned char statusQuad;
+unsigned char modeQuad;
 unsigned char statusRx;
