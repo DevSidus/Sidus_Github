@@ -69,6 +69,7 @@ void setup() {
 	scheduler.insert(udpCheck, 25000);
 	scheduler.insert(checkMpuHealth, 1000000);
 	scheduler.insert(checkBaroDataReliability, 1000000);
+	scheduler.insert(readBatteryVoltage, 770000);
 
 }
 // the loop function runs over and over again until power down or reset
@@ -264,6 +265,8 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.baroAlt = barometerAlt;
 
 	MsgCoWorkerTx.compassHdg = compassHdg;
+
+	MsgCoWorkerTx.batteryVoltageInBits = batteryVoltageInBits;
 }
 
 void serialCheck()
@@ -397,4 +400,9 @@ void updateCompassData()
 	Vector compassNorm = compass.readNormalize();
 	// To calculate heading in degrees. 0 degree indicates North
 	compassHdg = atan2(compassNorm.YAxis, compassNorm.XAxis);
+}
+
+void readBatteryVoltage()
+{
+	batteryVoltageInBits = analogRead(A0);
 }

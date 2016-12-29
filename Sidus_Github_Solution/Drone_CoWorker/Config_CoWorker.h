@@ -64,6 +64,7 @@ int32_t barometerPress;
 
 float compassHdg;
 
+short batteryVoltageInBits;
 
 
 //Enum Type Definitions, two mcu config files may be merged!
