@@ -55,6 +55,37 @@ This header file define all the configurable variables including constants, pin 
 
 #define		CMD_THR_ARM_START	CMD_THR_MIN+(CMD_THR_MAX-CMD_THR_MIN)/10
 
+#define		PID_RATE_PITCH_KP	1.0
+#define		PID_RATE_PITCH_KI	0.0
+#define		PID_RATE_PITCH_KD	0.0
+#define		PID_RATE_PITCH_OUTMIN	-250
+#define		PID_RATE_PITCH_OUTMAX	250
+
+
+
+#define		MPU_GYRO_DEG_SEC_TO_LSB	16.4     //This value can be used to convert deg/sec to LSB
+
+
+struct structPID
+{
+	double Kp;
+	double Ki;
+	double Kd;
+	double sensedVal;
+	double setpoint;
+	double output;
+	double outputLimitMin;
+	double outputLimitMax;
+};
+struct structSuperPID
+{
+	structPID ratePitch;
+	structPID rateRoll;
+	structPID rateYaw;
+	structPID anglePitch;
+	structPID angleRoll;
+	structPID angleYaw;	
+}pidVars;
 
 
 

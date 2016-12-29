@@ -17,6 +17,9 @@
 #include "cMsgR01.h"
 #include "cMsgUdpT01.h"
 #include "cSerialParse.h"
+#include "Local_FilterOnePole.h"
+#include "Local_PID_v1.h"
+
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
@@ -24,6 +27,7 @@ cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT01.message.startChar2, MsgT01.message.endChar);
 HardwareSerial Serial2(2);
 
+PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -49,11 +53,13 @@ void setup() {
 	scheduler.insert(mapRxDCtoCmd, 20000);
 	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(serialTransmit, 18000);
+	scheduler.insert(processPID, 20000);
 	scheduler.insert(runMotors, 20000);
 	scheduler.insert(checkRxStatus, 1000000);
 	scheduler.insert(checkMode, 310000);
 
 	initVariables();
+	initPIDtuning();
 
 }
 // the loop function runs over and over again until power down or reset
@@ -72,6 +78,19 @@ void initVariables()
 	startTime_Roll = micros();
 	startTime_Yaw = micros();
 
+	//PID related variable initializations
+	pidVars.ratePitch.Kp = PID_RATE_PITCH_KP;
+	pidVars.ratePitch.Ki = PID_RATE_PITCH_KI;
+	pidVars.ratePitch.Kd = PID_RATE_PITCH_KD;
+	pidVars.ratePitch.outputLimitMin = PID_RATE_PITCH_OUTMIN;
+	pidVars.ratePitch.outputLimitMax = PID_RATE_PITCH_OUTMAX;
+
+
+}
+void initPIDtuning()
+{
+	pidRatePitch.SetOutputLimits(pidVars.ratePitch.outputLimitMin, pidVars.ratePitch.outputLimitMax);
+	pidRatePitch.SetTunings(pidVars.ratePitch.Kp, pidVars.ratePitch.Ki, pidVars.ratePitch.Kd);
 }
 
 void setupMotorPins()
@@ -340,4 +359,11 @@ void checkMode()
 
 
 
+}
+
+void processPID()
+{
+	pidVars.ratePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroY / MPU_GYRO_DEG_SEC_TO_LSB;
+	pidVars.ratePitch.setpoint = cmdPitch;
+	pidRatePitch.Compute();
 }
