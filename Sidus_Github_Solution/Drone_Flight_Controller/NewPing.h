@@ -210,14 +210,14 @@ class NewPing {
 		unsigned long ping_median(uint8_t it = 5, unsigned int max_cm_distance = 0);
 		static unsigned int convert_cm(unsigned int echoTime);
 		static unsigned int convert_in(unsigned int echoTime);
-//#if TIMER_ENABLED == true    //sonar.ping_timer tanımsız hatası verdiği için if döngüsü iptal edildi -AKİF-
+#if TIMER_ENABLED == true    //sonar.ping_timer tanımsız hatası verdiği için if döngüsü iptal edildi -AKİF-
 		void ping_timer(void (*userFunc)(void), unsigned int max_cm_distance = 0);
 		boolean check_timer();
 		unsigned long ping_result;
 		static void timer_us(unsigned int frequency, void (*userFunc)(void));
 		static void timer_ms(unsigned long frequency, void (*userFunc)(void));
 		static void timer_stop();
-//#endif
+#endif
 	private:
 		boolean ping_trigger();
 		void set_max_distance(unsigned int max_cm_distance);

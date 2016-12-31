@@ -20,8 +20,8 @@ This header file define all the configurable variables including constants, pin 
 #define		PIN_YAW			39
 
 //uSonic Pin Definitions
-#define TRIGGER_PIN			8		//sensor trigger pin
-#define ECHO_PIN			9		//sensor echo pin
+#define TRIGGER_PIN			12		//sensor trigger pin
+#define ECHO_PIN			13		//sensor echo pin
 #define MAX_DISTANCE		200		//MAX distance for USensor
 
 

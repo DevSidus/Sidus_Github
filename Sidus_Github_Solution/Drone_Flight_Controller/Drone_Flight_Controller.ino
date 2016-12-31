@@ -11,7 +11,8 @@
 #include "cMsgT01.h"
 #include "cMsgR01.h"
 #include "cSerialParse.h"
-#include "NewPing.h"
+//#include "NewPing.h"
+#include <NewPing.h>
 
 
 //Global Class Definitions
@@ -28,10 +29,13 @@ unsigned int pingSpeed = 50; // How frequently are we going to send out a ping (
 unsigned long pingTimer;     // Holds the next ping time.
 
 
+
 void setup() {
 	Serial.begin(921600);
 	Serial2.begin(921600);
-	
+	Serial.println("Setup Serial Begin!");
+
+
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
 	pinMode(PIN_THR, INPUT);
@@ -54,8 +58,8 @@ void setup() {
 	
 
 	//Insert all tasks into scheduler
-	scheduler.insert(test_task, 500000);
-	scheduler.insert(serialCheck, 15000);
+	//scheduler.insert(test_task, 500000);
+	//scheduler.insert(serialCheck, 15000);
 	scheduler.insert(uSonic, 15000);
 }
 
@@ -180,20 +184,30 @@ void isrYAW()
 
 void uSonic()  // ultrasonic sensör için
 {
+	Serial.println("USonic Taska Girildi!!");
 	
-	if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.
-		pingTimer += pingSpeed;      // Set the next ping time.
-		sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
-	}
+	int dist = sonar.ping_median(5); //median off 5 values
+	dist = sonar.convert_cm(dist); //convert that to cm, replace "cm" with "in" for inches
+	Serial.print("Ping: ");
+	Serial.print(dist); // //print value to screen so we can see it.
+	Serial.println(" cm");
+
+
+	//Aþaðýdaki Kodlar NewPing sonar sensör için yazýldý fakat baþarýlý çalýþmadý. Yeni kod 
+	//denenene kadar yorum olarak ayarlandý.
+	//if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.
+	//	pingTimer += pingSpeed;      // Set the next ping time.
+	//	sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
+	//}
 }
 
 void echoCheck()
 { // Timer2 interrupt calls this function every 24uS where you can check the ping status.
 				  
-	if (sonar.check_timer()) { // This is how you check to see if the ping was received.
+	//if (sonar.check_timer()) { // This is how you check to see if the ping was received.
 							   // Here's where you can add code.
-		Serial.print("Ping: ");
-		Serial.print(sonar.ping_result / US_ROUNDTRIP_CM); // Ping returned, uS result in ping_result, convert to cm with US_ROUNDTRIP_CM.
-		Serial.println("cm");
-	}
+	//	Serial.print("Ping: ");
+	//	Serial.print(sonar.ping_result / US_ROUNDTRIP_CM); // Ping returned, uS result in ping_result, convert to cm with US_ROUNDTRIP_CM.
+	//	Serial.println("cm");
+	//}
 }
