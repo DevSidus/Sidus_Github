@@ -61,6 +61,11 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_PITCH_OUTMIN	-250
 #define		PID_RATE_PITCH_OUTMAX	250
 
+#define		PID_RATE_ROLL_KP	1.0
+#define		PID_RATE_ROLL_KI	0.0
+#define		PID_RATE_ROLL_KD	0.0
+#define		PID_RATE_ROLL_OUTMIN	-250
+#define		PID_RATE_ROLL_OUTMAX	250
 
 
 #define		MPU_GYRO_DEG_SEC_TO_LSB	16.4     //This value can be used to convert deg/sec to LSB
@@ -107,6 +112,18 @@ typedef enum
 	modeQuadSpare = 3,
 
 }modeQuadType;
+
+typedef enum
+{
+	pidCommandNoAction = 0,
+	pidCommandApplyRatePitch = 1,
+	pidCommandApplyRateRoll = 2,
+	pidCommandApplyRateYaw = 3,
+	pidCommandApplyAnglePitch = 4,
+	pidCommandApplyAngleRoll = 5,
+	pidCommandApplyAngleYaw = 6,
+}pidCommandType;
+
 
 
 //Global Variable Declarations

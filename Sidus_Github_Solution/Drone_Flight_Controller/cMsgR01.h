@@ -7,12 +7,21 @@ struct structMsgR01
 {
 	char startChar1;
 	char startChar2;
+
 	unsigned char modeQuad;
 	unsigned char statusRx;
 	short rxThrottle;
 	short rxPitch;
 	short rxRoll;
 	short rxYaw;
+
+	float pidAngleKp;
+	float pidAngleKi;
+	float pidAngleKd;
+	float pidRateKp;
+	float pidRateKi;
+	float pidRateKd;
+
 	char endChar;
 };
 #pragma pack(pop)
