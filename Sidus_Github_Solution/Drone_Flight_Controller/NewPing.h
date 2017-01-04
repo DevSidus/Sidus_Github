@@ -132,15 +132,15 @@
 #define NewPing_h
 
 #if defined (ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
+#include <Arduino.h>
 #else
-	#include <WProgram.h>
-	#include <pins_arduino.h>
+#include <WProgram.h>
+#include <pins_arduino.h>
 #endif
 
 #if defined (__AVR__)
-	#include <avr/io.h>
-	#include <avr/interrupt.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
 #endif
 
 // Shouldn't need to change these values unless you have a specific need to do so.
@@ -160,10 +160,10 @@
 #define PING_OVERHEAD 5         // Ping overhead in microseconds (uS). Default=5
 #define PING_TIMER_OVERHEAD 13  // Ping timer overhead in microseconds (uS). Default=13
 #if URM37_ENABLED == true
-	#undef  US_ROUNDTRIP_CM
-	#undef  US_ROUNDTRIP_IN
-	#define US_ROUNDTRIP_CM 50  // Every 50uS PWM signal is low indicates 1cm distance. Default=50
-	#define US_ROUNDTRIP_IN 127 // If 50uS is 1cm, 1 inch would be 127uS (50 x 2.54 = 127). Default=127
+#undef  US_ROUNDTRIP_CM
+#undef  US_ROUNDTRIP_IN
+#define US_ROUNDTRIP_CM 50  // Every 50uS PWM signal is low indicates 1cm distance. Default=50
+#define US_ROUNDTRIP_IN 127 // If 50uS is 1cm, 1 inch would be 127uS (50 x 2.54 = 127). Default=127
 #endif
 
 // Conversion from uS to distance (round result to nearest cm or inch).
@@ -171,74 +171,74 @@
 
 // Detect non-AVR microcontrollers (Teensy 3.x, Arduino DUE, etc.) and don't use port registers or timer interrupts as required.
 #if (defined (__arm__) && defined (TEENSYDUINO))
-	#undef  PING_OVERHEAD
-	#define PING_OVERHEAD 1
-	#undef  PING_TIMER_OVERHEAD
-	#define PING_TIMER_OVERHEAD 1
-	#define DO_BITWISE true
+#undef  PING_OVERHEAD
+#define PING_OVERHEAD 1
+#undef  PING_TIMER_OVERHEAD
+#define PING_TIMER_OVERHEAD 1
+#define DO_BITWISE true
 #elif !defined (__AVR__)
-	#undef  PING_OVERHEAD
-	#define PING_OVERHEAD 1
-	#undef  PING_TIMER_OVERHEAD
-	#define PING_TIMER_OVERHEAD 1
-	#undef  TIMER_ENABLED
-	#define TIMER_ENABLED false
-	#define DO_BITWISE false
+#undef  PING_OVERHEAD
+#define PING_OVERHEAD 1
+#undef  PING_TIMER_OVERHEAD
+#define PING_TIMER_OVERHEAD 1
+#undef  TIMER_ENABLED
+#define TIMER_ENABLED false
+#define DO_BITWISE false
 #else
-	#define DO_BITWISE true
+#define DO_BITWISE true
 #endif
 
 // Disable the timer interrupts when using ATmega128 and all ATtiny microcontrollers.
 #if defined (__AVR_ATmega128__) || defined (__AVR_ATtiny24__) || defined (__AVR_ATtiny44__) || defined (__AVR_ATtiny84__) || defined (__AVR_ATtiny25__) || defined (__AVR_ATtiny45__) || defined (__AVR_ATtiny85__) || defined (__AVR_ATtiny261__) || defined (__AVR_ATtiny461__) || defined (__AVR_ATtiny861__) || defined (__AVR_ATtiny43U__)
-	#undef  TIMER_ENABLED
-	#define TIMER_ENABLED false
+#undef  TIMER_ENABLED
+#define TIMER_ENABLED false
 #endif
 
 // Define timers when using ATmega8, ATmega16, ATmega32 and ATmega8535 microcontrollers.
 #if defined (__AVR_ATmega8__) || defined (__AVR_ATmega16__) || defined (__AVR_ATmega32__) || defined (__AVR_ATmega8535__)
-	#define OCR2A OCR2
-	#define TIMSK2 TIMSK
-	#define OCIE2A OCIE2
+#define OCR2A OCR2
+#define TIMSK2 TIMSK
+#define OCIE2A OCIE2
 #endif
 
 class NewPing {
-	public:
-		NewPing(uint8_t trigger_pin, uint8_t echo_pin, unsigned int max_cm_distance = MAX_SENSOR_DISTANCE);
-		unsigned int ping(unsigned int max_cm_distance = 0);
-		unsigned long ping_cm(unsigned int max_cm_distance = 0);
-		unsigned long ping_in(unsigned int max_cm_distance = 0);
-		unsigned long ping_median(uint8_t it = 5, unsigned int max_cm_distance = 0);
-		static unsigned int convert_cm(unsigned int echoTime);
-		static unsigned int convert_in(unsigned int echoTime);
-#if TIMER_ENABLED == true    //sonar.ping_timer tanımsız hatası verdiği için if döngüsü iptal edildi -AKİF-
-		void ping_timer(void (*userFunc)(void), unsigned int max_cm_distance = 0);
-		boolean check_timer();
-		unsigned long ping_result;
-		static void timer_us(unsigned int frequency, void (*userFunc)(void));
-		static void timer_ms(unsigned long frequency, void (*userFunc)(void));
-		static void timer_stop();
-#endif
-	private:
-		boolean ping_trigger();
-		void set_max_distance(unsigned int max_cm_distance);
+public:
+	NewPing(uint8_t trigger_pin, uint8_t echo_pin, unsigned int max_cm_distance = MAX_SENSOR_DISTANCE);
+	unsigned int ping(unsigned int max_cm_distance = 0);
+	unsigned long ping_cm(unsigned int max_cm_distance = 0);
+	unsigned long ping_in(unsigned int max_cm_distance = 0);
+	unsigned long ping_median(uint8_t it = 5, unsigned int max_cm_distance = 0);
+	static unsigned int convert_cm(unsigned int echoTime);
+	static unsigned int convert_in(unsigned int echoTime);
+	//#if TIMER_ENABLED == true       //Sonar.ping_timer tanımsız hatası verdiği için kapatıldı --AKİF
+	void ping_timer(void(*userFunc)(void), unsigned int max_cm_distance = 0);
+	boolean check_timer();
+	unsigned long ping_result;
+	static void timer_us(unsigned int frequency, void(*userFunc)(void));
+	static void timer_ms(unsigned long frequency, void(*userFunc)(void));
+	static void timer_stop();
+	//#endif
+private:
+	boolean ping_trigger();
+	void set_max_distance(unsigned int max_cm_distance);
 #if TIMER_ENABLED == true
-		boolean ping_trigger_timer(unsigned int trigger_delay);
-		boolean ping_wait_timer();
-		static void timer_setup();
-		static void timer_ms_cntdwn();
+	boolean ping_trigger_timer(unsigned int trigger_delay);
+	boolean ping_wait_timer();
+	static void timer_setup();
+	static void timer_ms_cntdwn();
 #endif
 #if DO_BITWISE == true
-		uint8_t _triggerBit;
-		uint8_t _echoBit;
-		volatile uint8_t *_triggerOutput;
-		volatile uint8_t *_echoInput;
-		volatile uint8_t *_triggerMode;
+	uint8_t _triggerBit;
+	uint8_t _echoBit;
+	volatile uint8_t *_triggerOutput;
+	volatile uint8_t *_echoInput;
+	volatile uint8_t *_triggerMode;
 #else
-		uint8_t _triggerPin;
-		uint8_t _echoPin;
+	uint8_t _triggerPin;
+	uint8_t _echoPin;
 #endif
-		unsigned int _maxEchoTime;
-		unsigned long _max_time;
+	unsigned int _maxEchoTime;
+	unsigned long _max_time;
 };
 
 

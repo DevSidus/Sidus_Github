@@ -41,3 +41,15 @@ uint32_t startTime_Roll, dutyCycle_Roll;
 uint32_t startTime_Yaw, dutyCycle_Yaw;
 
 uint32_t rxLastDataTime;
+
+
+//Buzzer Tone Definitions
+
+#define		PIN_BUZZER		14
+
+typedef enum
+{
+	toneTypeNoTone = 0,
+	toneTypeMotorArmed = 1,
+	toneTypeBatteryLow = 2,
+}toneType;

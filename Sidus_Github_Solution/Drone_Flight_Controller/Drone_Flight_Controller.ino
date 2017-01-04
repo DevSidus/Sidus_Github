@@ -5,14 +5,14 @@
  Description: This is the main code for Drone_Flight_Controller Project
 */
 //Local include class and files
-#include "Ultrasonic_Sensor.h"
+
+#include "Tone.h"
 #include "Local_Agenda.h"
 #include "Config.h"
 #include "cMsgT01.h"
 #include "cMsgR01.h"
 #include "cSerialParse.h"
-//#include "NewPing.h"
-#include <NewPing.h>
+#include "NewPing.h"
 
 
 //Global Class Definitions
@@ -48,6 +48,7 @@ void setup() {
 	pinMode(ECHO_PIN, INPUT);      //sets echo as input
 	
 
+	//interrupt pins def.
 	attachInterrupt(PIN_THR, isrTHR, CHANGE);
 	attachInterrupt(PIN_PITCH, isrPITCH, CHANGE);
 	attachInterrupt(PIN_ROLL, isrROLL, CHANGE);
@@ -57,7 +58,7 @@ void setup() {
 	//Insert all tasks into scheduler
 	//scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
-	scheduler.insert(uSonic, 15000);
+	//scheduler.insert(uSonic, 15000);
 }
 
 // the loop function runs over and over again until power down or reset
@@ -178,12 +179,12 @@ void isrYAW()
 		dutyCycle_Yaw = micros() - startTime_Yaw;
 	}
 }
-
 void uSonic()  // ultrasonic sensör için
 {
 
-		//Çalýþan Sonar Cod Bloðu
-		
+		//Çalýþan Sonar Code Bloðu
+		//kod if içerisine sebebi ise; sensör ani mesafe deðiþimlerinde 0 deðerlerini gösteriyordu. Anlýk olarak bu deðerleri
+		// seri ekranda göstermemesi için 0 deðerinden büyük deðerleri gösteriyor. 
 	
 		int dist = sonar.ping_median(5); //median off 5 values
 		dist = sonar.convert_cm(dist); //convert that to cm, replace "cm" with "in" for inches
@@ -191,6 +192,19 @@ void uSonic()  // ultrasonic sensör için
 			Serial.print("Ping: ");
 			Serial.print(dist); // //print value to screen so we can see it.
 			Serial.println(" cm");
+			
 		}
 }
 
+void tone()  //Buzzer Tone
+{
+	tone_class buzzer(1);
+	
+	//toneTypeNoTone = 0,
+	//toneTypeMotorArmed = 1,
+	//toneTypeBatteryLow = 2,
+	
+	
+
+
+}
