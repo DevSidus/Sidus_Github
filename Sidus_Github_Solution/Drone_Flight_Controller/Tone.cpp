@@ -29,5 +29,5 @@ void tone_class::playTone(unsigned int toneType)
 			analogWrite(PIN_BUZZER, 0);
 
 		toneIndex = (toneIndex + 1) % 20;
-	}
+	}	
 }
