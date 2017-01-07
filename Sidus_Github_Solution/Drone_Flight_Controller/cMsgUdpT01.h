@@ -9,23 +9,18 @@ struct structMsgUdpT01
 	unsigned char pidRatePitchKp;
 	unsigned char pidRatePitchKi;
 	unsigned char pidRatePitchKd;
-
 	unsigned char pidRateRollKp;
 	unsigned char pidRateRollKi;
 	unsigned char pidRateRollKd;
-
 	unsigned char pidRateYawKp;
 	unsigned char pidRateYawKi;
 	unsigned char pidRateYawKd;
-
 	unsigned char pidAnglePitchKp;
 	unsigned char pidAnglePitchKi;
 	unsigned char pidAnglePitchKd;
-
 	unsigned char pidAngleRollKp;
 	unsigned char pidAngleRollKi;
 	unsigned char pidAngleRollKd;
-
 	unsigned char pidAngleYawKp;
 	unsigned char pidAngleYawKi;
 	unsigned char pidAngleYawKd;

@@ -12,7 +12,7 @@
 #include "Local_I2Cdev.h"
 #include "Local_MPU6050_6Axis_MotionApps20.h"
 #include "Config_CoWorker.h"
-#include "structMsgCoWorkerTx.h"
+#include "cMsgCoWorkerTx.h"
 #include "cMsgR01.h"
 #include "cMsgT01.h"
 #include "cMsgUdpR01.h"

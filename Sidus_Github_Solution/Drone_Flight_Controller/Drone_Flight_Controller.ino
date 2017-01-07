@@ -12,7 +12,7 @@
 //Local include class and files
 #include "Local_Agenda.h"
 #include "Config.h"
-#include "structMsgCoWorkerTx.h"
+#include "cMsgCoWorkerTx.h"
 #include "cMsgT01.h"
 #include "cMsgR01.h"
 #include "cMsgUdpT01.h"
@@ -257,7 +257,7 @@ void serialTransmit()
 	MsgR01.message.rxPitch = cmdPitch;
 	MsgR01.message.rxRoll = cmdRoll;
 	MsgR01.message.rxYaw = cmdYaw;
-
+	/*
 	MsgR01.message.pidAngleKp = pidVars.anglePitch.Kp;
 	MsgR01.message.pidAngleKi = pidVars.anglePitch.Ki;
 	MsgR01.message.pidAngleKd = pidVars.anglePitch.Kd;
@@ -265,7 +265,7 @@ void serialTransmit()
 	MsgR01.message.pidRateKp = pidVars.ratePitch.Kp;
 	MsgR01.message.pidRateKi = pidVars.ratePitch.Ki;
 	MsgR01.message.pidRateKd = pidVars.ratePitch.Kd;
-
+	*/
 	MsgR01.getPacket();
 	Serial2.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
 

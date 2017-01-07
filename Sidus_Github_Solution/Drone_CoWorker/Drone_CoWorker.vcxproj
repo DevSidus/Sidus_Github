@@ -94,7 +94,7 @@
     <ClInclude Include="..\Drone_Flight_Controller\Local_MPU6050.h" />
     <ClInclude Include="..\Drone_Flight_Controller\Local_MPU6050_6Axis_MotionApps20.h" />
     <ClInclude Include="..\Drone_Flight_Controller\Local_MS5611.h" />
-    <ClInclude Include="..\Drone_Flight_Controller\structMsgCoWorkerTx.h" />
+    <ClInclude Include="..\Drone_Flight_Controller\cMsgCoWorkerTx.h" />
     <ClInclude Include="Config_CoWorker.h" />
     <ClInclude Include="cUdpInterfaceClass.h" />
     <ClInclude Include="__vm\.Drone_CoWorker.vsarduino.h" />
