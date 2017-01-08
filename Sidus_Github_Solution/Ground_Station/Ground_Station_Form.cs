@@ -19,6 +19,7 @@ namespace Ground_Station
         cMsgUdpR01 MsgUdpR01 = new cMsgUdpR01();
 
         cDataAnalysisClass DataAnalysisObj = new cDataAnalysisClass();
+        cDataTxDisplayClass DataTxDisplayObj = new cDataTxDisplayClass();
         public Ground_Station()
         {
             vfnDeclaration();
@@ -63,8 +64,11 @@ namespace Ground_Station
         private void Ground_Station_Load(object sender, EventArgs e)
         {
             //Bugun tum ekipce skype uzerinden görüntülü görüşme yaptık.
-            
+
+            MsgUdpT01.message.pidAnglePitchKd = 120;
             DataAnalysisObj.init(lvDataAnalysis, pnlDataAnalysis);
+            DataTxDisplayObj.init(lvDataTx, MsgUdpT01.message);
+
 
             bwUdpSniffer.RunWorkerAsync();
             timerDisplayRefresh.Enabled = true;
@@ -93,6 +97,7 @@ namespace Ground_Station
         {
             updateMessagesForDataAnalysis();
             DataAnalysisObj.update(lvDataAnalysis, pnlDataAnalysis, tbGraphBackColor.BackColor);
+            DataTxDisplayObj.update(lvDataTx, MsgUdpT01.message);
         }
 
         private void updateMessagesForDataAnalysis()
@@ -228,6 +233,51 @@ namespace Ground_Station
                 textBox_trackBarGraphHor.BackColor = Color.Red;
 
             }
+        }
+   
+
+        private void btnDataAnalysisSelectAll_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in lvDataAnalysis.Items)
+            {
+                item.Checked = true;
+            }
+        }
+
+        private void btnDataAnalysisDeselectAll_Click(object sender, EventArgs e)
+        {
+
+            foreach (ListViewItem item in lvDataAnalysis.Items)
+            {
+                item.Checked = false;
+            }
+        }
+
+        private void lvDataTx_SelectedIndexChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void lvDataTx_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            foreach (ListViewItem item in lvDataTx.Items)
+            {
+                if(item.Checked)
+                {
+                    numericUpDownDataTx.Value = Convert.ToDecimal(item.SubItems[1].Text);
+                    break;
+                }
+            }
+
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            DataTxDisplayObj.setData(lvDataTx, ref MsgUdpT01.message, 5);
+        }
+
+        private void numericUpDownDataTx_ValueChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

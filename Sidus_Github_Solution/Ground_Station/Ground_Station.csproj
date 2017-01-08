@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="cConfig.cs" />
     <Compile Include="cDataAnalysisClass.cs" />
+    <Compile Include="cDataTxDisplayClass.cs" />
     <Compile Include="cMsgCoWorkerTx.cs" />
     <Compile Include="cMsgR01.cs" />
     <Compile Include="cMsgUdpR01.cs" />
