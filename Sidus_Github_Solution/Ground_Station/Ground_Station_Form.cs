@@ -268,16 +268,18 @@ namespace Ground_Station
                 }
             }
 
-        }
-
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            DataTxDisplayObj.setData(lvDataTx, ref MsgUdpT01.message, 5);
-        }
+        }        
 
         private void numericUpDownDataTx_ValueChanged(object sender, EventArgs e)
         {
-
+            if (DataTxDisplayObj.setData(lvDataTx, ref MsgUdpT01.message, Convert.ToDouble(numericUpDownDataTx.Value)))
+            {
+                numericUpDownDataTx.BackColor = Color.White;
+            }
+            else
+            {
+                numericUpDownDataTx.BackColor = Color.Red;
+            }
         }
     }
 }

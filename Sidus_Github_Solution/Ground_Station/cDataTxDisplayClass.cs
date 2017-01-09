@@ -36,24 +36,27 @@ namespace Ground_Station
 
         }
 
-        public void setData(ListView lv, ref structMsgUdpT01 message, double data)
+        public bool setData(ListView lv, ref structMsgUdpT01 message, double data)
         {
-            /*
-            structMsgUdpT01 myMsg = new structMsgUdpT01();
-            foreach (PropertyInfo prop in myMsg.GetType().GetProperties())
+
+            object tempObj = message;
+            foreach (var prop in tempObj.GetType().GetProperties())
             {
-                
-                //    prop.SetValue(message, Convert.ChangeType(myByte, prop.PropertyType), null);
-
-                PropertyInfo myProp = myMsg.GetType().GetProperty("pidRatePitchKd");
-                myProp.SetValue(myMsg, Convert.ChangeType(5, prop.PropertyType), null);
-              
-                
+                ListViewItem lvi = lv.FindItemWithText(prop.Name);
+                if(lvi!=null && lvi.Checked)
+                {
+                    try
+                    {
+                        prop.SetValue(tempObj, Convert.ChangeType(data, prop.PropertyType), null);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }    
             }
-            
-    */
-
-            
+            message = (structMsgUdpT01)tempObj;
+            return true;
         }
     }
 }
