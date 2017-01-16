@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -32,7 +33,11 @@ namespace Ground_Station
             bwUdpSniffer.WorkerReportsProgress = true;
             bwUdpSniffer.DoWork += new DoWorkEventHandler(bwUdpSniffer_DoWork);
             //bwUdpSniffer.ProgressChanged += new ProgressChangedEventHandler(bwUdpSniffer_ProgressChanged);
-            
+
+            bwUdpTransmit.WorkerReportsProgress = true;
+            bwUdpTransmit.DoWork += new DoWorkEventHandler(bwUdpTransmit_DoWork);
+
+
 
         }
         private void bwUdpSniffer_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -44,6 +49,16 @@ namespace Ground_Station
             
             while (true)
             {
+                qgsUdp.ReceivePacket();
+                if (qgsUdp.receivedDataFresh)
+                {
+                    byte[] buffer = qgsUdp.getReceivedData();
+                    if (buffer.Length >= Marshal.SizeOf(MsgUdpR01.dataBytes))
+                    {
+                        Buffer.BlockCopy(buffer, 0, MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.dataBytes));
+                    }
+                        
+                }
 
                 checkUdpClientStatus();
                 /*
@@ -56,21 +71,33 @@ namespace Ground_Station
                     pnlHeartBeat.BackColor = System.Drawing.Color.OrangeRed;
                 }
 
-                    */
+                */
+
+
                 System.Threading.Thread.Sleep(20);
                           
             }
         }
+
+        private void bwUdpTransmit_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (true)
+            {
+                MsgUdpT01.getPacket();
+                qgsUdp.SendPacket(MsgUdpT01.dataBytes, Marshal.SizeOf(MsgUdpT01.dataBytes));
+                System.Threading.Thread.Sleep(100);
+            }
+
+        }
+
         private void Ground_Station_Load(object sender, EventArgs e)
         {
-            //Bugun tum ekipce skype uzerinden görüntülü görüşme yaptık.
-
-            MsgUdpT01.message.pidAnglePitchKd = 120;
             DataAnalysisObj.init(lvDataAnalysis, pnlDataAnalysis);
             DataTxDisplayObj.init(lvDataTx, MsgUdpT01.message);
 
 
             bwUdpSniffer.RunWorkerAsync();
+            bwUdpTransmit.RunWorkerAsync();
             timerDisplayRefresh.Enabled = true;
 
             ssMainLabel1.Text = "IP:" + qgsUdp.GetLocalIPv4();
@@ -281,6 +308,7 @@ namespace Ground_Station
                 numericUpDownDataTx.BackColor = Color.Red;
             }
         }
+
     }
 }
 

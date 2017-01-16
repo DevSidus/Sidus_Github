@@ -78,24 +78,21 @@ namespace Ground_Station
         }
         public void ReceivePacket()
         {
-            while (true)
+            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, port);
+            receivedData = udpServer.Receive(ref remoteEP);
+            receivedDataFresh = true;
+            timeSpan = DateTime.Now - lastTime;
+            lastTime = DateTime.Now;
+
+            if (timeSpan.TotalMilliseconds < connectionThresholdTime)
+                connectionHanged = false;
+            else
+                connectionHanged = true;
+
+            if (!clientConnected)
             {
-                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, port);
-                receivedData = udpServer.Receive(ref remoteEP);
-                receivedDataFresh = true;
-                timeSpan = DateTime.Now - lastTime;
-                lastTime = DateTime.Now;
-
-                if (timeSpan.TotalMilliseconds < connectionThresholdTime)
-                    connectionHanged = false;
-                else
-                    connectionHanged = true;
-
-                if (!clientConnected)
-                {
-                    remoteIpEndPoint = remoteEP;
-                    clientConnected = true;
-                }
+                remoteIpEndPoint = remoteEP;
+                clientConnected = true;
             }
         }
         public byte[] getReceivedData()
