@@ -1,7 +1,7 @@
 #pragma once
 #include <string.h>
 #include "cMsgR01.h"
-#include "structMsgCoWorkerTx.h"
+#include "cMsgCoWorkerTx.h"
 using namespace std;
 
 #pragma pack(push, 1)

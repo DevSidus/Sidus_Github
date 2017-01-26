@@ -48,16 +48,15 @@ namespace Ground_Station
         {
             
             while (true)
-            {
+            {                
                 qgsUdp.ReceivePacket();
                 if (qgsUdp.receivedDataFresh)
                 {
                     byte[] buffer = qgsUdp.getReceivedData();
-                    if (buffer.Length >= Marshal.SizeOf(MsgUdpR01.dataBytes))
+                    if (buffer.Length >= Marshal.SizeOf(MsgUdpR01.message))
                     {
-                        Buffer.BlockCopy(buffer, 0, MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.dataBytes));
-                    }
-                        
+                        Buffer.BlockCopy(buffer, 0, MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.message));
+                    }                                            
                 }
 
                 checkUdpClientStatus();
@@ -70,9 +69,7 @@ namespace Ground_Station
                 {
                     pnlHeartBeat.BackColor = System.Drawing.Color.OrangeRed;
                 }
-
-                */
-
+                */      
 
                 System.Threading.Thread.Sleep(20);
                           
@@ -92,19 +89,19 @@ namespace Ground_Station
 
         private void Ground_Station_Load(object sender, EventArgs e)
         {
+
             DataAnalysisObj.init(lvDataAnalysis, pnlDataAnalysis);
             DataTxDisplayObj.init(lvDataTx, MsgUdpT01.message);
 
-
             bwUdpSniffer.RunWorkerAsync();
             bwUdpTransmit.RunWorkerAsync();
+
             timerDisplayRefresh.Enabled = true;
 
             ssMainLabel1.Text = "IP:" + qgsUdp.GetLocalIPv4();
             ssMainLabel2.Text = "Port#:" + qgsUdp.port.ToString();
         }
         
-
         private void checkUdpClientStatus()
         {
             if (qgsUdp.clientConnected)
@@ -118,8 +115,7 @@ namespace Ground_Station
                 ssMainLabel4.Text = "Client IP:" + "---";
             }
         }
-               
-
+        
         private void timerDisplayRefresh_Tick(object sender, EventArgs e)
         {
             updateMessagesForDataAnalysis();
@@ -129,6 +125,8 @@ namespace Ground_Station
 
         private void updateMessagesForDataAnalysis()
         {
+            MsgUdpR01.setPacket();
+
             DataAnalysisObj.data.R1_baroAlt = MsgUdpR01.message.coWorkerTxPacket.baroAlt;
             DataAnalysisObj.data.R1_baroTemp = MsgUdpR01.message.coWorkerTxPacket.baroTemp;
             DataAnalysisObj.data.R1_batteryVoltageInBits = MsgUdpR01.message.coWorkerTxPacket.batteryVoltageInBits;
@@ -262,7 +260,6 @@ namespace Ground_Station
             }
         }
    
-
         private void btnDataAnalysisSelectAll_Click(object sender, EventArgs e)
         {
             foreach (ListViewItem item in lvDataAnalysis.Items)
