@@ -30,6 +30,7 @@ namespace Ground_Station
         public short R1_batteryVoltageInBits { get; set; }
 
         //MsgR01 Members
+        public byte R2_modeQuad { get; set; }
         public short R2_rxThrottle { get; set; }
         public short R2_rxPitch { get; set; }
         public short R2_rxRoll { get; set; }

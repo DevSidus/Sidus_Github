@@ -43,8 +43,7 @@ void setup() {
 	Serial.begin(921600);
 	Wire.begin(PIN_MCU_SDA, PIN_MCU_SCL);
 	Wire.setClock(800000L);
-
-
+	
 	Serial.println("Serial started");
 
 	//Configure all PINs
@@ -80,7 +79,7 @@ void loop() {
 
 void test_task()
 {
-	//Serial.println(compassHdg);
+	//Serial.println("test task");
 }
 
 void initVariables()
@@ -311,6 +310,8 @@ void udpTransmit()
 
 	MsgUdpR01.getPacket();
 	myUdp.sendPacket(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+	//Serial.println("udp messages sent");
+	 
 }
 
 void udpCheck()

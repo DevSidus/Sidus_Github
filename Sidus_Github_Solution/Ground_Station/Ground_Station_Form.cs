@@ -140,9 +140,10 @@ namespace Ground_Station
             DataAnalysisObj.data.R1_mpuGyroX = MsgUdpR01.message.coWorkerTxPacket.mpuGyroX;
             DataAnalysisObj.data.R1_mpuGyroY = MsgUdpR01.message.coWorkerTxPacket.mpuGyroY;
             DataAnalysisObj.data.R1_mpuGyroZ = MsgUdpR01.message.coWorkerTxPacket.mpuGyroZ;
-            DataAnalysisObj.data.R1_mpuPitch = MsgUdpR01.message.coWorkerTxPacket.mpuPitch;
-            DataAnalysisObj.data.R1_mpuRoll = MsgUdpR01.message.coWorkerTxPacket.mpuRoll;
-            DataAnalysisObj.data.R1_mpuYaw = MsgUdpR01.message.coWorkerTxPacket.mpuYaw;
+            DataAnalysisObj.data.R1_mpuPitch = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuPitch * 180.0 / Math.PI);
+            DataAnalysisObj.data.R1_mpuRoll = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuRoll * 180.0 / Math.PI);
+            DataAnalysisObj.data.R1_mpuYaw = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuYaw * 180.0 / Math.PI);
+            DataAnalysisObj.data.R2_modeQuad = MsgUdpR01.message.serialR01RelayPacket.modeQuad;
             DataAnalysisObj.data.R2_pidAnglePitchKd = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKd;
             DataAnalysisObj.data.R2_pidAnglePitchKi = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKi;
             DataAnalysisObj.data.R2_pidAnglePitchKp = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKp;
@@ -165,6 +166,7 @@ namespace Ground_Station
             DataAnalysisObj.data.R2_rxRoll = MsgUdpR01.message.serialR01RelayPacket.rxRoll;
             DataAnalysisObj.data.R2_rxThrottle = MsgUdpR01.message.serialR01RelayPacket.rxThrottle;
             DataAnalysisObj.data.R2_rxYaw = MsgUdpR01.message.serialR01RelayPacket.rxYaw;
+            
 
         }
 

@@ -43,6 +43,8 @@ bool UdpInterfaceClass::initConnection(int timeoutInMillis, bool _isAP)
 				udp.beginPacket(remoteIP, udpPort);
 				udp.write("Welcome Message", 15);
 				udp.endPacket();
+
+				Serial.println("Welcome Message Sent via UDP");
 				return true;
 			}
 			else

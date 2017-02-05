@@ -15,12 +15,12 @@
 #define ESP_PLATFORM
 #define HAVE_CONFIG_H
 #define F_CPU 240000000L
-#define ARDUINO 10609
+#define ARDUINO 10801
 #define ARDUINO_ESP32_DEV
 #define ARDUINO_ARCH_ESP32
 #define ESP32
 #define __cplusplus 201103L
-#define GCC_VERSION 40805
+#define GCC_VERSION 50200
 #define __inline__
 #define __asm__(x)
 #define __extension__

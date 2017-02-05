@@ -9,15 +9,15 @@ This header file define all the configurable variables including constants, pin 
 //Pin Definitions
 #define		PIN_LED				5
 
-#define		PIN_RX_THR			36	
+#define		PIN_RX_THR			38	
 #define		PIN_RX_PITCH		37	
-#define		PIN_RX_ROLL			38
+#define		PIN_RX_ROLL			36
 #define		PIN_RX_YAW			39
-#define		PIN_RX_5TH_CHAN		32
-#define		PIN_RX_6TH_CHAN		33
+#define		PIN_RX_5TH_CHAN		34
+#define		PIN_RX_6TH_CHAN		35
 
-#define		PIN_M1			34
-#define		PIN_M2			35
+#define		PIN_M1			32
+#define		PIN_M2			33
 #define		PIN_M3			25
 #define		PIN_M4			26
 
@@ -67,6 +67,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_ROLL_OUTMIN	-250
 #define		PID_RATE_ROLL_OUTMAX	250
 
+#define		RX_MAX_PULSE_WIDTH	2000	//in microseconds
 
 #define		MPU_GYRO_DEG_SEC_TO_LSB	16.4     //This value can be used to convert deg/sec to LSB
 
@@ -129,12 +130,18 @@ typedef enum
 //Global Variable Declarations
 int test_task_counter = 0;
 
-uint32_t startTime_Thr, dutyCycle_Thr;
-uint32_t startTime_Pitch, dutyCycle_Pitch;
-uint32_t startTime_Roll, dutyCycle_Roll;
-uint32_t startTime_Yaw, dutyCycle_Yaw;
+volatile uint32_t startTime_Thr;
+volatile uint32_t startTime_Pitch;
+volatile uint32_t startTime_Roll;
+volatile uint32_t startTime_Yaw;
 
-uint32_t rxLastDataTime;
+volatile unsigned short dutyCycle_Thr;
+volatile unsigned short dutyCycle_Pitch;
+volatile unsigned short dutyCycle_Roll;
+volatile unsigned short dutyCycle_Yaw;
+
+
+volatile uint32_t rxLastDataTime;
 
 float cmdPitch = 0, cmdRoll = 0, cmdThr = 0, cmdYaw = 0;
 

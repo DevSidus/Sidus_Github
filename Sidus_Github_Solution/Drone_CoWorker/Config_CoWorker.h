@@ -6,8 +6,14 @@ This header file define all the configurable variables including constants, pin 
 //Wifi, UDP Definitions
 #define		WIFI_SSID	"khorfo_net"
 #define		WIFI_PASS	"ahmet_ipek_12082004"
+//#define		WIFI_SSID	"RaykentLojistik"
+//#define		WIFI_PASS	"NaziM.4878312_yoy"
+//#define		WIFI_SSID	"AAGCA"
+//#define		WIFI_PASS	"ahmet(12082004)"
 #define		UDP_PORT	8080
 #define		DEFAULT_GROUND_STATION_IP	"192.168.1.7"
+//#define		DEFAULT_GROUND_STATION_IP	"192.168.2.170"
+//#define		DEFAULT_GROUND_STATION_IP	"172.20.10.2"
 
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000

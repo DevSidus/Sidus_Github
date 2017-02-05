@@ -19,21 +19,27 @@
 #include "cSerialParse.h"
 #include "Local_FilterOnePole.h"
 #include "Local_PID_v1.h"
+#include "cRxFilter.h"
+
 
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
 cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT01.message.startChar2, MsgT01.message.endChar);
-HardwareSerial Serial2(2);
+//HardwareSerial Serial2(2);
 
 PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint);
 PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint);
 
+cRxFilter filterRxThr, filterRxPitch, filterRxRoll, filterRxYaw;
+
+int hataCount = 0;
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(921600);
-	Serial2.begin(921600);
+	//Serial2.begin(921600);
+	
 	
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
@@ -47,12 +53,12 @@ void setup() {
 	attachInterrupt(PIN_RX_THR, isrTHR, CHANGE);
 	attachInterrupt(PIN_RX_PITCH, isrPITCH, CHANGE);
 	attachInterrupt(PIN_RX_ROLL, isrROLL, CHANGE);
-	attachInterrupt(PIN_RX_YAW, isrYAW, CHANGE);	
+	attachInterrupt(PIN_RX_YAW, isrYAW, CHANGE);
 
 	//Insert all tasks into scheduler
-	scheduler.insert(test_task, 500000);
+	scheduler.insert(test_task, 1000000);
 	scheduler.insert(mapRxDCtoCmd, 20000);
-	scheduler.insert(serialCheck, 15000);
+	scheduler.insert(serialCheck, 19000);
 	scheduler.insert(serialTransmit, 18000);
 	scheduler.insert(processPID, 20000);
 	scheduler.insert(runMotors, 20000);
@@ -61,6 +67,7 @@ void setup() {
 
 	initVariables();
 	initPIDtuning();
+
 
 }
 // the loop function runs over and over again until power down or reset
@@ -124,10 +131,14 @@ float mapping(float input, float inputMin, float inputMax, float outputMin, floa
 {
 	float result = 0;
 
-	if (input < inputMin)
-		input = inputMin;
-	else if (input>inputMax)
-		input = inputMax;
+	if (input <= inputMin)
+	{
+		result = outputMin;
+	}
+	else if (input >= inputMax)
+	{
+		result = outputMax;
+	}
 	else
 	{
 		result = outputMin + (input - inputMin) / (inputMax - inputMin) * (outputMax - outputMin);
@@ -143,10 +154,12 @@ void isrTHR()
 	}
 	else
 	{
-		dutyCycle_Thr = micros() - startTime_Thr;
+		if(micros() - startTime_Thr < RX_MAX_PULSE_WIDTH)
+			dutyCycle_Thr = micros() - startTime_Thr;
+		rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
 	}
-	rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
 }
+
 void isrPITCH()
 {
 	if (digitalRead(PIN_RX_PITCH) == HIGH)
@@ -155,7 +168,8 @@ void isrPITCH()
 	}
 	else
 	{
-		dutyCycle_Pitch = micros() - startTime_Pitch;
+		if (micros() - startTime_Pitch < RX_MAX_PULSE_WIDTH)
+			dutyCycle_Pitch = micros() - startTime_Pitch;
 	}
 }
 void isrROLL()
@@ -166,7 +180,8 @@ void isrROLL()
 	}
 	else
 	{
-		dutyCycle_Roll = micros() - startTime_Roll;
+		if (micros() - startTime_Roll < RX_MAX_PULSE_WIDTH)
+			dutyCycle_Roll = micros() - startTime_Roll;
 	}
 }
 void isrYAW()
@@ -177,7 +192,8 @@ void isrYAW()
 	}
 	else
 	{
-		dutyCycle_Yaw = micros() - startTime_Yaw;
+		if (micros() - startTime_Yaw < RX_MAX_PULSE_WIDTH)
+			dutyCycle_Yaw = micros() - startTime_Yaw;
 	}
 }
 
@@ -188,6 +204,7 @@ void test_task()
 	{
 		digitalWrite(PIN_LED, HIGH);
 		
+		/*
 		Serial.print("Mpu Pitch:");
 		Serial.print(MsgT01.message.coWorkerTxPacket.mpuPitch*180/M_PI);
 		Serial.print("   Compass Hdg:");
@@ -196,6 +213,7 @@ void test_task()
 		Serial.print(MsgT01.message.coWorkerTxPacket.baroAlt);
 		Serial.print("   Baro Temp:");
 		Serial.println(MsgT01.message.coWorkerTxPacket.baroTemp);
+		*/
 		
 		/*
 		Serial.print("Thr:");
@@ -213,24 +231,44 @@ void test_task()
 		Serial.print("   Pitch");
 		Serial.println(MsgR01.message.rxPitch);
 		*/
+		/*
+		Serial.print("Thr:");
+		Serial.print(cmdThr);
+		Serial.print("   Pitch:");
+		Serial.print(cmdPitch);
+		Serial.print("   Roll:");
+		Serial.print(cmdRoll);
+		Serial.print("   Yaw:");
+		Serial.println(cmdYaw);
+		*/
+
 
 	}
 	else
 	{
 		digitalWrite(PIN_LED, LOW);
 	}
+	/*
+	if (abs(cmdThr - 1200) > 10)
+	{
+		Serial.println("HATA!!");
+	}
+	Serial.println("");
+	Serial.println(hataCount);
+	Serial.println(cmdThr);
+	*/
 }
 
 void serialCheck()
 {
-	int numberofbytes = Serial2.available();
+	int numberofbytes = Serial.available();
 	if (numberofbytes > 0)
 	{
 		//If available number of bytes is less than our buffer size, normal case
 		if (numberofbytes <= sizeof(MsgT01.message) * 3)
 		{
 			unsigned char buffer[sizeof(MsgT01.message) * 3];
-			Serial2.readBytes(buffer, numberofbytes);
+			Serial.readBytes(buffer, numberofbytes);
 			serialParse.Push(buffer, numberofbytes);
 			if (serialParse.getParsedData(MsgT01.dataBytes, sizeof(MsgT01.message)))
 			{
@@ -243,7 +281,7 @@ void serialCheck()
 		{
 			//Just read it
 			unsigned char buffer[sizeof(MsgT01.message) * 3];
-			Serial2.readBytes(buffer, sizeof(MsgT01.message) * 3);
+			Serial.readBytes(buffer, sizeof(MsgT01.message) * 3);
 		}
 	}
 }
@@ -257,6 +295,13 @@ void serialTransmit()
 	MsgR01.message.rxPitch = cmdPitch;
 	MsgR01.message.rxRoll = cmdRoll;
 	MsgR01.message.rxYaw = cmdYaw;
+
+	/*
+	MsgR01.message.rxThrottle = dutyCycle_Thr;
+	MsgR01.message.rxPitch = dutyCycle_Pitch;
+	MsgR01.message.rxRoll = dutyCycle_Roll;
+	MsgR01.message.rxYaw = dutyCycle_Yaw;
+	*/
 	/*
 	MsgR01.message.pidAngleKp = pidVars.anglePitch.Kp;
 	MsgR01.message.pidAngleKi = pidVars.anglePitch.Ki;
@@ -266,9 +311,14 @@ void serialTransmit()
 	MsgR01.message.pidRateKi = pidVars.ratePitch.Ki;
 	MsgR01.message.pidRateKd = pidVars.ratePitch.Kd;
 	*/
-	MsgR01.getPacket();
-	Serial2.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
 
+	if (abs(cmdThr - 1200) > 20)
+	{
+		hataCount++;
+	}
+
+	MsgR01.getPacket();
+	Serial.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
 
 }
 
@@ -373,10 +423,12 @@ void mapRxDCtoCmd()
 {
 	if (statusRx == statusType_Normal)
 	{
-		cmdPitch = mapping(dutyCycle_Pitch, DC_PITCH_MIN, DC_PITCH_MAX, CMD_PITCH_MIN, CMD_PITCH_MAX);
-		cmdRoll = mapping(dutyCycle_Roll, DC_ROLL_MIN, DC_ROLL_MAX, CMD_ROLL_MIN, CMD_ROLL_MAX);
-		cmdYaw = mapping(dutyCycle_Yaw, DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
-		cmdThr = mapping(dutyCycle_Thr, DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
+
+		cmdPitch = mapping(filterRxPitch.process(dutyCycle_Pitch), DC_PITCH_MIN, DC_PITCH_MAX, CMD_PITCH_MIN, CMD_PITCH_MAX);
+		cmdRoll = mapping(filterRxRoll.process(dutyCycle_Roll), DC_ROLL_MIN, DC_ROLL_MAX, CMD_ROLL_MIN, CMD_ROLL_MAX);
+		cmdYaw = mapping(filterRxYaw.process(dutyCycle_Yaw), DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
+		cmdThr = mapping(filterRxThr.process(dutyCycle_Thr), DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
+
 	}
 	else
 	{
@@ -397,7 +449,7 @@ void checkMode()
 		cmdRoll = 0;
 		cmdYaw = 0;
 		cmdThr = CMD_THR_MIN;
-		//Serial.println("QUAD is in SAFE Mode");
+		//Serial.println("QUAD is in SAFE Mode Check Rx!");
 		return;
 	}
 
@@ -419,9 +471,6 @@ void checkMode()
 	{
 		modeQuad = modeQuadDirCmd;
 	}
-
-
-
 }
 
 void processPID()
