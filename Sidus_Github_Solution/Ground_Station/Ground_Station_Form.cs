@@ -81,7 +81,7 @@ namespace Ground_Station
             while (true)
             {
                 MsgUdpT01.getPacket();
-                qgsUdp.SendPacket(MsgUdpT01.dataBytes, Marshal.SizeOf(MsgUdpT01.dataBytes));
+                qgsUdp.SendPacket(MsgUdpT01.dataBytes, Marshal.SizeOf(MsgUdpT01.message));
                 System.Threading.Thread.Sleep(100);
             }
 
@@ -127,16 +127,16 @@ namespace Ground_Station
         {
             MsgUdpR01.setPacket();
 
-            DataAnalysisObj.data.R1_baroAlt = MsgUdpR01.message.coWorkerTxPacket.baroAlt;
-            DataAnalysisObj.data.R1_baroTemp = MsgUdpR01.message.coWorkerTxPacket.baroTemp;
-            DataAnalysisObj.data.R1_batteryVoltageInBits = MsgUdpR01.message.coWorkerTxPacket.batteryVoltageInBits;
-            DataAnalysisObj.data.R1_compassHdg = MsgUdpR01.message.coWorkerTxPacket.compassHdg;
-            DataAnalysisObj.data.R1_mpuAccRealX = MsgUdpR01.message.coWorkerTxPacket.mpuAccRealX;
-            DataAnalysisObj.data.R1_mpuAccRealY = MsgUdpR01.message.coWorkerTxPacket.mpuAccRealY;
-            DataAnalysisObj.data.R1_mpuAccRealZ = MsgUdpR01.message.coWorkerTxPacket.mpuAccRealZ;
-            DataAnalysisObj.data.R1_mpuAccX = MsgUdpR01.message.coWorkerTxPacket.mpuAccX;
-            DataAnalysisObj.data.R1_mpuAccY = MsgUdpR01.message.coWorkerTxPacket.mpuAccY;
-            DataAnalysisObj.data.R1_mpuAccZ = MsgUdpR01.message.coWorkerTxPacket.mpuAccZ;
+            //DataAnalysisObj.data.R1_baroAlt = MsgUdpR01.message.coWorkerTxPacket.baroAlt;
+            //DataAnalysisObj.data.R1_baroTemp = MsgUdpR01.message.coWorkerTxPacket.baroTemp;
+            //DataAnalysisObj.data.R1_batteryVoltageInBits = MsgUdpR01.message.coWorkerTxPacket.batteryVoltageInBits;
+            //DataAnalysisObj.data.R1_compassHdg = MsgUdpR01.message.coWorkerTxPacket.compassHdg;
+            //DataAnalysisObj.data.R1_mpuAccRealX = MsgUdpR01.message.coWorkerTxPacket.mpuAccRealX;
+            //DataAnalysisObj.data.R1_mpuAccRealY = MsgUdpR01.message.coWorkerTxPacket.mpuAccRealY;
+            //DataAnalysisObj.data.R1_mpuAccRealZ = MsgUdpR01.message.coWorkerTxPacket.mpuAccRealZ;
+            //DataAnalysisObj.data.R1_mpuAccX = MsgUdpR01.message.coWorkerTxPacket.mpuAccX;
+            //DataAnalysisObj.data.R1_mpuAccY = MsgUdpR01.message.coWorkerTxPacket.mpuAccY;
+            //DataAnalysisObj.data.R1_mpuAccZ = MsgUdpR01.message.coWorkerTxPacket.mpuAccZ;
             DataAnalysisObj.data.R1_mpuGyroX = MsgUdpR01.message.coWorkerTxPacket.mpuGyroX;
             DataAnalysisObj.data.R1_mpuGyroY = MsgUdpR01.message.coWorkerTxPacket.mpuGyroY;
             DataAnalysisObj.data.R1_mpuGyroZ = MsgUdpR01.message.coWorkerTxPacket.mpuGyroZ;
@@ -144,29 +144,35 @@ namespace Ground_Station
             DataAnalysisObj.data.R1_mpuRoll = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuRoll * 180.0 / Math.PI);
             DataAnalysisObj.data.R1_mpuYaw = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuYaw * 180.0 / Math.PI);
             DataAnalysisObj.data.R2_modeQuad = MsgUdpR01.message.serialR01RelayPacket.modeQuad;
-            DataAnalysisObj.data.R2_pidAnglePitchKd = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKd;
-            DataAnalysisObj.data.R2_pidAnglePitchKi = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKi;
-            DataAnalysisObj.data.R2_pidAnglePitchKp = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKp;
-            DataAnalysisObj.data.R2_pidAngleRollKd = MsgUdpR01.message.serialR01RelayPacket.pidAngleRollKd;
-            DataAnalysisObj.data.R2_pidAngleRollKi = MsgUdpR01.message.serialR01RelayPacket.pidAngleRollKi;
-            DataAnalysisObj.data.R2_pidAngleRollKp = MsgUdpR01.message.serialR01RelayPacket.pidAngleRollKp;
-            DataAnalysisObj.data.R2_pidAngleYawKd = MsgUdpR01.message.serialR01RelayPacket.pidAngleYawKd;
-            DataAnalysisObj.data.R2_pidAngleYawKi = MsgUdpR01.message.serialR01RelayPacket.pidAngleYawKi;
-            DataAnalysisObj.data.R2_pidAngleYawKp = MsgUdpR01.message.serialR01RelayPacket.pidAngleYawKp;
+            //DataAnalysisObj.data.R2_pidAnglePitchKd = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKd;
+            //DataAnalysisObj.data.R2_pidAnglePitchKi = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKi;
+            //DataAnalysisObj.data.R2_pidAnglePitchKp = MsgUdpR01.message.serialR01RelayPacket.pidAnglePitchKp;
+            //DataAnalysisObj.data.R2_pidAngleRollKd = MsgUdpR01.message.serialR01RelayPacket.pidAngleRollKd;
+            //DataAnalysisObj.data.R2_pidAngleRollKi = MsgUdpR01.message.serialR01RelayPacket.pidAngleRollKi;
+            //DataAnalysisObj.data.R2_pidAngleRollKp = MsgUdpR01.message.serialR01RelayPacket.pidAngleRollKp;
+            //DataAnalysisObj.data.R2_pidAngleYawKd = MsgUdpR01.message.serialR01RelayPacket.pidAngleYawKd;
+            //DataAnalysisObj.data.R2_pidAngleYawKi = MsgUdpR01.message.serialR01RelayPacket.pidAngleYawKi;
+            //DataAnalysisObj.data.R2_pidAngleYawKp = MsgUdpR01.message.serialR01RelayPacket.pidAngleYawKp;
             DataAnalysisObj.data.R2_pidRatePitchKd = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchKd;
             DataAnalysisObj.data.R2_pidRatePitchKi = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchKi;
             DataAnalysisObj.data.R2_pidRatePitchKp = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchKp;
-            DataAnalysisObj.data.R2_pidRateRollKd = MsgUdpR01.message.serialR01RelayPacket.pidRateRollKd;
-            DataAnalysisObj.data.R2_pidRateRollKi = MsgUdpR01.message.serialR01RelayPacket.pidRateRollKi;
-            DataAnalysisObj.data.R2_pidRateRollKp = MsgUdpR01.message.serialR01RelayPacket.pidRateRollKp;
-            DataAnalysisObj.data.R2_pidRateYawKd = MsgUdpR01.message.serialR01RelayPacket.pidRateYawKd;
-            DataAnalysisObj.data.R2_pidRateYawKi = MsgUdpR01.message.serialR01RelayPacket.pidRateYawKi;
-            DataAnalysisObj.data.R2_pidRateYawKp = MsgUdpR01.message.serialR01RelayPacket.pidRateYawKp;
+            //DataAnalysisObj.data.R2_pidRateRollKd = MsgUdpR01.message.serialR01RelayPacket.pidRateRollKd;
+            //DataAnalysisObj.data.R2_pidRateRollKi = MsgUdpR01.message.serialR01RelayPacket.pidRateRollKi;
+            //DataAnalysisObj.data.R2_pidRateRollKp = MsgUdpR01.message.serialR01RelayPacket.pidRateRollKp;
+            //DataAnalysisObj.data.R2_pidRateYawKd = MsgUdpR01.message.serialR01RelayPacket.pidRateYawKd;
+            //DataAnalysisObj.data.R2_pidRateYawKi = MsgUdpR01.message.serialR01RelayPacket.pidRateYawKi;
+            //DataAnalysisObj.data.R2_pidRateYawKp = MsgUdpR01.message.serialR01RelayPacket.pidRateYawKp;
             DataAnalysisObj.data.R2_rxPitch = MsgUdpR01.message.serialR01RelayPacket.rxPitch;
             DataAnalysisObj.data.R2_rxRoll = MsgUdpR01.message.serialR01RelayPacket.rxRoll;
             DataAnalysisObj.data.R2_rxThrottle = MsgUdpR01.message.serialR01RelayPacket.rxThrottle;
             DataAnalysisObj.data.R2_rxYaw = MsgUdpR01.message.serialR01RelayPacket.rxYaw;
-            
+            DataAnalysisObj.data.R2_pidRatePitchOutput = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchOutput;
+            DataAnalysisObj.data.R2_pidRatePitchPresult = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchPresult;
+            DataAnalysisObj.data.R2_pidRatePitchIresult = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchIresult;
+            DataAnalysisObj.data.R2_pidRatePitchDresult = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchDresult;
+            DataAnalysisObj.data.R2_pidRatePitchF1 = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchF1;
+            DataAnalysisObj.data.R2_pidRatePitchF2 = MsgUdpR01.message.serialR01RelayPacket.pidRatePitchF2;
+
 
         }
 

@@ -63,9 +63,6 @@
     <ClInclude Include="structMsgCoWorkerTx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Local_FilterOnePole.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Local_PID_v1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -102,9 +99,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cMsgUdpT01.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Local_FilterOnePole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Local_PID_v1.cpp">

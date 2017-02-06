@@ -15,19 +15,19 @@ namespace Ground_Station
         public short R1_mpuGyroX { get; set; }
         public short R1_mpuGyroY { get; set; }
         public short R1_mpuGyroZ { get; set; }
-        public short R1_mpuAccX { get; set; }
-        public short R1_mpuAccY { get; set; }
-        public short R1_mpuAccZ { get; set; }
-        public short R1_mpuAccRealX { get; set; }
-        public short R1_mpuAccRealY { get; set; }
-        public short R1_mpuAccRealZ { get; set; }
+        //public short R1_mpuAccX { get; set; }
+        //public short R1_mpuAccY { get; set; }
+        //public short R1_mpuAccZ { get; set; }
+        //public short R1_mpuAccRealX { get; set; }
+        //public short R1_mpuAccRealY { get; set; }
+        //public short R1_mpuAccRealZ { get; set; }
         public float R1_mpuYaw { get; set; }
         public float R1_mpuPitch { get; set; }
         public float R1_mpuRoll { get; set; }
-        public float R1_baroTemp { get; set; }
-        public float R1_baroAlt { get; set; }
-        public float R1_compassHdg { get; set; }
-        public short R1_batteryVoltageInBits { get; set; }
+        //public float R1_baroTemp { get; set; }
+        //public float R1_baroAlt { get; set; }
+        //public float R1_compassHdg { get; set; }
+        //public short R1_batteryVoltageInBits { get; set; }
 
         //MsgR01 Members
         public byte R2_modeQuad { get; set; }
@@ -38,21 +38,30 @@ namespace Ground_Station
         public byte R2_pidRatePitchKp { get; set; }
         public byte R2_pidRatePitchKi { get; set; }
         public byte R2_pidRatePitchKd { get; set; }
-        public byte R2_pidRateRollKp { get; set; }
-        public byte R2_pidRateRollKi { get; set; }
-        public byte R2_pidRateRollKd { get; set; }
-        public byte R2_pidRateYawKp { get; set; }
-        public byte R2_pidRateYawKi { get; set; }
-        public byte R2_pidRateYawKd { get; set; }
-        public byte R2_pidAnglePitchKp { get; set; }
-        public byte R2_pidAnglePitchKi { get; set; }
-        public byte R2_pidAnglePitchKd { get; set; }
-        public byte R2_pidAngleRollKp { get; set; }
-        public byte R2_pidAngleRollKi { get; set; }
-        public byte R2_pidAngleRollKd { get; set; }
-        public byte R2_pidAngleYawKp { get; set; }
-        public byte R2_pidAngleYawKi { get; set; }
-        public byte R2_pidAngleYawKd { get; set; }
+        public short R2_pidRatePitchOutput { get; set; }
+        public short R2_pidRatePitchPresult { get; set; }
+        public short R2_pidRatePitchIresult { get; set; }
+        public short R2_pidRatePitchDresult { get; set; }
+        public byte R2_pidRatePitchF1 { get; set; }
+        public byte R2_pidRatePitchF2 { get; set; }
+
+        //public byte R2_pidRateRollKp { get; set; }
+        //public byte R2_pidRateRollKi { get; set; }
+        //public byte R2_pidRateRollKd { get; set; }
+        //public byte R2_pidRateYawKp { get; set; }
+        //public byte R2_pidRateYawKi { get; set; }
+        //public byte R2_pidRateYawKd { get; set; }
+        //public byte R2_pidAnglePitchKp { get; set; }
+        //public byte R2_pidAnglePitchKi { get; set; }
+        //public byte R2_pidAnglePitchKd { get; set; }
+        //public byte R2_pidAngleRollKp { get; set; }
+        //public byte R2_pidAngleRollKi { get; set; }
+        //public byte R2_pidAngleRollKd { get; set; }
+        //public byte R2_pidAngleYawKp { get; set; }
+        //public byte R2_pidAngleYawKi { get; set; }
+        //public byte R2_pidAngleYawKd { get; set; }
+
+
     }
 
     class cDataAnalysisClass

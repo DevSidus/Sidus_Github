@@ -17,21 +17,31 @@ struct structMsgR01
 	unsigned char pidRatePitchKp;
 	unsigned char pidRatePitchKi;
 	unsigned char pidRatePitchKd;
-	unsigned char pidRateRollKp;
-	unsigned char pidRateRollKi;
-	unsigned char pidRateRollKd;
-	unsigned char pidRateYawKp;
-	unsigned char pidRateYawKi;
-	unsigned char pidRateYawKd;
-	unsigned char pidAnglePitchKp;
-	unsigned char pidAnglePitchKi;
-	unsigned char pidAnglePitchKd;
-	unsigned char pidAngleRollKp;
-	unsigned char pidAngleRollKi;
-	unsigned char pidAngleRollKd;
-	unsigned char pidAngleYawKp;
-	unsigned char pidAngleYawKi;
-	unsigned char pidAngleYawKd;
+	short pidRatePitchOutput;
+	short pidRatePitchPresult;
+	short pidRatePitchIresult;
+	short pidRatePitchDresult;
+	unsigned char pidRatePitchF1;
+	unsigned char pidRatePitchF2;
+
+
+	//unsigned char pidraterollkp;
+	//unsigned char pidraterollki;
+	//unsigned char pidraterollkd;
+	//unsigned char pidrateyawkp;
+	//unsigned char pidrateyawki;
+	//unsigned char pidrateyawkd;
+	//unsigned char pidanglepitchkp;
+	//unsigned char pidanglepitchki;
+	//unsigned char pidanglepitchkd;
+	//unsigned char pidanglerollkp;
+	//unsigned char pidanglerollki;
+	//unsigned char pidanglerollkd;
+	//unsigned char pidangleyawkp;
+	//unsigned char pidangleyawki;
+	//unsigned char pidangleyawkd;
+
+
 	char endChar;
 };
 #pragma pack(pop)

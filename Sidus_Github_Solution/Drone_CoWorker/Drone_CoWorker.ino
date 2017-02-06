@@ -57,7 +57,7 @@ void setup() {
 	initCompass();
 
 	//Insert all tasks into scheduler
-	scheduler.insert(test_task, 500000);
+	//scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(processMpuTask, 17000);
 	scheduler.insert(setCoWorkerTxDataFields, 20000);
@@ -79,7 +79,7 @@ void loop() {
 
 void test_task()
 {
-	//Serial.println("test task");
+	Serial.println("test task");
 }
 
 void initVariables()

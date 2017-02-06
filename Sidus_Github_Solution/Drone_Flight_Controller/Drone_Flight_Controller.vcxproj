@@ -90,7 +90,6 @@
     <ClInclude Include="cRxFilter.h" />
     <ClInclude Include="cSerialParse.h" />
     <ClInclude Include="Local_Agenda.h" />
-    <ClInclude Include="Local_FilterOnePole.h" />
     <ClInclude Include="Local_helper_3dmath.h" />
     <ClInclude Include="Local_HMC5883L.h" />
     <ClInclude Include="Local_I2Cdev.h" />
@@ -109,7 +108,6 @@
     <ClCompile Include="cRxFilter.cpp" />
     <ClCompile Include="cSerialParse.cpp" />
     <ClCompile Include="Local_Agenda.cpp" />
-    <ClCompile Include="Local_FilterOnePole.cpp" />
     <ClCompile Include="Local_HMC5883L.cpp" />
     <ClCompile Include="Local_I2Cdev.cpp" />
     <ClCompile Include="Local_MPU6050.cpp" />

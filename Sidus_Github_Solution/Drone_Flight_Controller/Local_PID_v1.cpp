@@ -36,8 +36,11 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint)
 
     lastTime = millis();
 	lastError = 0;
-	myFilter = new FilterOnePole(LOWPASS, 5, 0);
-	myFilter2 = new FilterOnePole(LOWPASS, 5, 0);
+
+	f1 = 0.6;
+	f2 = 0.6;
+	errorSmooth = 0;
+	errorDerivativeSmooth = 0;
 
 }
  
@@ -52,24 +55,26 @@ bool PID::Compute()
       /*Compute all the working error variables*/
 
 	  double dTimeInSec = dTime / 1000.0;
+      double error = *mySetpoint - *myMeasuredVal;
 
-      double error2 = *mySetpoint - *myMeasuredVal;
+	  errorSmooth = error * (1 - f1) + errorSmooth * f1;
 
-	  double error = myFilter2->input(error2);
+
 
       if(I_Result > outMax) I_Result = outMax;
       else if(I_Result < outMin) I_Result= outMin;
 
-	  errorDerivative = (error - lastError) / dTimeInSec;
-	  errorDerivativeFiltered = myFilter->input(errorDerivative);
+	  errorDerivative = (errorSmooth - lastError) / dTimeInSec;
+	  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+	  
 	  
  
       /*Compute PID Output*/
-	  P_Result = Kp * error;
-	  I_Result += (Ki * dTimeInSec * error);
-	  D_Result = Kd * errorDerivativeFiltered;
+	  P_Result = Kp * errorSmooth;
+	  I_Result += (Ki * dTimeInSec * errorSmooth);
+	  D_Result = Kd * errorDerivativeSmooth;
 
-      double output = P_Result + I_Result + D_Result;
+	  double output = P_Result + I_Result + D_Result;
       
 	  if(output > outMax) output = outMax;
       else if(output < outMin) output = outMin;
@@ -78,7 +83,7 @@ bool PID::Compute()
 	  
       /*Remember some variables for next time*/
       lastTime = now;
-	  lastError = error;
+	  lastError = errorSmooth;
 	  return true;
    }
    else return false;
@@ -158,9 +163,16 @@ double PID::GetKp(){ return  Kp; }
 double PID::GetKi(){ return  Ki;}
 double PID::GetKd(){ return  Kd;}
 
+float PID::GetF1() { return  f1; }
+float PID::GetF2() { return  f2; }
+
 void PID::SetKp(double _Kp) { Kp = _Kp; }
 void PID::SetKi(double _Ki) { Ki = _Ki; }
 void PID::SetKd(double _Kd) { Kd = _Kd; }
+
+void PID::SetF1(float _f1) { f1 = _f1; }
+void PID::SetF2(float _f2) { f2 = _f2; }
+
 
 double PID::Get_P_Result() { return P_Result; }
 double PID::Get_I_Result() { return I_Result; }
