@@ -19,6 +19,7 @@
 #include "cSerialParse.h"
 #include "Local_PID_v1.h"
 #include "cRxFilter.h"
+#include "cBuzzerMelody.h"
 
 
 //Global Class Definitions
@@ -32,6 +33,7 @@ PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVa
 PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint);
 
 cRxFilter filterRxThr, filterRxPitch, filterRxRoll, filterRxYaw;
+cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
 int hataCount = 0;
 // the setup function runs once when you press reset or power the board
@@ -46,6 +48,8 @@ void setup() {
 	pinMode(PIN_RX_PITCH, INPUT);
 	pinMode(PIN_RX_ROLL, INPUT);
 	pinMode(PIN_RX_YAW, INPUT);
+
+	pinMode(PIN_BUZZER, OUTPUT);
 	
 	setupMotorPins();
 
@@ -63,6 +67,7 @@ void setup() {
 	scheduler.insert(runMotors, 20000);
 	scheduler.insert(checkRxStatus, 1000000);
 	scheduler.insert(checkMode, 310000);
+	scheduler.insert(playMelody, 100000);
 
 	initVariables();
 	initPIDtuning();
@@ -497,4 +502,12 @@ void processPID()
 	//pidVars.rateRoll.setpoint = cmdRoll;
 	//pidRateRoll.Compute();
 
+}
+
+void playMelody()
+{
+	if (modeQuad == modeQuadARMED)
+		buzzer.play(1);
+	else
+		buzzer.play(0);	
 }
