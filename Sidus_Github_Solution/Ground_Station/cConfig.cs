@@ -10,5 +10,10 @@ namespace Ground_Station
     {
         public static int UDP_PORT_NUM = 8080;
         public static string DEFAULT_REMOTE_IP = "192.168.1.10";
+
+        public static double RESOLUTION_PID_KP = 0.01;
+        public static double RESOLUTION_PID_KI = 0.001;
+        public static double RESOLUTION_PID_KD = 0.001;
+        public static double RESOLUTION_PID_F = 0.01;
     }
 }

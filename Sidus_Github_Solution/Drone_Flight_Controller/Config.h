@@ -58,21 +58,44 @@ This header file define all the configurable variables including constants, pin 
 
 #define		CMD_THR_ARM_START	CMD_THR_MIN+(CMD_THR_MAX-CMD_THR_MIN)/10
 
-#define		PID_RATE_PITCH_KP	1.0
-#define		PID_RATE_PITCH_KI	0.0
-#define		PID_RATE_PITCH_KD	0.0
-#define		PID_RATE_PITCH_OUTMIN	-250
-#define		PID_RATE_PITCH_OUTMAX	250
+#define		CMD_MODE_CHANGE_THR_GAP		50
+#define		CMD_MODE_CHANGE_ANGLE_GAP	10
 
-#define		PID_RATE_ROLL_KP	1.0
-#define		PID_RATE_ROLL_KI	0.0
-#define		PID_RATE_ROLL_KD	0.0
-#define		PID_RATE_ROLL_OUTMIN	-250
-#define		PID_RATE_ROLL_OUTMAX	250
+#define		PID_RATE_PITCH_KP			1.0
+#define		PID_RATE_PITCH_KI			0.0
+#define		PID_RATE_PITCH_KD			0.0
+#define		PID_RATE_PITCH_OUTMIN		-250
+#define		PID_RATE_PITCH_OUTMAX		250
+#define		PID_RATE_PITCH_F1_DEFAULT	0.5
+#define		PID_RATE_PITCH_F2_DEFAULT	0.5
 
-#define		RX_MAX_PULSE_WIDTH	2000	//in microseconds
+#define		PID_ANGLE_PITCH_KP			1.0
+#define		PID_ANGLE_PITCH_KI			0.0
+#define		PID_ANGLE_PITCH_KD			0.0
+#define		PID_ANGLE_PITCH_OUTMIN		-250
+#define		PID_ANGLE_PITCH_OUTMAX		250
+#define		PID_ANGLE_PITCH_F1_DEFAULT	0.5
+#define		PID_ANGLE_PITCH_F2_DEFAULT	0.5
 
-#define		MPU_GYRO_DEG_SEC_TO_LSB	16.4     //This value can be used to convert deg/sec to LSB
+#define		PID_RATE_ROLL_KP			1.0
+#define		PID_RATE_ROLL_KI			0.0
+#define		PID_RATE_ROLL_KD			0.0
+#define		PID_RATE_ROLL_OUTMIN		-250
+#define		PID_RATE_ROLL_OUTMAX		250
+#define		PID_RATE_ROLL_F1_DEFAULT	0.5
+#define		PID_RATE_ROLL_F2_DEFAULT	0.5
+
+#define		RX_MAX_PULSE_WIDTH			2000	//in microseconds
+
+#define		MPU_GYRO_DEG_SEC_TO_LSB		16.4     //This value can be used to convert deg/sec to LSB
+
+#define		RESOLUTION_PID_KP			0.01
+#define		RESOLUTION_PID_KI			0.001
+#define		RESOLUTION_PID_KD			0.001
+#define		RESOLUTION_PID_F			0.01
+
+#define		SERIAL_COM_SPEED			921600
+#define		SERIAL_PARSE_OVF_MULT		3
 
 
 struct structPID
@@ -87,6 +110,7 @@ struct structPID
 	double outputLimitMax;
 	float f1;
 	float f2;
+	double d_bypass;
 };
 struct structSuperPID
 {
@@ -130,6 +154,11 @@ typedef enum
 	pidCommandApplyAngleYaw = 6,
 }pidCommandType;
 
+typedef enum
+{
+	buzzerMelodyNoTone = 0,
+	buzzerMelodyArmWarning = 1,
+}buzzerMelodyType;
 
 
 //Global Variable Declarations

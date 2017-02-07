@@ -35,6 +35,7 @@ namespace Ground_Station
         public short R2_rxPitch { get; set; }
         public short R2_rxRoll { get; set; }
         public short R2_rxYaw { get; set; }
+
         public byte R2_pidRatePitchKp { get; set; }
         public byte R2_pidRatePitchKi { get; set; }
         public byte R2_pidRatePitchKd { get; set; }
@@ -45,21 +46,15 @@ namespace Ground_Station
         public byte R2_pidRatePitchF1 { get; set; }
         public byte R2_pidRatePitchF2 { get; set; }
 
-        //public byte R2_pidRateRollKp { get; set; }
-        //public byte R2_pidRateRollKi { get; set; }
-        //public byte R2_pidRateRollKd { get; set; }
-        //public byte R2_pidRateYawKp { get; set; }
-        //public byte R2_pidRateYawKi { get; set; }
-        //public byte R2_pidRateYawKd { get; set; }
-        //public byte R2_pidAnglePitchKp { get; set; }
-        //public byte R2_pidAnglePitchKi { get; set; }
-        //public byte R2_pidAnglePitchKd { get; set; }
-        //public byte R2_pidAngleRollKp { get; set; }
-        //public byte R2_pidAngleRollKi { get; set; }
-        //public byte R2_pidAngleRollKd { get; set; }
-        //public byte R2_pidAngleYawKp { get; set; }
-        //public byte R2_pidAngleYawKi { get; set; }
-        //public byte R2_pidAngleYawKd { get; set; }
+        public byte R2_pidAnglePitchKp { get; set; }
+        public byte R2_pidAnglePitchKi { get; set; }
+        public byte R2_pidAnglePitchKd { get; set; }
+        public short R2_pidAnglePitchOutput { get; set; }
+        public short R2_pidAnglePitchPresult { get; set; }
+        public short R2_pidAnglePitchIresult { get; set; }
+        public short R2_pidAnglePitchDresult { get; set; }
+        public byte R2_pidAnglePitchF1 { get; set; }
+        public byte R2_pidAnglePitchF2 { get; set; }
 
 
     }

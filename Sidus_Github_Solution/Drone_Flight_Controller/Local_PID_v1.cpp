@@ -24,6 +24,8 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint)
     myMeasuredVal = MeasuredVal;
     mySetpoint = Setpoint;
 	inAuto = false;
+	d_bypass = 0;
+	d_bypass_enabled = false;
 	
 	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
 	
@@ -41,9 +43,37 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint)
 	f2 = 0.6;
 	errorSmooth = 0;
 	errorDerivativeSmooth = 0;
-
 }
- 
+
+PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* _d_bypass)
+{
+
+	myOutput = Output;
+	myMeasuredVal = MeasuredVal;
+	mySetpoint = Setpoint;
+	inAuto = false;
+	d_bypass = _d_bypass;
+	d_bypass_enabled = true;
+
+	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
+
+													//PID::SetTunings(Kp, Ki, Kd);
+	Kp = 1;
+	Ki = 0;
+	Kd = 0;
+
+	PID::SetMode(AUTOMATIC);
+
+	lastTime = millis();
+	lastError = 0;
+
+	f1 = 0.6;
+	f2 = 0.6;
+	errorSmooth = 0;
+	errorDerivativeSmooth = 0;
+}
+
+
 bool PID::Compute()
 {
    if(!inAuto) return false;
@@ -72,7 +102,13 @@ bool PID::Compute()
       /*Compute PID Output*/
 	  P_Result = Kp * errorSmooth;
 	  I_Result += (Ki * dTimeInSec * errorSmooth);
-	  D_Result = Kd * errorDerivativeSmooth;
+
+	  //bypass value could be inserted just before errorderivativesmooth
+	  if(d_bypass_enabled)
+		  D_Result = Kd * (*d_bypass);
+	  else
+		  D_Result = Kd * errorDerivativeSmooth;
+
 
 	  double output = P_Result + I_Result + D_Result;
       

@@ -23,7 +23,15 @@ struct structMsgR01
 	short pidRatePitchDresult;
 	unsigned char pidRatePitchF1;
 	unsigned char pidRatePitchF2;
-
+	unsigned char pidAnglePitchKp;
+	unsigned char pidAnglePitchKi;
+	unsigned char pidAnglePitchKd;
+	short pidAnglePitchOutput;
+	short pidAnglePitchPresult;
+	short pidAnglePitchIresult;
+	short pidAnglePitchDresult;
+	unsigned char pidAnglePitchF1;
+	unsigned char pidAnglePitchF2;
 
 	//unsigned char pidraterollkp;
 	//unsigned char pidraterollki;

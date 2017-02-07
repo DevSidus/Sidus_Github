@@ -18,6 +18,8 @@ class PID
   //commonly used functions **************************************************************************
 	PID(double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
 											//   Setpoint. 
+	PID(double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
+												//   Setpoint. 
 	
     void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
@@ -77,6 +79,7 @@ class PID
     double *myOutput;             //   This creates a hard link between the variables and the 
     double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                   //   what these values are.  with pointers we'll just know.
+	double *d_bypass;
 			  
 	unsigned long lastTime;
 	double lastError;
@@ -86,6 +89,7 @@ class PID
 
 	double outMin, outMax;
 	bool inAuto;
+	bool d_bypass_enabled;
 
 	
 };

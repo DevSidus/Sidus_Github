@@ -18,6 +18,7 @@ namespace Ground_Station
         public short rxPitch { get; set; }
         public short rxRoll { get; set; }
         public short rxYaw { get; set; }
+
         public byte pidRatePitchKp { get; set; }
         public byte pidRatePitchKi { get; set; }
         public byte pidRatePitchKd { get; set; }
@@ -27,21 +28,17 @@ namespace Ground_Station
         public short pidRatePitchDresult { get; set; }
         public byte pidRatePitchF1 { get; set; }
         public byte pidRatePitchF2 { get; set; }
-        //public byte pidRateRollKp { get; set; }
-        //public byte pidRateRollKi { get; set; }
-        //public byte pidRateRollKd { get; set; }
-        //public byte pidRateYawKp { get; set; }
-        //public byte pidRateYawKi { get; set; }
-        //public byte pidRateYawKd { get; set; }
-        //public byte pidAnglePitchKp { get; set; }
-        //public byte pidAnglePitchKi { get; set; }
-        //public byte pidAnglePitchKd { get; set; }
-        //public byte pidAngleRollKp { get; set; }
-        //public byte pidAngleRollKi { get; set; }
-        //public byte pidAngleRollKd { get; set; }
-        //public byte pidAngleYawKp { get; set; }
-        //public byte pidAngleYawKi { get; set; }
-        //public byte pidAngleYawKd { get; set; }
+
+        public byte pidAnglePitchKp { get; set; }
+        public byte pidAnglePitchKi { get; set; }
+        public byte pidAnglePitchKd { get; set; }
+        public short pidAnglePitchOutput { get; set; }
+        public short pidAnglePitchPresult { get; set; }
+        public short pidAnglePitchIresult { get; set; }
+        public short pidAnglePitchDresult { get; set; }
+        public byte pidAnglePitchF1 { get; set; }
+        public byte pidAnglePitchF2 { get; set; }
+
         public char endChar { get; set; }
     }
     class cMsgR01

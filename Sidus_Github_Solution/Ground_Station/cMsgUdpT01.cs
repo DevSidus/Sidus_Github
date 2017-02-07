@@ -17,25 +17,12 @@ namespace Ground_Station
         public byte pidRatePitchF1 { get; set; }
         public byte pidRatePitchF2 { get; set; }
 
-        //public byte pidRateRollKp { get; set; }
-        //public byte pidRateRollKi { get; set; }
-        //public byte pidRateRollKd { get; set; }
+        public byte pidAnglePitchKp { get; set; }
+        public byte pidAnglePitchKi { get; set; }
+        public byte pidAnglePitchKd { get; set; }
+        public byte pidAnglePitchF1 { get; set; }
+        public byte pidAnglePitchF2 { get; set; }
 
-        //public byte pidRateYawKp { get; set; }
-        //public byte pidRateYawKi { get; set; }
-        //public byte pidRateYawKd { get; set; } 
-
-        //public byte pidAnglePitchKp { get; set; }
-        //public byte pidAnglePitchKi { get; set; }
-        //public byte pidAnglePitchKd { get; set; }
-
-        //public byte pidAngleRollKp { get; set; }
-        //public byte pidAngleRollKi { get; set; }
-        //public byte pidAngleRollKd { get; set; }
-
-        //public byte pidAngleYawKp { get; set; }
-        //public byte pidAngleYawKi { get; set; }
-        //public byte pidAngleYawKd { get; set; }
     }
     class cMsgUdpT01
     {
