@@ -22,6 +22,11 @@ namespace Ground_Station
         public byte pidAnglePitchKd { get; set; }
         public byte pidAnglePitchF1 { get; set; }
         public byte pidAnglePitchF2 { get; set; }
+        public byte pidRateRollKp { get; set; }
+        public byte pidRateRollKi { get; set; }
+        public byte pidRateRollKd { get; set; }
+        public byte pidRateRollF1 { get; set; }
+        public byte pidRateRollF2 { get; set; }
 
     }
     class cMsgUdpT01

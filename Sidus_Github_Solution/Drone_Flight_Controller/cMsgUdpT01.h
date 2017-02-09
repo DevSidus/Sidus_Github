@@ -18,6 +18,12 @@ struct structMsgUdpT01
 	unsigned char pidAnglePitchF1;
 	unsigned char pidAnglePitchF2;
 
+	unsigned char pidRateRollKp;
+	unsigned char pidRateRollKi;
+	unsigned char pidRateRollKd;
+	unsigned char pidRateRollF1;
+	unsigned char pidRateRollF2;
+
 };
 #pragma pack(pop)
 

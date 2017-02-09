@@ -31,7 +31,7 @@ cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT
 
 PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint);
 PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.d_bypass);
-//PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint);
+PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint);
 
 cRxFilter filterRxThr, filterRxPitch, filterRxRoll, filterRxYaw;
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
@@ -107,13 +107,13 @@ void initVariables()
 	pidVars.anglePitch.f1 = PID_ANGLE_PITCH_F1_DEFAULT;
 	pidVars.anglePitch.f2 = PID_ANGLE_PITCH_F2_DEFAULT;
 
-	//pidVars.rateRoll.Kp = PID_RATE_ROLL_KP;
-	//pidVars.rateRoll.Ki = PID_RATE_ROLL_KI;
-	//pidVars.rateRoll.Kd = PID_RATE_ROLL_KD;
-	//pidVars.rateRoll.outputLimitMin = PID_RATE_ROLL_OUTMIN;
-	//pidVars.rateRoll.outputLimitMax = PID_RATE_ROLL_OUTMAX;
-	//pidVars.rateRoll.f1 = PID_RATE_ROLL_F1_DEFAULT;
-	//pidVars.rateRoll.f2 = PID_RATE_ROLL_F2_DEFAULT;
+	pidVars.rateRoll.Kp = PID_RATE_ROLL_KP;
+	pidVars.rateRoll.Ki = PID_RATE_ROLL_KI;
+	pidVars.rateRoll.Kd = PID_RATE_ROLL_KD;
+	pidVars.rateRoll.outputLimitMin = PID_RATE_ROLL_OUTMIN;
+	pidVars.rateRoll.outputLimitMax = PID_RATE_ROLL_OUTMAX;
+	pidVars.rateRoll.f1 = PID_RATE_ROLL_F1_DEFAULT;
+	pidVars.rateRoll.f2 = PID_RATE_ROLL_F2_DEFAULT;
 
 }
 
@@ -129,10 +129,10 @@ void initPIDtuning()
 	pidAnglePitch.SetF1(pidVars.anglePitch.f1);
 	pidAnglePitch.SetF2(pidVars.anglePitch.f2);
 
-	//pidRateRoll.SetOutputLimits(pidVars.rateRoll.outputLimitMin, pidVars.rateRoll.outputLimitMax);
-	//pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
-	//pidRateRoll.SetF1(pidVars.rateRoll.f1);
-	//pidRateRoll.SetF2(pidVars.rateRoll.f2);
+	pidRateRoll.SetOutputLimits(pidVars.rateRoll.outputLimitMin, pidVars.rateRoll.outputLimitMax);
+	pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
+	pidRateRoll.SetF1(pidVars.rateRoll.f1);
+	pidRateRoll.SetF2(pidVars.rateRoll.f2);
 
 }
 
@@ -340,6 +340,17 @@ void serialTransmit()
 	MsgR01.message.pidAnglePitchDresult = pidAnglePitch.Get_D_Result();
 	MsgR01.message.pidAnglePitchF1 = pidVars.anglePitch.f1 / RESOLUTION_PID_F;
 	MsgR01.message.pidAnglePitchF2 = pidVars.anglePitch.f2 / RESOLUTION_PID_F;
+	
+	MsgR01.message.pidRateRollKp = pidVars.rateRoll.Kp / RESOLUTION_PID_KP;
+	MsgR01.message.pidRateRollKi = pidVars.rateRoll.Ki / RESOLUTION_PID_KI;
+	MsgR01.message.pidRateRollKd = pidVars.rateRoll.Kd / RESOLUTION_PID_KD;
+	MsgR01.message.pidRateRollOutput = pidVars.rateRoll.output;
+	MsgR01.message.pidRateRollPresult = pidRateRoll.Get_P_Result();
+	MsgR01.message.pidRateRollIresult = pidRateRoll.Get_I_Result();
+	MsgR01.message.pidRateRollDresult = pidRateRoll.Get_D_Result();
+	MsgR01.message.pidRateRollF1 = pidVars.rateRoll.f1 / RESOLUTION_PID_F;
+	MsgR01.message.pidRateRollF2 = pidVars.rateRoll.f2 / RESOLUTION_PID_F;
+
 
 	MsgR01.getPacket();
 	Serial.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
@@ -362,12 +373,16 @@ void updateMessageVariables()
 		pidRatePitch.SetF2(pidVars.ratePitch.f2);
 		break;
 
-	//case pidCommandApplyRateRoll:
-	//	pidVars.rateRoll.Kp = MsgT01.message.udpT01RelayPacket.pidRateRollKp;
-	//	pidVars.rateRoll.Ki = MsgT01.message.udpT01RelayPacket.pidRateRollKi;
-	//	pidVars.rateRoll.Kd = MsgT01.message.udpT01RelayPacket.pidRateRollKd;
-	//	pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
-	//	break;
+	case pidCommandApplyRateRoll:
+		pidVars.rateRoll.Kp = MsgT01.message.udpT01RelayPacket.pidRateRollKp * RESOLUTION_PID_KP;
+		pidVars.rateRoll.Ki = MsgT01.message.udpT01RelayPacket.pidRateRollKi * RESOLUTION_PID_KI;
+		pidVars.rateRoll.Kd = MsgT01.message.udpT01RelayPacket.pidRateRollKd * RESOLUTION_PID_KD;
+		pidVars.rateRoll.f1 = MsgT01.message.udpT01RelayPacket.pidRateRollF1 * RESOLUTION_PID_F;
+		pidVars.rateRoll.f2 = MsgT01.message.udpT01RelayPacket.pidRateRollF2 * RESOLUTION_PID_F;
+		pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
+		pidRateRoll.SetF1(pidVars.rateRoll.f1);
+		pidRateRoll.SetF2(pidVars.rateRoll.f2);
+		break;
 	//case pidCommandApplyRateYaw:
 	//	pidVars.rateYaw.Kp = MsgT01.message.udpT01RelayPacket.pidRateYawKp;
 	//	pidVars.rateYaw.Ki = MsgT01.message.udpT01RelayPacket.pidRateYawKi;
@@ -507,10 +522,14 @@ void processPID()
 	pidVars.anglePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI;  //no need to change LSB to deg/sec
 	pidAnglePitch.Compute();
 
-	pidVars.ratePitch.setpoint = cmdPitch;
+
+	pidVars.ratePitch.setpoint = cmdPitch * 4;						//pidVars.anglePitch.output;
 	pidVars.ratePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec
 	pidRatePitch.Compute();
 
+	pidVars.rateRoll.setpoint = cmdRoll;
+	pidVars.rateRoll.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroX;  //no need to change LSB to deg/sec
+	pidRateRoll.Compute();
 	
 	//Serial.print(cmdPitch);
 	//Serial.print("  P:");

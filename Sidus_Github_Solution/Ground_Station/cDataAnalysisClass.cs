@@ -55,6 +55,15 @@ namespace Ground_Station
         public short R2_pidAnglePitchDresult { get; set; }
         public byte R2_pidAnglePitchF1 { get; set; }
         public byte R2_pidAnglePitchF2 { get; set; }
+        public byte R2_pidRateRollKp { get; set; }
+        public byte R2_pidRateRollKi { get; set; }
+        public byte R2_pidRateRollKd { get; set; }
+        public short R2_pidRateRollOutput { get; set; }
+        public short R2_pidRateRollPresult { get; set; }
+        public short R2_pidRateRollIresult { get; set; }
+        public short R2_pidRateRollDresult { get; set; }
+        public byte R2_pidRateRollF1 { get; set; }
+        public byte R2_pidRateRollF2 { get; set; }
 
 
     }

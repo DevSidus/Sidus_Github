@@ -32,6 +32,15 @@ struct structMsgR01
 	short pidAnglePitchDresult;
 	unsigned char pidAnglePitchF1;
 	unsigned char pidAnglePitchF2;
+	unsigned char pidRateRollKp;
+	unsigned char pidRateRollKi;
+	unsigned char pidRateRollKd;
+	short pidRateRollOutput;
+	short pidRateRollPresult;
+	short pidRateRollIresult;
+	short pidRateRollDresult;
+	unsigned char pidRateRollF1;
+	unsigned char pidRateRollF2;
 
 	//unsigned char pidraterollkp;
 	//unsigned char pidraterollki;
