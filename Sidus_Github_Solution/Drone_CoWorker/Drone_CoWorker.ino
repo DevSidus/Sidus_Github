@@ -59,7 +59,7 @@ void setup() {
 	//Insert all tasks into scheduler
 	//scheduler.insert(test_task, 500000);
 	scheduler.insert(serialCheck, 15000);
-	scheduler.insert(processMpuTask, 17000);
+	scheduler.insert(processMpuTask, 5000);
 	scheduler.insert(setCoWorkerTxDataFields, 20000);
 	scheduler.insert(serialTransmit, 20000);
 	scheduler.insert(updateBarometerData, 19000);
@@ -183,7 +183,7 @@ void processMpuTask()
 	//If mpu connection is lost, re initialize mpu, check the code mpuIntStatus statement again!
 	if (mpuIntStatus == 0)
 	{
-		initMPU();
+		//initMPU();
 	}
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
@@ -301,6 +301,10 @@ void serialTransmit()
 
 	MsgT01.getPacket();
 	Serial.write(MsgT01.dataBytes, sizeof(MsgT01.dataBytes));
+
+	//Serial.print(millis());
+	//Serial.print(",");
+	//Serial.println(-MsgT01.message.coWorkerTxPacket.mpuGyroY);
 }
 
 void udpTransmit()

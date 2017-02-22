@@ -63,6 +63,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\Arduino\hardware\espressif\esp32\libraries\Wire\src;D:\Arduino\libraries;D:\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;D:\Arduino\hardware\espressif\esp32\cores\esp32;D:\Arduino\hardware\espressif\esp32\cores\esp32\libb64;D:\Arduino\hardware\espressif\esp32\variants\esp32;D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\xtensa-esp32-elf\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\5.2.0\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\5.2.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -523,8 +523,8 @@ void processPID()
 	pidAnglePitch.Compute();
 
 
-	pidVars.ratePitch.setpoint = cmdPitch * 4;						//pidVars.anglePitch.output;
-	pidVars.ratePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec
+	pidVars.ratePitch.setpoint = cmdPitch * 2;						//pidVars.anglePitch.output;
+	pidVars.ratePitch.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec
 	pidRatePitch.Compute();
 
 	pidVars.rateRoll.setpoint = cmdRoll;

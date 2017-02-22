@@ -8,10 +8,10 @@ This header file define all the configurable variables including constants, pin 
 //#define		WIFI_PASS	"ahmet_ipek_12082004"
 #define		WIFI_SSID	"AndroidAP"
 #define		WIFI_PASS	"Yavuzzz."
-//#define		WIFI_SSID	"AAGCA"
-//#define		WIFI_PASS	"ahmet(12082004)"
+//#define		WIFI_SSID	"kulucka"
+//#define		WIFI_PASS	"girisim*"
 #define		UDP_PORT	8080
-#define		DEFAULT_GROUND_STATION_IP	"192.168.43.55"
+#define		DEFAULT_GROUND_STATION_IP	"192.168.43.84"
 //#define		DEFAULT_GROUND_STATION_IP	"192.168.2.170"
 //#define		DEFAULT_GROUND_STATION_IP	"172.20.10.2"
 
