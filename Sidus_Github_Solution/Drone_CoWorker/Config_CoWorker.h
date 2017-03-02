@@ -15,6 +15,9 @@ This header file define all the configurable variables including constants, pin 
 //#define		DEFAULT_GROUND_STATION_IP	"192.168.2.170"
 //#define		DEFAULT_GROUND_STATION_IP	"172.20.10.2"
 
+//If your IMU is placed inverse, you should uncomment the below definition
+//#define		INVERSE_IMU
+
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
 #define		BARO_TEMP_MIN				-20

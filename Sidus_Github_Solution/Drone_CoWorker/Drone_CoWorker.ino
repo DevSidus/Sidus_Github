@@ -244,6 +244,24 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.statusBaro = statusBaro;
 	MsgCoWorkerTx.statusCompass = statusCompass;
 
+
+#ifdef INVERSE_IMU
+	MsgCoWorkerTx.mpuGyroX = gg[0];
+	MsgCoWorkerTx.mpuGyroY = -gg[1];
+	MsgCoWorkerTx.mpuGyroZ = -gg[2];
+
+	MsgCoWorkerTx.mpuAccX = aa.x;
+	MsgCoWorkerTx.mpuAccY = -aa.y;
+	MsgCoWorkerTx.mpuAccZ = -aa.z;
+
+	MsgCoWorkerTx.mpuAccRealX = aaReal.x;
+	MsgCoWorkerTx.mpuAccRealY = -aaReal.y;
+	MsgCoWorkerTx.mpuAccRealZ = -aaReal.z;
+
+	MsgCoWorkerTx.mpuYaw = -ypr[0];
+	MsgCoWorkerTx.mpuPitch = ypr[1];  //buradan emin degilim :)
+	MsgCoWorkerTx.mpuRoll = ypr[2];   //buradan emin degilim :)
+#else
 	MsgCoWorkerTx.mpuGyroX = gg[0];
 	MsgCoWorkerTx.mpuGyroY = gg[1];
 	MsgCoWorkerTx.mpuGyroZ = gg[2];
@@ -259,6 +277,10 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuYaw = ypr[0];
 	MsgCoWorkerTx.mpuPitch = ypr[1];
 	MsgCoWorkerTx.mpuRoll = ypr[2];
+#endif
+
+
+
 
 	MsgCoWorkerTx.baroTemp = barometerTemp;
 	MsgCoWorkerTx.baroAlt = barometerAlt;
