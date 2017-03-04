@@ -4,15 +4,15 @@ This header file define all the configurable variables including constants, pin 
 */
 
 //Wifi, UDP Definitions
-//#define		WIFI_SSID	"khorfo_net"
-//#define		WIFI_PASS	"ahmet_ipek_12082004"
-#define		WIFI_SSID	"AndroidAP"
-#define		WIFI_PASS	"Yavuzzz."
+#define		WIFI_SSID	"khorfo_net"
+#define		WIFI_PASS	"ahmet_ipek_12082004"
+//#define		WIFI_SSID	"AndroidAP"
+//#define		WIFI_PASS	"Yavuzzz."
 //#define		WIFI_SSID	"kulucka"
 //#define		WIFI_PASS	"girisim*"
 #define		UDP_PORT	8080
-#define		DEFAULT_GROUND_STATION_IP	"192.168.43.84"
-//#define		DEFAULT_GROUND_STATION_IP	"192.168.2.170"
+//#define		DEFAULT_GROUND_STATION_IP	"192.168.43.84"
+#define		DEFAULT_GROUND_STATION_IP	"192.168.1.9"
 //#define		DEFAULT_GROUND_STATION_IP	"172.20.10.2"
 
 //If your IMU is placed inverse, you should uncomment the below definition

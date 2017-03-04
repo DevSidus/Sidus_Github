@@ -61,10 +61,10 @@ void setup() {
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 1000000);
 	scheduler.insert(mapRxDCtoCmd, 20000);
-	scheduler.insert(serialCheck, 19000);
-	scheduler.insert(serialTransmit, 18000);
-	scheduler.insert(processPID, 20000);
-	scheduler.insert(runMotors, 20000);
+	scheduler.insert(serialCheck, 9000);
+	scheduler.insert(processPID, 9000);
+	scheduler.insert(runMotors, 9000);
+	scheduler.insert(serialTransmit, 19000);
 	scheduler.insert(checkRxStatus, 1000000);
 	scheduler.insert(checkMode, 310000);
 	scheduler.insert(playMelody, 100000);
@@ -292,6 +292,8 @@ void serialCheck()
 		//If available number of bytes is less than our buffer size, normal case
 		if (numberofbytes <= sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT)
 		{
+			//long st_time = micros();
+
 			unsigned char buffer[sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT];
 			Serial.readBytes(buffer, numberofbytes);
 			serialParse.Push(buffer, numberofbytes);
@@ -300,6 +302,8 @@ void serialCheck()
 				MsgT01.setPacket();
 				updateMessageVariables();
 			}
+
+			//Serial.println(micros() - st_time);
 		}
 		//Else if buffer overflow, abnormal case
 		else
@@ -333,7 +337,7 @@ void serialTransmit()
 
 	MsgR01.message.pidAnglePitchKp = pidVars.anglePitch.Kp / RESOLUTION_PID_KP;
 	MsgR01.message.pidAnglePitchKi = pidVars.anglePitch.Ki / RESOLUTION_PID_KI;
-	MsgR01.message.pidAnglePitchKd = pidVars.anglePitch.Kd / RESOLUTION_PID_KD;
+	MsgR01.message.pidAnglePitchKd = pidVars.anglePitch.Kd / 0.01;
 	MsgR01.message.pidAnglePitchOutput = pidVars.anglePitch.output;
 	MsgR01.message.pidAnglePitchPresult = pidAnglePitch.Get_P_Result();
 	MsgR01.message.pidAnglePitchIresult = pidAnglePitch.Get_I_Result();
@@ -392,7 +396,7 @@ void updateMessageVariables()
 	case pidCommandApplyAnglePitch:
 		pidVars.anglePitch.Kp = MsgT01.message.udpT01RelayPacket.pidAnglePitchKp * RESOLUTION_PID_KP;
 		pidVars.anglePitch.Ki = MsgT01.message.udpT01RelayPacket.pidAnglePitchKi * RESOLUTION_PID_KI;
-		pidVars.anglePitch.Kd = MsgT01.message.udpT01RelayPacket.pidAnglePitchKd * RESOLUTION_PID_KD;
+		pidVars.anglePitch.Kd = MsgT01.message.udpT01RelayPacket.pidAnglePitchKd * 0.01;
 		pidVars.anglePitch.f1 = MsgT01.message.udpT01RelayPacket.pidAnglePitchF1 * RESOLUTION_PID_F;
 		pidVars.anglePitch.f2 = MsgT01.message.udpT01RelayPacket.pidAnglePitchF2 * RESOLUTION_PID_F;
 		pidAnglePitch.SetTunings(pidVars.anglePitch.Kp, pidVars.anglePitch.Ki, pidVars.anglePitch.Kd);
@@ -517,13 +521,18 @@ void checkMode()
 
 void processPID()
 {
+
+	//Serial.print(millis());
+	//Serial.print(",");
+	//Serial.println(-MsgT01.message.coWorkerTxPacket.mpuGyroY);
+
 	pidVars.anglePitch.d_bypass = MsgT01.message.coWorkerTxPacket.mpuGyroY;
 	pidVars.anglePitch.setpoint = cmdPitch;
 	pidVars.anglePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI;  //no need to change LSB to deg/sec
 	pidAnglePitch.Compute();
 
 
-	pidVars.ratePitch.setpoint = cmdPitch * 2;						//pidVars.anglePitch.output;
+	pidVars.ratePitch.setpoint = pidVars.anglePitch.output;						//pidVars.anglePitch.output;
 	pidVars.ratePitch.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec
 	pidRatePitch.Compute();
 

@@ -57,11 +57,11 @@ void setup() {
 	initCompass();
 
 	//Insert all tasks into scheduler
-	//scheduler.insert(test_task, 500000);
+	//scheduler.insert(test_task, 5000000);
 	scheduler.insert(serialCheck, 15000);
-	scheduler.insert(processMpuTask, 5000);
-	scheduler.insert(setCoWorkerTxDataFields, 20000);
-	scheduler.insert(serialTransmit, 20000);
+	scheduler.insert(processMpuTask, 9500);
+	scheduler.insert(setCoWorkerTxDataFields, 9500);
+	scheduler.insert(serialTransmit, 9500);
 	scheduler.insert(updateBarometerData, 19000);
 	scheduler.insert(updateCompassData, 37000);
 	scheduler.insert(udpTransmit, 33000);
@@ -147,6 +147,10 @@ bool initMPU()
 
 		mpuLastDataTime = millis();
 
+
+		// reset so we can continue cleanly
+		mpu.resetFIFO();
+
 	}
 	else
 	{
@@ -184,6 +188,8 @@ void processMpuTask()
 	if (mpuIntStatus == 0)
 	{
 		//initMPU();
+		Serial.println("bos veri");
+
 	}
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
@@ -195,32 +201,44 @@ void processMpuTask()
 		mpu.resetFIFO();
 		//Serial.println(F("FIFO overflow!"));
 		// otherwise, check for DMP data ready interrupt (this should happen frequently)
+
+		Serial.println("fifo overflow");
 	}
-	else if ((mpuIntStatus & 0x02) && (fifoCount >= packetSize))
+	else if ((mpuIntStatus & 0x02))
 	{
-		mpuProcessStartTime = micros();
+		//Serial.println(fifoCount);
+		if (fifoCount >= packetSize)
+		{
+			mpuProcessStartTime = micros();
 
-		// wait for correct available data length, should be a VERY short wait
-		//while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+			// wait for correct available data length, should be a VERY short wait
+			//while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
 
-		// read a packet from FIFO
-		mpu.getFIFOBytes(fifoBuffer, packetSize);
+			// read a packet from FIFO
+			while (fifoCount >= packetSize)
+			{
+				mpu.getFIFOBytes(fifoBuffer, packetSize);
+				// track FIFO count here in case there is > 1 packet available
+				// (this lets us immediately read more without waiting for an interrupt)
+				fifoCount -= packetSize;
+			}
 
-		// track FIFO count here in case there is > 1 packet available
-		// (this lets us immediately read more without waiting for an interrupt)
-		//fifoCount -= packetSize;
+			mpu.dmpGetQuaternion(&q, fifoBuffer);
+			mpu.dmpGetGravity(&gravity, &q);
+			mpu.dmpGetAccel(&aa, fifoBuffer);
+			mpu.dmpGetGyro(gg, fifoBuffer);
+			mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+			mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+			mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
-		mpu.dmpGetQuaternion(&q, fifoBuffer);
-		mpu.dmpGetGravity(&gravity, &q);
-		mpu.dmpGetAccel(&aa, fifoBuffer);
-		mpu.dmpGetGyro(gg, fifoBuffer);
-		mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-		mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-		mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+			//Serial.println(millis() - mpuLastDataTime);
+			mpuLastDataTime = millis();
 
-		mpuLastDataTime = millis();
+			mpuProcessTaskDuration = micros() - mpuProcessStartTime;
+			//Serial.println(mpuProcessTaskDuration);
+		}
 
-		mpuProcessTaskDuration = micros() - mpuProcessStartTime;
+
 	}
 }
 
@@ -318,6 +336,8 @@ void serialCheck()
 
 void serialTransmit()
 {
+	
+
 	MsgT01.message.coWorkerTxPacket = MsgCoWorkerTx;
 	MsgT01.message.udpT01RelayPacket = MsgUdpT01.message;
 
