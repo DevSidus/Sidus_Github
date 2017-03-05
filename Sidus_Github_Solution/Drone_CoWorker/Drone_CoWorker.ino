@@ -188,7 +188,7 @@ void processMpuTask()
 	if (mpuIntStatus == 0)
 	{
 		//initMPU();
-		Serial.println("bos veri");
+		//Serial.println("bos veri");
 
 	}
 	// get current FIFO count
@@ -202,7 +202,7 @@ void processMpuTask()
 		//Serial.println(F("FIFO overflow!"));
 		// otherwise, check for DMP data ready interrupt (this should happen frequently)
 
-		Serial.println("fifo overflow");
+		//Serial.println("fifo overflow");
 	}
 	else if ((mpuIntStatus & 0x02))
 	{

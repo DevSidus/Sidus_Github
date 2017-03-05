@@ -61,13 +61,13 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_MODE_CHANGE_THR_GAP		50
 #define		CMD_MODE_CHANGE_ANGLE_GAP	10
 
-#define		PID_RATE_PITCH_KP			0.24
+#define		PID_RATE_PITCH_KP			0.8
 #define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.02
+#define		PID_RATE_PITCH_KD			0.025
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
-#define		PID_RATE_PITCH_F1_DEFAULT	0.75
-#define		PID_RATE_PITCH_F2_DEFAULT	0.75
+#define		PID_RATE_PITCH_F1_DEFAULT	0.0
+#define		PID_RATE_PITCH_F2_DEFAULT	0.5
 
 #define		PID_ANGLE_PITCH_KP			1.0
 #define		PID_ANGLE_PITCH_KI			0.0

@@ -73,7 +73,7 @@ namespace Ground_Station
                 
 
                 counter++;
-                System.Threading.Thread.Sleep(20);
+                System.Threading.Thread.Sleep(10);
             }
         }
 

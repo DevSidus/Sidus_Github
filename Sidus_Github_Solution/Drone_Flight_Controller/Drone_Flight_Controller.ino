@@ -526,13 +526,13 @@ void processPID()
 	//Serial.print(",");
 	//Serial.println(-MsgT01.message.coWorkerTxPacket.mpuGyroY);
 
-	pidVars.anglePitch.d_bypass = MsgT01.message.coWorkerTxPacket.mpuGyroY;
-	pidVars.anglePitch.setpoint = cmdPitch;
-	pidVars.anglePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI;  //no need to change LSB to deg/sec
-	pidAnglePitch.Compute();
+	//pidVars.anglePitch.d_bypass = MsgT01.message.coWorkerTxPacket.mpuGyroY;
+	//pidVars.anglePitch.setpoint = cmdPitch;
+	//pidVars.anglePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI;  //no need to change LSB to deg/sec
+	//pidAnglePitch.Compute();
 
 
-	pidVars.ratePitch.setpoint = pidVars.anglePitch.output;						//pidVars.anglePitch.output;
+	pidVars.ratePitch.setpoint = cmdPitch * 3.5;						//pidVars.anglePitch.output;
 	pidVars.ratePitch.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec
 	pidRatePitch.Compute();
 
