@@ -277,8 +277,8 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuAccRealZ = -aaReal.z;
 
 	MsgCoWorkerTx.mpuYaw = -ypr[0];
-	MsgCoWorkerTx.mpuPitch = ypr[1];  //buradan emin degilim :)
-	MsgCoWorkerTx.mpuRoll = ypr[2];   //buradan emin degilim :)
+	MsgCoWorkerTx.mpuPitch = ypr[1];
+	MsgCoWorkerTx.mpuRoll = -ypr[2];
 #else
 	MsgCoWorkerTx.mpuGyroX = gg[0];
 	MsgCoWorkerTx.mpuGyroY = gg[1];
