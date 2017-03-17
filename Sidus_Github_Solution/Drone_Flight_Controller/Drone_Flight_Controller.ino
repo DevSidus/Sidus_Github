@@ -98,6 +98,7 @@ void initVariables()
 	pidVars.ratePitch.outputLimitMax = PID_RATE_PITCH_OUTMAX;
 	pidVars.ratePitch.f1 = PID_RATE_PITCH_F1_DEFAULT;
 	pidVars.ratePitch.f2 = PID_RATE_PITCH_F2_DEFAULT;
+	pidVars.ratePitch.outputFilterConstant = PID_RATE_PITCH_OUT_FILT_CONSTANT;
 
 	pidVars.anglePitch.Kp = PID_ANGLE_PITCH_KP;
 	pidVars.anglePitch.Ki = PID_ANGLE_PITCH_KI;
@@ -106,6 +107,7 @@ void initVariables()
 	pidVars.anglePitch.outputLimitMax = PID_ANGLE_PITCH_OUTMAX;
 	pidVars.anglePitch.f1 = PID_ANGLE_PITCH_F1_DEFAULT;
 	pidVars.anglePitch.f2 = PID_ANGLE_PITCH_F2_DEFAULT;
+	pidVars.anglePitch.outputFilterConstant = PID_ANGLE_PITCH_OUT_FILT_CONSTANT;
 
 	pidVars.rateRoll.Kp = PID_RATE_ROLL_KP;
 	pidVars.rateRoll.Ki = PID_RATE_ROLL_KI;
@@ -114,6 +116,7 @@ void initVariables()
 	pidVars.rateRoll.outputLimitMax = PID_RATE_ROLL_OUTMAX;
 	pidVars.rateRoll.f1 = PID_RATE_ROLL_F1_DEFAULT;
 	pidVars.rateRoll.f2 = PID_RATE_ROLL_F2_DEFAULT;
+	pidVars.rateRoll.outputFilterConstant = PID_RATE_ROLL_OUT_FILT_CONSTANT;
 
 }
 
@@ -427,10 +430,13 @@ void runMotors()
 	{
 		if (cmdThr > CMD_THR_ARM_START)
 		{
-			pwmMicroSeconds(M_FL_CHANNEL, cmdThr + pidVars.ratePitch.output);
-			pwmMicroSeconds(M_FR_CHANNEL, cmdThr + pidVars.ratePitch.output);
-			pwmMicroSeconds(M_BR_CHANNEL, cmdThr - pidVars.ratePitch.output);
-			pwmMicroSeconds(M_BL_CHANNEL, cmdThr - pidVars.ratePitch.output);
+			calculate_pid_thr_batt_scale_factor();
+			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output * PID_THR_BATT_SCALE_FACTOR;
+
+			pwmMicroSeconds(M_FL_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated);
+			pwmMicroSeconds(M_FR_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated);
+			pwmMicroSeconds(M_BR_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated);
+			pwmMicroSeconds(M_BL_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated);
 		}
 		else
 		{
@@ -526,14 +532,15 @@ void processPID()
 	//Serial.print(",");
 	//Serial.println(-MsgT01.message.coWorkerTxPacket.mpuGyroY);
 
-	pidVars.anglePitch.d_bypass = MsgT01.message.coWorkerTxPacket.mpuGyroY;
+	pidVars.anglePitch.d_bypass = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  // negative is important
 	pidVars.anglePitch.setpoint = cmdPitch;
 	pidVars.anglePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI;  //no need to change LSB to deg/sec
 	pidAnglePitch.Compute();
+	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
 
 
-	pidVars.ratePitch.setpoint = pidVars.anglePitch.output;
-	pidVars.ratePitch.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec
+	pidVars.ratePitch.setpoint = pidVars.anglePitch.outputFiltered;
+	pidVars.ratePitch.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec, negative is important
 	pidRatePitch.Compute();
 
 	pidVars.rateRoll.setpoint = cmdRoll;
@@ -562,4 +569,24 @@ void playMelody()
 		buzzer.play(buzzerMelodyArmWarning);
 	else
 		buzzer.play(buzzerMelodyNoTone);	
+}
+
+float basicFilter(float data, float filterConstant, float filteredData)
+{
+	if (filterConstant > 1) {      // check to make sure param's are within range
+		filterConstant = .99;
+	}
+	else if (filterConstant <= 0) {
+		filterConstant = 0;
+	}
+	filteredData = (data * (1 - filterConstant)) + (filteredData  *  filterConstant);
+	return filteredData;
+}
+
+void calculate_pid_thr_batt_scale_factor() //this function will be modified to include battery voltage compensation also
+{
+	if (cmdThr <= CMD_THR_MAX && cmdThr >= CMD_THR_MIN)
+		PID_THR_BATT_SCALE_FACTOR = (CMD_THR_MAX - cmdThr) / (CMD_THR_MAX - CMD_THR_MIN) + 0.2;
+	else
+		PID_THR_BATT_SCALE_FACTOR = 0.4;
 }

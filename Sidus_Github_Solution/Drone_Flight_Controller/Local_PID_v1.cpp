@@ -105,7 +105,7 @@ bool PID::Compute()
 
 	  //bypass value could be inserted just before errorderivativesmooth
 	  if(d_bypass_enabled)
-		  D_Result = Kd * (*d_bypass);
+		  D_Result = Kd * (-*d_bypass);
 	  else
 		  D_Result = Kd * errorDerivativeSmooth;
 

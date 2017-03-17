@@ -61,6 +61,7 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_MODE_CHANGE_THR_GAP		50
 #define		CMD_MODE_CHANGE_ANGLE_GAP	10
 
+
 #define		PID_RATE_PITCH_KP			0.8
 #define		PID_RATE_PITCH_KI			0.0
 #define		PID_RATE_PITCH_KD			0.025
@@ -68,6 +69,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_PITCH_OUTMAX		250
 #define		PID_RATE_PITCH_F1_DEFAULT	0.0
 #define		PID_RATE_PITCH_F2_DEFAULT	0.5
+#define		PID_RATE_PITCH_OUT_FILT_CONSTANT	0.7
 
 #define		PID_ANGLE_PITCH_KP			1.0
 #define		PID_ANGLE_PITCH_KI			0.0
@@ -76,6 +78,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_PITCH_OUTMAX		250
 #define		PID_ANGLE_PITCH_F1_DEFAULT	0.75
 #define		PID_ANGLE_PITCH_F2_DEFAULT	0.75
+#define		PID_ANGLE_PITCH_OUT_FILT_CONSTANT	0.7
 
 #define		PID_RATE_ROLL_KP			0.4
 #define		PID_RATE_ROLL_KI			0.0
@@ -84,6 +87,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_ROLL_OUTMAX		250
 #define		PID_RATE_ROLL_F1_DEFAULT	0.5
 #define		PID_RATE_ROLL_F2_DEFAULT	0.5
+#define		PID_RATE_ROLL_OUT_FILT_CONSTANT		0.7
 
 #define		RX_MAX_PULSE_WIDTH			2000	//in microseconds
 
@@ -97,6 +101,7 @@ This header file define all the configurable variables including constants, pin 
 #define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
 
+float		PID_THR_BATT_SCALE_FACTOR = 1.0;
 
 struct structPID
 {
@@ -106,6 +111,9 @@ struct structPID
 	double sensedVal;
 	double setpoint;
 	double output;
+	double outputFiltered;
+	float  outputFilterConstant;
+	double outputCompensated;
 	double outputLimitMin;
 	double outputLimitMax;
 	float f1;
