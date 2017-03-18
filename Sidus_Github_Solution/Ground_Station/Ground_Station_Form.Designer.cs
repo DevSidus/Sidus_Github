@@ -418,7 +418,7 @@
             this.tableLayoutPanel5.ColumnCount = 3;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.76923F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 69.23077F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 255F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 256F));
             this.tableLayoutPanel5.Controls.Add(this.button_GraphSetDefault, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.button_RemoveGraph, 2, 0);
             this.tableLayoutPanel5.Controls.Add(this.button_InsertGraph, 1, 0);
@@ -447,9 +447,9 @@
             this.button_RemoveGraph.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_RemoveGraph.Location = new System.Drawing.Point(238, 3);
+            this.button_RemoveGraph.Location = new System.Drawing.Point(237, 3);
             this.button_RemoveGraph.Name = "button_RemoveGraph";
-            this.button_RemoveGraph.Size = new System.Drawing.Size(250, 21);
+            this.button_RemoveGraph.Size = new System.Drawing.Size(251, 21);
             this.button_RemoveGraph.TabIndex = 13;
             this.button_RemoveGraph.Text = "Remove";
             this.button_RemoveGraph.UseVisualStyleBackColor = true;
@@ -462,7 +462,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.button_InsertGraph.Location = new System.Drawing.Point(75, 3);
             this.button_InsertGraph.Name = "button_InsertGraph";
-            this.button_InsertGraph.Size = new System.Drawing.Size(157, 21);
+            this.button_InsertGraph.Size = new System.Drawing.Size(156, 21);
             this.button_InsertGraph.TabIndex = 12;
             this.button_InsertGraph.Text = "Insert";
             this.button_InsertGraph.UseVisualStyleBackColor = true;
