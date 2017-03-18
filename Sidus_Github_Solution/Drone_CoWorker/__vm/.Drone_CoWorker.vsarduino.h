@@ -14,7 +14,7 @@
 #define __ESP8266_ESP8266__
 #define __ets__
 #define ICACHE_FLASH
-#define F_CPU 160000000L
+#define F_CPU 80000000L
 #define LWIP_OPEN_SRC
 #define ARDUINO 10801
 #define ARDUINO_ESP8266_NODEMCU
@@ -79,12 +79,22 @@ typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {;}
 
 
+typedef long __INTPTR_TYPE__ ;
+typedef long __UINTPTR_TYPE__ ;
+typedef long __SIZE_TYPE__ 	;
+typedef long __PTRDIFF_TYPE__;
+
+
 #include "new"
 #include "Esp.h"
 
 
 #include <arduino.h>
 #include <pins_arduino.h> 
+
+#include "..\generic\Common.h"
+#include "..\generic\pins_arduino.h"
+
 #undef F
 #define F(string_literal) ((const PROGMEM char *)(string_literal))
 #undef PSTR
