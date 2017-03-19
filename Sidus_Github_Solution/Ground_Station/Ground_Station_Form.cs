@@ -91,7 +91,6 @@ namespace Ground_Station
 
         private void Ground_Station_Load(object sender, EventArgs e)
         {
-
             DataAnalysisObj.init(lvDataAnalysis, pnlDataAnalysis);
             DataTxDisplayObj.init(lvDataTx, MsgUdpT01.message);
 
@@ -103,6 +102,7 @@ namespace Ground_Station
             ssMainLabel1.Text = "IP:" + qgsUdp.GetLocalIPv4();
             ssMainLabel2.Text = "Port#:" + qgsUdp.port.ToString();
         }
+        
         
         private void checkUdpClientStatus()
         {
@@ -320,43 +320,116 @@ namespace Ground_Station
             {
                 numericUpDownDataTx.BackColor = Color.Red;
             }
-        }
+        }        
         
         private void tb_pid_angle_pitch_roll_kp_Scroll(object sender, EventArgs e)
         {
             
             toolTip1.SetToolTip(tb_pid_angle_pitch_roll_kp, tb_pid_angle_pitch_roll_kp.Value.ToString());
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAnglePitch);
+
+            MsgUdpT01.message.pidAnglePitchKp = Convert.ToByte(tb_pid_angle_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidAnglePitchKi = Convert.ToByte(tb_pid_angle_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidAnglePitchKd = Convert.ToByte(tb_pid_angle_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidAnglePitchF1 = Convert.ToByte(tb_pid_angle_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidAnglePitchF2 = Convert.ToByte(tb_pid_angle_pitch_roll_f2.Value);
         }
 
         private void tb_pid_angle_pitch_roll_ki_Scroll(object sender, EventArgs e)
         {
             toolTip1.SetToolTip(tb_pid_angle_pitch_roll_ki, tb_pid_angle_pitch_roll_ki.Value.ToString());
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAnglePitch);
+            MsgUdpT01.message.pidAnglePitchKp = Convert.ToByte(tb_pid_angle_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidAnglePitchKi = Convert.ToByte(tb_pid_angle_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidAnglePitchKd = Convert.ToByte(tb_pid_angle_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidAnglePitchF1 = Convert.ToByte(tb_pid_angle_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidAnglePitchF2 = Convert.ToByte(tb_pid_angle_pitch_roll_f2.Value);
         }
 
         private void tb_pid_angle_pitch_roll_kd_Scroll(object sender, EventArgs e)
         {
             toolTip1.SetToolTip(tb_pid_angle_pitch_roll_kd, tb_pid_angle_pitch_roll_kd.Value.ToString());
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAnglePitch);
+            MsgUdpT01.message.pidAnglePitchKp = Convert.ToByte(tb_pid_angle_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidAnglePitchKi = Convert.ToByte(tb_pid_angle_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidAnglePitchKd = Convert.ToByte(tb_pid_angle_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidAnglePitchF1 = Convert.ToByte(tb_pid_angle_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidAnglePitchF2 = Convert.ToByte(tb_pid_angle_pitch_roll_f2.Value);
+        }
+        private void tb_pid_angle_pitch_roll_f1_Scroll(object sender, EventArgs e)
+        {
+            toolTip1.SetToolTip(tb_pid_angle_pitch_roll_f1, tb_pid_angle_pitch_roll_f1.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAnglePitch);
+            MsgUdpT01.message.pidAnglePitchKp = Convert.ToByte(tb_pid_angle_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidAnglePitchKi = Convert.ToByte(tb_pid_angle_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidAnglePitchKd = Convert.ToByte(tb_pid_angle_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidAnglePitchF1 = Convert.ToByte(tb_pid_angle_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidAnglePitchF2 = Convert.ToByte(tb_pid_angle_pitch_roll_f2.Value);
+        }
+        private void tb_pid_angle_pitch_roll_f2_Scroll(object sender, EventArgs e)
+        {
+            toolTip1.SetToolTip(tb_pid_angle_pitch_roll_f2, tb_pid_angle_pitch_roll_f2.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAnglePitch);
+            MsgUdpT01.message.pidAnglePitchKp = Convert.ToByte(tb_pid_angle_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidAnglePitchKi = Convert.ToByte(tb_pid_angle_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidAnglePitchKd = Convert.ToByte(tb_pid_angle_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidAnglePitchF1 = Convert.ToByte(tb_pid_angle_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidAnglePitchF2 = Convert.ToByte(tb_pid_angle_pitch_roll_f2.Value);
         }
 
         private void tb_pid_rate_pitch_roll_kp_Scroll(object sender, EventArgs e)
         {
             toolTip1.SetToolTip(tb_pid_rate_pitch_roll_kp, tb_pid_rate_pitch_roll_kp.Value.ToString());
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyRatePitch);
+            MsgUdpT01.message.pidRatePitchKp = Convert.ToByte(tb_pid_rate_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidRatePitchKi = Convert.ToByte(tb_pid_rate_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidRatePitchKd = Convert.ToByte(tb_pid_rate_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidRatePitchF1 = Convert.ToByte(tb_pid_rate_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidRatePitchF2 = Convert.ToByte(tb_pid_rate_pitch_roll_f2.Value);
         }
 
         private void tb_pid_rate_pitch_roll_ki_Scroll(object sender, EventArgs e)
         {
             toolTip1.SetToolTip(tb_pid_rate_pitch_roll_ki, tb_pid_rate_pitch_roll_ki.Value.ToString());
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyRatePitch);
+            MsgUdpT01.message.pidRatePitchKp = Convert.ToByte(tb_pid_rate_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidRatePitchKi = Convert.ToByte(tb_pid_rate_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidRatePitchKd = Convert.ToByte(tb_pid_rate_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidRatePitchF1 = Convert.ToByte(tb_pid_rate_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidRatePitchF2 = Convert.ToByte(tb_pid_rate_pitch_roll_f2.Value);
         }
 
         private void tb_pid_rate_pitch_roll_kd_Scroll(object sender, EventArgs e)
         {
             toolTip1.SetToolTip(tb_pid_rate_pitch_roll_kd, tb_pid_rate_pitch_roll_kd.Value.ToString());
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyRatePitch);
+            MsgUdpT01.message.pidRatePitchKp = Convert.ToByte(tb_pid_rate_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidRatePitchKi = Convert.ToByte(tb_pid_rate_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidRatePitchKd = Convert.ToByte(tb_pid_rate_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidRatePitchF1 = Convert.ToByte(tb_pid_rate_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidRatePitchF2 = Convert.ToByte(tb_pid_rate_pitch_roll_f2.Value);
+        }
+        
+        private void tb_pid_rate_pitch_roll_f1_Scroll(object sender, EventArgs e)
+        {
+            toolTip1.SetToolTip(tb_pid_rate_pitch_roll_f1, tb_pid_rate_pitch_roll_f1.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyRatePitch);
+            MsgUdpT01.message.pidRatePitchKp = Convert.ToByte(tb_pid_rate_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidRatePitchKi = Convert.ToByte(tb_pid_rate_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidRatePitchKd = Convert.ToByte(tb_pid_rate_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidRatePitchF1 = Convert.ToByte(tb_pid_rate_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidRatePitchF2 = Convert.ToByte(tb_pid_rate_pitch_roll_f2.Value);
+        }
+
+        private void tb_pid_rate_pitch_roll_f2_Scroll(object sender, EventArgs e)
+        {
+            toolTip1.SetToolTip(tb_pid_rate_pitch_roll_f2, tb_pid_rate_pitch_roll_f2.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyRatePitch);
+            MsgUdpT01.message.pidRatePitchKp = Convert.ToByte(tb_pid_rate_pitch_roll_kp.Value);
+            MsgUdpT01.message.pidRatePitchKi = Convert.ToByte(tb_pid_rate_pitch_roll_ki.Value);
+            MsgUdpT01.message.pidRatePitchKd = Convert.ToByte(tb_pid_rate_pitch_roll_kd.Value);
+            MsgUdpT01.message.pidRatePitchF1 = Convert.ToByte(tb_pid_rate_pitch_roll_f1.Value);
+            MsgUdpT01.message.pidRatePitchF2 = Convert.ToByte(tb_pid_rate_pitch_roll_f2.Value);
         }
     }
 }

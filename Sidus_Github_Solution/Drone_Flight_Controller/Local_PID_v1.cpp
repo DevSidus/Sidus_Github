@@ -94,8 +94,8 @@ bool PID::Compute()
       if(I_Result > outMax) I_Result = outMax;
       else if(I_Result < outMin) I_Result= outMin;
 
-	  errorDerivative = (errorSmooth - lastError) / dTimeInSec;
-	  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+
+
 	  
 	  
  
@@ -104,10 +104,19 @@ bool PID::Compute()
 	  I_Result += (Ki * dTimeInSec * errorSmooth);
 
 	  //bypass value could be inserted just before errorderivativesmooth
-	  if(d_bypass_enabled)
-		  D_Result = Kd * (-*d_bypass);
+	  if (d_bypass_enabled)
+	  {
+		  errorDerivative = (*mySetpoint - lastSetpoint) / dTimeInSec;
+		  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+		  D_Result = Kd * (errorDerivativeSmooth + (-*d_bypass));
+	  }
 	  else
+	  {
+		  errorDerivative = (errorSmooth - lastError) / dTimeInSec;
+		  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+
 		  D_Result = Kd * errorDerivativeSmooth;
+	  }
 
 
 	  double output = P_Result + I_Result + D_Result;
@@ -120,6 +129,7 @@ bool PID::Compute()
       /*Remember some variables for next time*/
       lastTime = now;
 	  lastError = errorSmooth;
+	  lastSetpoint = *mySetpoint;
 	  return true;
    }
    else return false;

@@ -85,6 +85,7 @@ class PID
 	double lastError;
 	double errorDerivative;
 	double errorSmooth, errorDerivativeSmooth;
+	double lastSetpoint;
 	float f1, f2;
 
 	double outMin, outMax;

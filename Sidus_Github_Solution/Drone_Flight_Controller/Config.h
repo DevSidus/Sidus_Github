@@ -93,9 +93,12 @@ This header file define all the configurable variables including constants, pin 
 
 #define		MPU_GYRO_DEG_SEC_TO_LSB		16.4     //This value can be used to convert deg/sec to LSB
 
-#define		RESOLUTION_PID_KP			0.01
-#define		RESOLUTION_PID_KI			0.001
-#define		RESOLUTION_PID_KD			0.001
+#define		RESOLUTION_PID_RATE_KP			0.01
+#define		RESOLUTION_PID_RATE_KI			0.001
+#define		RESOLUTION_PID_RATE_KD			0.001
+#define		RESOLUTION_PID_ANGLE_KP			0.1
+#define		RESOLUTION_PID_ANGLE_KI			0.01
+#define		RESOLUTION_PID_ANGLE_KD			0.001
 #define		RESOLUTION_PID_F			0.01
 
 #define		SERIAL_COM_SPEED			921600

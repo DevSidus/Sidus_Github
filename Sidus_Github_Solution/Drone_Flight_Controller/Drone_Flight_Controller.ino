@@ -328,9 +328,9 @@ void serialTransmit()
 	MsgR01.message.rxRoll = cmdRoll;
 	MsgR01.message.rxYaw = cmdYaw;
 
-	MsgR01.message.pidRatePitchKp = pidVars.ratePitch.Kp / RESOLUTION_PID_KP;
-	MsgR01.message.pidRatePitchKi = pidVars.ratePitch.Ki / RESOLUTION_PID_KI;
-	MsgR01.message.pidRatePitchKd = pidVars.ratePitch.Kd / RESOLUTION_PID_KD;	
+	MsgR01.message.pidRatePitchKp = pidVars.ratePitch.Kp / RESOLUTION_PID_RATE_KP;
+	MsgR01.message.pidRatePitchKi = pidVars.ratePitch.Ki / RESOLUTION_PID_RATE_KI;
+	MsgR01.message.pidRatePitchKd = pidVars.ratePitch.Kd / RESOLUTION_PID_RATE_KD;	
 	MsgR01.message.pidRatePitchOutput = pidVars.ratePitch.output;
 	MsgR01.message.pidRatePitchPresult = pidRatePitch.Get_P_Result();
 	MsgR01.message.pidRatePitchIresult = pidRatePitch.Get_I_Result();
@@ -338,9 +338,9 @@ void serialTransmit()
 	MsgR01.message.pidRatePitchF1 = pidVars.ratePitch.f1 / RESOLUTION_PID_F;
 	MsgR01.message.pidRatePitchF2 = pidVars.ratePitch.f2 / RESOLUTION_PID_F;
 
-	MsgR01.message.pidAnglePitchKp = pidVars.anglePitch.Kp / RESOLUTION_PID_KP;
-	MsgR01.message.pidAnglePitchKi = pidVars.anglePitch.Ki / RESOLUTION_PID_KI;
-	MsgR01.message.pidAnglePitchKd = pidVars.anglePitch.Kd / 0.01;
+	MsgR01.message.pidAnglePitchKp = pidVars.anglePitch.Kp / RESOLUTION_PID_ANGLE_KP;
+	MsgR01.message.pidAnglePitchKi = pidVars.anglePitch.Ki / RESOLUTION_PID_ANGLE_KI;
+	MsgR01.message.pidAnglePitchKd = pidVars.anglePitch.Kd / RESOLUTION_PID_ANGLE_KD;
 	MsgR01.message.pidAnglePitchOutput = pidVars.anglePitch.output;
 	MsgR01.message.pidAnglePitchPresult = pidAnglePitch.Get_P_Result();
 	MsgR01.message.pidAnglePitchIresult = pidAnglePitch.Get_I_Result();
@@ -348,9 +348,9 @@ void serialTransmit()
 	MsgR01.message.pidAnglePitchF1 = pidVars.anglePitch.f1 / RESOLUTION_PID_F;
 	MsgR01.message.pidAnglePitchF2 = pidVars.anglePitch.f2 / RESOLUTION_PID_F;
 	
-	MsgR01.message.pidRateRollKp = pidVars.rateRoll.Kp / RESOLUTION_PID_KP;
-	MsgR01.message.pidRateRollKi = pidVars.rateRoll.Ki / RESOLUTION_PID_KI;
-	MsgR01.message.pidRateRollKd = pidVars.rateRoll.Kd / RESOLUTION_PID_KD;
+	MsgR01.message.pidRateRollKp = pidVars.rateRoll.Kp / RESOLUTION_PID_RATE_KP;
+	MsgR01.message.pidRateRollKi = pidVars.rateRoll.Ki / RESOLUTION_PID_RATE_KI;
+	MsgR01.message.pidRateRollKd = pidVars.rateRoll.Kd / RESOLUTION_PID_RATE_KD;
 	MsgR01.message.pidRateRollOutput = pidVars.rateRoll.output;
 	MsgR01.message.pidRateRollPresult = pidRateRoll.Get_P_Result();
 	MsgR01.message.pidRateRollIresult = pidRateRoll.Get_I_Result();
@@ -370,9 +370,9 @@ void updateMessageVariables()
 	switch (MsgT01.message.udpT01RelayPacket.pidCommandState)
 	{
 	case pidCommandApplyRatePitch:
-		pidVars.ratePitch.Kp = MsgT01.message.udpT01RelayPacket.pidRatePitchKp * RESOLUTION_PID_KP;
-		pidVars.ratePitch.Ki = MsgT01.message.udpT01RelayPacket.pidRatePitchKi * RESOLUTION_PID_KI;
-		pidVars.ratePitch.Kd = MsgT01.message.udpT01RelayPacket.pidRatePitchKd * RESOLUTION_PID_KD;
+		pidVars.ratePitch.Kp = MsgT01.message.udpT01RelayPacket.pidRatePitchKp * RESOLUTION_PID_RATE_KP;
+		pidVars.ratePitch.Ki = MsgT01.message.udpT01RelayPacket.pidRatePitchKi * RESOLUTION_PID_RATE_KI;
+		pidVars.ratePitch.Kd = MsgT01.message.udpT01RelayPacket.pidRatePitchKd * RESOLUTION_PID_RATE_KD;
 		pidVars.ratePitch.f1 = MsgT01.message.udpT01RelayPacket.pidRatePitchF1 * RESOLUTION_PID_F;
 		pidVars.ratePitch.f2 = MsgT01.message.udpT01RelayPacket.pidRatePitchF2 * RESOLUTION_PID_F;
 		pidRatePitch.SetTunings(pidVars.ratePitch.Kp, pidVars.ratePitch.Ki, pidVars.ratePitch.Kd);
@@ -381,9 +381,9 @@ void updateMessageVariables()
 		break;
 
 	case pidCommandApplyRateRoll:
-		pidVars.rateRoll.Kp = MsgT01.message.udpT01RelayPacket.pidRateRollKp * RESOLUTION_PID_KP;
-		pidVars.rateRoll.Ki = MsgT01.message.udpT01RelayPacket.pidRateRollKi * RESOLUTION_PID_KI;
-		pidVars.rateRoll.Kd = MsgT01.message.udpT01RelayPacket.pidRateRollKd * RESOLUTION_PID_KD;
+		pidVars.rateRoll.Kp = MsgT01.message.udpT01RelayPacket.pidRateRollKp * RESOLUTION_PID_RATE_KP;
+		pidVars.rateRoll.Ki = MsgT01.message.udpT01RelayPacket.pidRateRollKi * RESOLUTION_PID_RATE_KI;
+		pidVars.rateRoll.Kd = MsgT01.message.udpT01RelayPacket.pidRateRollKd * RESOLUTION_PID_RATE_KD;
 		pidVars.rateRoll.f1 = MsgT01.message.udpT01RelayPacket.pidRateRollF1 * RESOLUTION_PID_F;
 		pidVars.rateRoll.f2 = MsgT01.message.udpT01RelayPacket.pidRateRollF2 * RESOLUTION_PID_F;
 		pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
@@ -397,9 +397,9 @@ void updateMessageVariables()
 	//	//pidRateYaw.SetTunings(pidVars.rateYaw.Kp, pidVars.rateYaw.Ki, pidVars.rateYaw.Kd);
 	//	break;
 	case pidCommandApplyAnglePitch:
-		pidVars.anglePitch.Kp = MsgT01.message.udpT01RelayPacket.pidAnglePitchKp * RESOLUTION_PID_KP;
-		pidVars.anglePitch.Ki = MsgT01.message.udpT01RelayPacket.pidAnglePitchKi * RESOLUTION_PID_KI;
-		pidVars.anglePitch.Kd = MsgT01.message.udpT01RelayPacket.pidAnglePitchKd * 0.01;
+		pidVars.anglePitch.Kp = MsgT01.message.udpT01RelayPacket.pidAnglePitchKp * RESOLUTION_PID_ANGLE_KP;
+		pidVars.anglePitch.Ki = MsgT01.message.udpT01RelayPacket.pidAnglePitchKi * RESOLUTION_PID_ANGLE_KI;
+		pidVars.anglePitch.Kd = MsgT01.message.udpT01RelayPacket.pidAnglePitchKd * RESOLUTION_PID_ANGLE_KD;
 		pidVars.anglePitch.f1 = MsgT01.message.udpT01RelayPacket.pidAnglePitchF1 * RESOLUTION_PID_F;
 		pidVars.anglePitch.f2 = MsgT01.message.udpT01RelayPacket.pidAnglePitchF2 * RESOLUTION_PID_F;
 		pidAnglePitch.SetTunings(pidVars.anglePitch.Kp, pidVars.anglePitch.Ki, pidVars.anglePitch.Kd);
