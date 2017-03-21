@@ -72,6 +72,9 @@
     <ClInclude Include="cBuzzerMelody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PID_YawAngle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Local_Agenda.cpp">
@@ -111,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cBuzzerMelody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PID_YawAngle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -11,22 +11,32 @@ namespace Ground_Station
     struct structMsgUdpT01
     {
         public byte pidCommandState { get; set; }
-        public byte pidRatePitchKp { get; set; }
-        public byte pidRatePitchKi { get; set; }
-        public byte pidRatePitchKd { get; set; }
-        public byte pidRatePitchF1 { get; set; }
-        public byte pidRatePitchF2 { get; set; }
+        public byte pidRatePitchRollKp { get; set; }
+        public byte pidRatePitchRollKi { get; set; }
+        public byte pidRatePitchRollKd { get; set; }
+        public byte pidRatePitchRollF1 { get; set; }
+        public byte pidRatePitchRollF2 { get; set; }
 
-        public byte pidAnglePitchKp { get; set; }
-        public byte pidAnglePitchKi { get; set; }
-        public byte pidAnglePitchKd { get; set; }
-        public byte pidAnglePitchF1 { get; set; }
-        public byte pidAnglePitchF2 { get; set; }
-        public byte pidRateRollKp { get; set; }
-        public byte pidRateRollKi { get; set; }
-        public byte pidRateRollKd { get; set; }
-        public byte pidRateRollF1 { get; set; }
-        public byte pidRateRollF2 { get; set; }
+        public byte pidAnglePitchRollKp { get; set; }
+        public byte pidAnglePitchRollKi { get; set; }
+        public byte pidAnglePitchRollKd { get; set; }
+        public byte pidAnglePitchRollF1 { get; set; }
+        public byte pidAnglePitchRollF2 { get; set; }
+
+        public byte pidRateYawKp { get; set; }
+        public byte pidRateYawKi { get; set; }
+        public byte pidRateYawKd { get; set; }
+        public byte pidRateYawF1 { get; set; }
+        public byte pidRateYawF2 { get; set; }
+
+        public byte pidAngleYawKp { get; set; }
+        public byte pidAngleYawKi { get; set; }
+        public byte pidAngleYawKd { get; set; }
+        public byte pidAngleYawF1 { get; set; }
+        public byte pidAngleYawF2 { get; set; }
+
+        public byte pidAnglePitchRollOutFilter { get; set; }
+        public byte pidAngleYawOutFilter { get; set; }
 
     }
     class cMsgUdpT01

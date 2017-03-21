@@ -14,6 +14,7 @@ struct structMsgR01
 	short rxPitch;
 	short rxRoll;
 	short rxYaw;
+
 	unsigned char pidRatePitchKp;
 	unsigned char pidRatePitchKi;
 	unsigned char pidRatePitchKd;
@@ -23,6 +24,7 @@ struct structMsgR01
 	short pidRatePitchDresult;
 	unsigned char pidRatePitchF1;
 	unsigned char pidRatePitchF2;
+
 	unsigned char pidAnglePitchKp;
 	unsigned char pidAnglePitchKi;
 	unsigned char pidAnglePitchKd;
@@ -32,6 +34,8 @@ struct structMsgR01
 	short pidAnglePitchDresult;
 	unsigned char pidAnglePitchF1;
 	unsigned char pidAnglePitchF2;
+	unsigned char pidAnglePitchOutFilter;
+
 	unsigned char pidRateRollKp;
 	unsigned char pidRateRollKi;
 	unsigned char pidRateRollKd;
@@ -42,22 +46,37 @@ struct structMsgR01
 	unsigned char pidRateRollF1;
 	unsigned char pidRateRollF2;
 
-	//unsigned char pidraterollkp;
-	//unsigned char pidraterollki;
-	//unsigned char pidraterollkd;
-	//unsigned char pidrateyawkp;
-	//unsigned char pidrateyawki;
-	//unsigned char pidrateyawkd;
-	//unsigned char pidanglepitchkp;
-	//unsigned char pidanglepitchki;
-	//unsigned char pidanglepitchkd;
-	//unsigned char pidanglerollkp;
-	//unsigned char pidanglerollki;
-	//unsigned char pidanglerollkd;
-	//unsigned char pidangleyawkp;
-	//unsigned char pidangleyawki;
-	//unsigned char pidangleyawkd;
+	unsigned char pidAngleRollKp;
+	unsigned char pidAngleRollKi;
+	unsigned char pidAngleRollKd;
+	short pidAngleRollOutput;
+	short pidAngleRollPresult;
+	short pidAngleRollIresult;
+	short pidAngleRollDresult;
+	unsigned char pidAngleRollF1;
+	unsigned char pidAngleRollF2;
+	unsigned char pidAngleRollOutFilter;
+	
+	unsigned char pidRateYawKp;
+	unsigned char pidRateYawKi;
+	unsigned char pidRateYawKd;
+	short pidRateYawOutput;
+	short pidRateYawPresult;
+	short pidRateYawIresult;
+	short pidRateYawDresult;
+	unsigned char pidRateYawF1;
+	unsigned char pidRateYawF2;
 
+	unsigned char pidAngleYawKp;
+	unsigned char pidAngleYawKi;
+	unsigned char pidAngleYawKd;
+	short pidAngleYawOutput;
+	short pidAngleYawPresult;
+	short pidAngleYawIresult;
+	short pidAngleYawDresult;
+	unsigned char pidAngleYawF1;
+	unsigned char pidAngleYawF2;
+	unsigned char pidAngleYawOutFilter;
 
 	char endChar;
 };

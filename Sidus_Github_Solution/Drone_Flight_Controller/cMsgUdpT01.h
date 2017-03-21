@@ -6,23 +6,32 @@ using namespace std;
 struct structMsgUdpT01
 {
 	unsigned char pidCommandState;
-	unsigned char pidRatePitchKp;
-	unsigned char pidRatePitchKi;
-	unsigned char pidRatePitchKd;
-	unsigned char pidRatePitchF1;
-	unsigned char pidRatePitchF2;
+	unsigned char pidRatePitchRollKp;
+	unsigned char pidRatePitchRollKi;
+	unsigned char pidRatePitchRollKd;
+	unsigned char pidRatePitchRollF1;
+	unsigned char pidRatePitchRollF2;
 
-	unsigned char pidAnglePitchKp;
-	unsigned char pidAnglePitchKi;
-	unsigned char pidAnglePitchKd;
-	unsigned char pidAnglePitchF1;
-	unsigned char pidAnglePitchF2;
+	unsigned char pidAnglePitchRollKp;
+	unsigned char pidAnglePitchRollKi;
+	unsigned char pidAnglePitchRollKd;
+	unsigned char pidAnglePitchRollF1;
+	unsigned char pidAnglePitchRollF2;
 
-	unsigned char pidRateRollKp;
-	unsigned char pidRateRollKi;
-	unsigned char pidRateRollKd;
-	unsigned char pidRateRollF1;
-	unsigned char pidRateRollF2;
+	unsigned char pidRateYawKp;
+	unsigned char pidRateYawKi;
+	unsigned char pidRateYawKd;
+	unsigned char pidRateYawF1;
+	unsigned char pidRateYawF2;
+
+	unsigned char pidAngleYawKp;
+	unsigned char pidAngleYawKi;
+	unsigned char pidAngleYawKd;
+	unsigned char pidAngleYawF1;
+	unsigned char pidAngleYawF2;
+
+	unsigned char pidAnglePitchRollOutFilter;
+	unsigned char pidAngleYawOutFilter;
 
 };
 #pragma pack(pop)

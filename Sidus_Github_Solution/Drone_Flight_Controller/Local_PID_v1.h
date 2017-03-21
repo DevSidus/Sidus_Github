@@ -61,6 +61,7 @@ class PID
 	double Get_D_Result();
 
 	int GetMode();						  //  inside the PID.
+	void SetFlightMode(bool);			  //For the I term computation enabling
 
   private:
 	void Initialize();
@@ -91,6 +92,16 @@ class PID
 	double outMin, outMax;
 	bool inAuto;
 	bool d_bypass_enabled;
+
+	bool inFlight;
+	int errorArraySize = 320;
+	double errorArray[320];
+	short errorArrayIndex;
+	double errorSum;
+	bool transientInterval;
+	int transientSetpointThreshold;
+	unsigned long transientStartTime;
+	unsigned int transientDuration;
 
 	
 };

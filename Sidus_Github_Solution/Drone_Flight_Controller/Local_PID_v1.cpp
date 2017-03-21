@@ -35,14 +35,6 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint)
 	Kd = 0;
 
 	PID::SetMode(AUTOMATIC);
-
-    lastTime = millis();
-	lastError = 0;
-
-	f1 = 0.6;
-	f2 = 0.6;
-	errorSmooth = 0;
-	errorDerivativeSmooth = 0;
 }
 
 PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* _d_bypass)
@@ -63,14 +55,6 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* _d_bypas
 	Kd = 0;
 
 	PID::SetMode(AUTOMATIC);
-
-	lastTime = millis();
-	lastError = 0;
-
-	f1 = 0.6;
-	f2 = 0.6;
-	errorSmooth = 0;
-	errorDerivativeSmooth = 0;
 }
 
 
@@ -91,18 +75,47 @@ bool PID::Compute()
 
 
 
-      if(I_Result > outMax) I_Result = outMax;
-      else if(I_Result < outMin) I_Result= outMin;
 
-
-
-	  
-	  
  
       /*Compute PID Output*/
-	  P_Result = Kp * errorSmooth;
-	  I_Result += (Ki * dTimeInSec * errorSmooth);
 
+	  //Calculate Proportional Term
+	  P_Result = Kp * errorSmooth;
+
+	  //Calculate Integral Term
+	  if (inFlight)
+	  {
+		  //Decide whether the state is transient
+		  if (abs(*mySetpoint - lastSetpoint) > transientSetpointThreshold)
+		  {
+			  transientInterval = true;
+			  transientStartTime = now;
+		  }
+		  else if ((now - transientStartTime) > transientDuration)
+		  {
+			  transientInterval = false;
+		  }
+
+		  if (!transientInterval)
+		  {
+			  errorSum -= errorArray[errorArrayIndex];
+			  errorSum += errorSmooth;
+			  errorArray[errorArrayIndex] = errorSmooth;
+			  errorArrayIndex = (errorArrayIndex + 1) % errorArraySize;
+			  I_Result = Ki * dTimeInSec * errorSum;
+
+			  //We may choose to limit the I term one third of maximum PID output
+			  if (I_Result > outMax/3) I_Result = outMax/3;
+			  else if (I_Result < outMin/3) I_Result = outMin/3;
+		  }
+	  }
+	  else
+	  {
+		  errorSum = 0;
+		  I_Result = 0;
+	  }
+	  
+	  //Calculate Derivative Term
 	  //bypass value could be inserted just before errorderivativesmooth
 	  if (d_bypass_enabled)
 	  {
@@ -198,6 +211,22 @@ void PID::Initialize()
    I_Result = *myOutput;
    if(I_Result > outMax) I_Result = outMax;
    else if(I_Result < outMin) I_Result = outMin;
+   
+   lastTime = millis();
+   lastError = 0;
+
+   f1 = 0;
+   f2 = 0.5;
+   errorSmooth = 0;
+   errorDerivativeSmooth = 0;
+   inFlight = false;
+   errorArrayIndex = 0;
+   errorArray[0] = 0;
+   errorSum = 0;
+   transientInterval = true;
+   transientSetpointThreshold = 5;
+   transientStartTime = millis();
+   transientDuration = 500; //in milliseconds
 }
 
 /* Status Funcions*************************************************************
@@ -225,4 +254,10 @@ double PID::Get_I_Result() { return I_Result; }
 double PID::Get_D_Result() { return D_Result; }
 
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
+
+
+void PID::SetFlightMode(bool isInFlight)
+{
+	inFlight = isInFlight;
+}
 

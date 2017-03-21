@@ -55,6 +55,8 @@ namespace Ground_Station
         public short R2_pidAnglePitchDresult { get; set; }
         public byte R2_pidAnglePitchF1 { get; set; }
         public byte R2_pidAnglePitchF2 { get; set; }
+        public byte R2_pidAnglePitchOutFilter { get; set; }
+
         public byte R2_pidRateRollKp { get; set; }
         public byte R2_pidRateRollKi { get; set; }
         public byte R2_pidRateRollKd { get; set; }
@@ -64,6 +66,38 @@ namespace Ground_Station
         public short R2_pidRateRollDresult { get; set; }
         public byte R2_pidRateRollF1 { get; set; }
         public byte R2_pidRateRollF2 { get; set; }
+
+        public byte R2_pidAngleRollKp { get; set; }
+        public byte R2_pidAngleRollKi { get; set; }
+        public byte R2_pidAngleRollKd { get; set; }
+        public short R2_pidAngleRollOutput { get; set; }
+        public short R2_pidAngleRollPresult { get; set; }
+        public short R2_pidAngleRollIresult { get; set; }
+        public short R2_pidAngleRollDresult { get; set; }
+        public byte R2_pidAngleRollF1 { get; set; }
+        public byte R2_pidAngleRollF2 { get; set; }
+        public byte R2_pidAngleRollOutFilter { get; set; }
+
+        public byte R2_pidRateYawKp { get; set; }
+        public byte R2_pidRateYawKi { get; set; }
+        public byte R2_pidRateYawKd { get; set; }
+        public short R2_pidRateYawOutput { get; set; }
+        public short R2_pidRateYawPresult { get; set; }
+        public short R2_pidRateYawIresult { get; set; }
+        public short R2_pidRateYawDresult { get; set; }
+        public byte R2_pidRateYawF1 { get; set; }
+        public byte R2_pidRateYawF2 { get; set; }
+
+        public byte R2_pidAngleYawKp { get; set; }
+        public byte R2_pidAngleYawKi { get; set; }
+        public byte R2_pidAngleYawKd { get; set; }
+        public short R2_pidAngleYawOutput { get; set; }
+        public short R2_pidAngleYawPresult { get; set; }
+        public short R2_pidAngleYawIresult { get; set; }
+        public short R2_pidAngleYawDresult { get; set; }
+        public byte R2_pidAngleYawF1 { get; set; }
+        public byte R2_pidAngleYawF2 { get; set; }
+        public byte R2_pidAngleYawOutFilter { get; set; }
 
 
     }

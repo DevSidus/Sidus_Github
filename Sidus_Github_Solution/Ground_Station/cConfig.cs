@@ -17,6 +17,6 @@ namespace Ground_Station
         public static double RESOLUTION_PID_F = 0.01;
     }
 
-    enum pidCommandType { pidCommandNoAction = 0, pidCommandApplyRatePitch = 1, pidCommandApplyRateRoll = 2, pidCommandApplyRateYaw = 3, pidCommandApplyAnglePitch = 4, pidCommandApplyAngleRoll = 5, pidCommandApplyAngleYaw = 6 }
+    enum pidCommandType { pidCommandNoAction = 0, pidCommandApplyRatePitchRoll = 1, pidCommandApplyAnglePitchRoll = 2, pidCommandApplyRateYaw = 3, pidCommandApplyAngleYaw = 4 }
 
 }
