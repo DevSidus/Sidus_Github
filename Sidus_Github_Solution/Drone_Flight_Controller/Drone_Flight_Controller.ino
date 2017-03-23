@@ -527,11 +527,12 @@ void runMotors()
 		{
 			calculate_pid_thr_batt_scale_factor();
 			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output * PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output * PID_THR_BATT_SCALE_FACTOR;
 
-			pwmMicroSeconds(M_FL_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated);
-			pwmMicroSeconds(M_FR_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated);
-			pwmMicroSeconds(M_BR_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated);
-			pwmMicroSeconds(M_BL_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated);
+			pwmMicroSeconds(M_FL_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated - pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_FR_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated + pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_BR_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated - pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_BL_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated + pidVars.rateYaw.outputCompensated);
 		}
 		else
 		{
@@ -662,8 +663,8 @@ void processPID()
 	pidAngleYaw.Compute();
 	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);
 
-	pidVars.rateYaw.setpoint = pidVars.angleYaw.outputFiltered;
-	pidVars.rateYaw.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroZ;  //no need to change LSB to deg/sec, 
+	pidVars.rateYaw.setpoint = cmdYaw * 1.6;
+	pidVars.rateYaw.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;  //no need to change LSB to deg/sec, //negative is added
 	pidRateYaw.Compute();
 
 
