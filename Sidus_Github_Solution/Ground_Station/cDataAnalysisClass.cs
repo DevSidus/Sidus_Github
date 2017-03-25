@@ -27,7 +27,7 @@ namespace Ground_Station
         //public float R1_baroTemp { get; set; }
         //public float R1_baroAlt { get; set; }
         //public float R1_compassHdg { get; set; }
-        //public short R1_batteryVoltageInBits { get; set; }
+        public double R1_batteryVoltageInBits { get; set; }
 
         //MsgR01 Members
         public byte R2_modeQuad { get; set; }

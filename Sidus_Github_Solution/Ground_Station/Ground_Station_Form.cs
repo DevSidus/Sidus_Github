@@ -151,6 +151,7 @@ namespace Ground_Station
             DataAnalysisObj.data.R1_mpuPitch = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuPitch * 180.0 / Math.PI);
             DataAnalysisObj.data.R1_mpuRoll = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuRoll * 180.0 / Math.PI);
             DataAnalysisObj.data.R1_mpuYaw = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuYaw * 180.0 / Math.PI);
+            DataAnalysisObj.data.R1_batteryVoltageInBits = Convert.ToDouble(MsgUdpR01.message.coWorkerTxPacket.batteryVoltageInBits) * 0.00336 * 61 / 10; //(BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2; ;
 
             DataAnalysisObj.data.R2_modeQuad = MsgUdpR01.message.serialR01RelayPacket.modeQuad;
             DataAnalysisObj.data.R2_rxThrottle = MsgUdpR01.message.serialR01RelayPacket.rxThrottle;

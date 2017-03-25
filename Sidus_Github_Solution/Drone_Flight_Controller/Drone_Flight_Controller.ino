@@ -471,7 +471,7 @@ void updateMessageVariables()
 	default:break;
 	}
 
-	batteryVoltageInVolts = float(MsgT01.message.coWorkerTxPacket.batteryVoltageInBits) * 0.00322 * (BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2;
+	batteryVoltageInVolts = float(MsgT01.message.coWorkerTxPacket.batteryVoltageInBits) * 0.00336 * (BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2;
 
 }
 
@@ -484,12 +484,13 @@ void runMotors()
 		{
 			calculate_pid_thr_batt_scale_factor();
 			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output * PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateRoll.outputCompensated = pidVars.rateRoll.output * PID_THR_BATT_SCALE_FACTOR;
 			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output * PID_THR_BATT_SCALE_FACTOR;
-
-			pwmMicroSeconds(M_FL_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated - pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_FR_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated + pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_BR_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated - pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_BL_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated + pidVars.rateYaw.outputCompensated);
+			
+			pwmMicroSeconds(M_FL_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_FR_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_BR_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_BL_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
 		}
 		else
 		{
@@ -678,7 +679,7 @@ void calculate_pid_thr_batt_scale_factor() //this function will be modified to i
 	//Make sure that voltage read is in valid range of operation
 	if (batteryVoltageInVolts > 9.0 && batteryVoltageInVolts < 13.2)
 	{
-		PID_THR_BATT_SCALE_FACTOR = PID_THR_BATT_SCALE_FACTOR * 12.2 / batteryVoltageInVolts;
+		PID_THR_BATT_SCALE_FACTOR = PID_THR_BATT_SCALE_FACTOR * 12.0 / batteryVoltageInVolts;
 	}
 }
 
@@ -771,6 +772,6 @@ void calculateCommandedYawAngle()
 	}
 	else
 	{
-		commandedYawAngle = MsgT01.message.coWorkerTxPacket.mpuYaw;
+		commandedYawAngle = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;
 	}
 }

@@ -95,7 +95,7 @@ bool PID_YawAngle::Compute()
 		if (inFlight)
 		{
 			//Decide whether the state is transient
-			if (abs(deltaSetpoint) > transientSetpointThreshold)
+			if (abs(*mySetpoint - lastSetpoint) > transientSetpointThreshold)
 			{
 				transientInterval = true;
 				transientStartTime = now;
@@ -107,13 +107,14 @@ bool PID_YawAngle::Compute()
 
 			if (!transientInterval)
 			{
-				errorSum -= errorArray[errorArrayIndex];
-				errorSum += errorSmooth;
-				errorArray[errorArrayIndex] = errorSmooth;
-				errorArrayIndex = (errorArrayIndex + 1) % errorArraySize;
-				I_Result = Ki * dTimeInSec * errorSum;
+				//errorSum -= errorArray[errorArrayIndex];
+				//errorSum += errorSmooth;
+				//errorArray[errorArrayIndex] = errorSmooth;
+				//errorArrayIndex = (errorArrayIndex + 1) % errorArraySize;
+				//I_Result = Ki * dTimeInSec * errorSum;
+				I_Result += (Ki * dTimeInSec * errorSmooth);
 
-				//We may choose to limit the I term one third of maximum PID_YawAngle output
+				//We may choose to limit the I term one third of maximum PID output
 				if (I_Result > outMax / 3) I_Result = outMax / 3;
 				else if (I_Result < outMin / 3) I_Result = outMin / 3;
 			}

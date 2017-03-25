@@ -64,7 +64,7 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_MODE_CHANGE_ANGLE_GAP	10
 
 
-#define		PID_RATE_PITCH_KP			1.0
+#define		PID_RATE_PITCH_KP			0.85
 #define		PID_RATE_PITCH_KI			0.0
 #define		PID_RATE_PITCH_KD			0.07
 #define		PID_RATE_PITCH_OUTMIN		-250
@@ -73,16 +73,16 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_PITCH_F2_DEFAULT	0.3
 #define		PID_RATE_PITCH_OUT_FILT_CONSTANT	0.0
 
-#define		PID_ANGLE_PITCH_KP			4.0
-#define		PID_ANGLE_PITCH_KI			0.0
+#define		PID_ANGLE_PITCH_KP			3.3
+#define		PID_ANGLE_PITCH_KI			1.0
 #define		PID_ANGLE_PITCH_KD			0.08
 #define		PID_ANGLE_PITCH_OUTMIN		-250
 #define		PID_ANGLE_PITCH_OUTMAX		250
 #define		PID_ANGLE_PITCH_F1_DEFAULT	0.0
-#define		PID_ANGLE_PITCH_F2_DEFAULT	0.95
-#define		PID_ANGLE_PITCH_OUT_FILT_CONSTANT	0.7
+#define		PID_ANGLE_PITCH_F2_DEFAULT	0.9
+#define		PID_ANGLE_PITCH_OUT_FILT_CONSTANT	0.88
 
-#define		PID_RATE_ROLL_KP			1.0
+#define		PID_RATE_ROLL_KP			0.9
 #define		PID_RATE_ROLL_KI			0.0
 #define		PID_RATE_ROLL_KD			0.07
 #define		PID_RATE_ROLL_OUTMIN		-250
@@ -91,33 +91,33 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_ROLL_F2_DEFAULT	0.3
 #define		PID_RATE_ROLL_OUT_FILT_CONSTANT		0.0
 
-#define		PID_ANGLE_ROLL_KP			4.0
-#define		PID_ANGLE_ROLL_KI			0.0
+#define		PID_ANGLE_ROLL_KP			3.6
+#define		PID_ANGLE_ROLL_KI			1.0
 #define		PID_ANGLE_ROLL_KD			0.08
 #define		PID_ANGLE_ROLL_OUTMIN		-250
 #define		PID_ANGLE_ROLL_OUTMAX		250
 #define		PID_ANGLE_ROLL_F1_DEFAULT	0.0
-#define		PID_ANGLE_ROLL_F2_DEFAULT	0.95
-#define		PID_ANGLE_ROLL_OUT_FILT_CONSTANT	0.7
+#define		PID_ANGLE_ROLL_F2_DEFAULT	0.9
+#define		PID_ANGLE_ROLL_OUT_FILT_CONSTANT	0.88
 
 
-#define		PID_RATE_YAW_KP			0.4
+#define		PID_RATE_YAW_KP			2.55
 #define		PID_RATE_YAW_KI			0.0
-#define		PID_RATE_YAW_KD			0.0
+#define		PID_RATE_YAW_KD			0.12
 #define		PID_RATE_YAW_OUTMIN		-250
 #define		PID_RATE_YAW_OUTMAX		250
-#define		PID_RATE_YAW_F1_DEFAULT	0.5
-#define		PID_RATE_YAW_F2_DEFAULT	0.5
-#define		PID_RATE_YAW_OUT_FILT_CONSTANT		0.7
+#define		PID_RATE_YAW_F1_DEFAULT	0.0
+#define		PID_RATE_YAW_F2_DEFAULT	0.3
+#define		PID_RATE_YAW_OUT_FILT_CONSTANT		0
 
-#define		PID_ANGLE_YAW_KP			1.0
+#define		PID_ANGLE_YAW_KP			25.5
 #define		PID_ANGLE_YAW_KI			0.0
-#define		PID_ANGLE_YAW_KD			0.0
+#define		PID_ANGLE_YAW_KD			0.255
 #define		PID_ANGLE_YAW_OUTMIN		-250
 #define		PID_ANGLE_YAW_OUTMAX		250
-#define		PID_ANGLE_YAW_F1_DEFAULT	0.75
-#define		PID_ANGLE_YAW_F2_DEFAULT	0.75
-#define		PID_ANGLE_YAW_OUT_FILT_CONSTANT	0.7
+#define		PID_ANGLE_YAW_F1_DEFAULT	0.0
+#define		PID_ANGLE_YAW_F2_DEFAULT	0.9
+#define		PID_ANGLE_YAW_OUT_FILT_CONSTANT	0.3
 
 
 
