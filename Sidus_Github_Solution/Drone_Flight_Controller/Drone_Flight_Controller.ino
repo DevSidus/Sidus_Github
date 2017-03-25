@@ -65,6 +65,7 @@ void setup() {
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 1000000);
 	scheduler.insert(mapRxDCtoCmd, 20000);
+	scheduler.insert(calculateCommandedYawAngle, 20000);
 	scheduler.insert(serialCheck, 9000);
 	scheduler.insert(processPID, 9000);
 	scheduler.insert(runMotors, 9000);
@@ -446,75 +447,31 @@ void updateMessageVariables()
 	switch (MsgT01.message.udpT01RelayPacket.pidCommandState)
 	{
 	case pidCommandApplyRatePitchRoll:
-		//Set Pitch Rate PID parameters
-		pidVars.ratePitch.Kp = MsgT01.message.udpT01RelayPacket.pidRatePitchRollKp * RESOLUTION_PID_RATE_KP;
-		pidVars.ratePitch.Ki = MsgT01.message.udpT01RelayPacket.pidRatePitchRollKi * RESOLUTION_PID_RATE_KI;
-		pidVars.ratePitch.Kd = MsgT01.message.udpT01RelayPacket.pidRatePitchRollKd * RESOLUTION_PID_RATE_KD;
-		pidVars.ratePitch.f1 = MsgT01.message.udpT01RelayPacket.pidRatePitchRollF1 * RESOLUTION_PID_F;
-		pidVars.ratePitch.f2 = MsgT01.message.udpT01RelayPacket.pidRatePitchRollF2 * RESOLUTION_PID_F;
-		pidRatePitch.SetTunings(pidVars.ratePitch.Kp, pidVars.ratePitch.Ki, pidVars.ratePitch.Kd);
-		pidRatePitch.SetF1(pidVars.ratePitch.f1);
-		pidRatePitch.SetF2(pidVars.ratePitch.f2);
-		//Set Roll Rate PID parameters
-		pidVars.rateRoll.Kp = pidVars.ratePitch.Kp;
-		pidVars.rateRoll.Ki = pidVars.ratePitch.Ki;
-		pidVars.rateRoll.Kd = pidVars.ratePitch.Kd;
-		pidVars.rateRoll.f1 = pidVars.ratePitch.f1;
-		pidVars.rateRoll.f2 = pidVars.ratePitch.f2;
-		pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
-		pidRateRoll.SetF1(pidVars.rateRoll.f1);
-		pidRateRoll.SetF2(pidVars.rateRoll.f2);
+		applyPidCommandRatePitchRoll();
 		break;
 
 	case pidCommandApplyAnglePitchRoll:
-		//Set Pitch Angle PID parameters
-		pidVars.anglePitch.Kp = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollKp * RESOLUTION_PID_ANGLE_KP;
-		pidVars.anglePitch.Ki = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollKi * RESOLUTION_PID_ANGLE_KI;
-		pidVars.anglePitch.Kd = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollKd * RESOLUTION_PID_ANGLE_KD;
-		pidVars.anglePitch.f1 = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollF1 * RESOLUTION_PID_F;
-		pidVars.anglePitch.f2 = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollF2 * RESOLUTION_PID_F;
-		pidVars.anglePitch.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollOutFilter * RESOLUTION_PID_F;
-		pidVars.angleRoll.outputFilterConstant = pidVars.anglePitch.outputFilterConstant;
-		pidAnglePitch.SetTunings(pidVars.anglePitch.Kp, pidVars.anglePitch.Ki, pidVars.anglePitch.Kd);
-		pidAnglePitch.SetF1(pidVars.anglePitch.f1);
-		pidAnglePitch.SetF2(pidVars.anglePitch.f2);
-		//Set Roll Angle PID parameters
-		pidVars.angleRoll.Kp = pidVars.anglePitch.Kp;
-		pidVars.angleRoll.Ki = pidVars.anglePitch.Ki;
-		pidVars.angleRoll.Kd = pidVars.anglePitch.Kd;
-		pidVars.angleRoll.f1 = pidVars.anglePitch.f1;
-		pidVars.angleRoll.f2 = pidVars.anglePitch.f2;
-		pidAngleRoll.SetTunings(pidVars.angleRoll.Kp, pidVars.angleRoll.Ki, pidVars.angleRoll.Kd);
-		pidAngleRoll.SetF1(pidVars.angleRoll.f1);
-		pidAngleRoll.SetF2(pidVars.angleRoll.f2);
+		applyPidCommandAnglePitchRoll();
 		break;
 
 	case pidCommandApplyRateYaw:
-		//Set Yaw Rate PID parameters
-		pidVars.rateYaw.Kp = MsgT01.message.udpT01RelayPacket.pidRateYawKp * RESOLUTION_PID_RATE_KP;
-		pidVars.rateYaw.Ki = MsgT01.message.udpT01RelayPacket.pidRateYawKi * RESOLUTION_PID_RATE_KI;
-		pidVars.rateYaw.Kd = MsgT01.message.udpT01RelayPacket.pidRateYawKd * RESOLUTION_PID_RATE_KD;
-		pidVars.rateYaw.f1 = MsgT01.message.udpT01RelayPacket.pidRateYawF1 * RESOLUTION_PID_F;
-		pidVars.rateYaw.f2 = MsgT01.message.udpT01RelayPacket.pidRateYawF2 * RESOLUTION_PID_F;
-		pidRateYaw.SetTunings(pidVars.rateYaw.Kp, pidVars.rateYaw.Ki, pidVars.rateYaw.Kd);
-		pidRateYaw.SetF1(pidVars.rateYaw.f1);
-		pidRateYaw.SetF2(pidVars.rateYaw.f2);
+		applyPidCommandRateYaw();
 		break;
 
 	case pidCommandApplyAngleYaw:
-		//Set Yaw Angle PID parameters
-		pidVars.angleYaw.Kp = MsgT01.message.udpT01RelayPacket.pidAngleYawKp * RESOLUTION_PID_ANGLE_KP;
-		pidVars.angleYaw.Ki = MsgT01.message.udpT01RelayPacket.pidAngleYawKi * RESOLUTION_PID_ANGLE_KI;
-		pidVars.angleYaw.Kd = MsgT01.message.udpT01RelayPacket.pidAngleYawKd * RESOLUTION_PID_ANGLE_KD;
-		pidVars.angleYaw.f1 = MsgT01.message.udpT01RelayPacket.pidAngleYawF1 * RESOLUTION_PID_F;
-		pidVars.angleYaw.f2 = MsgT01.message.udpT01RelayPacket.pidAngleYawF2 * RESOLUTION_PID_F;
-		pidVars.angleYaw.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidAngleYawOutFilter * RESOLUTION_PID_F;
-		pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
-		pidAngleYaw.SetF1(pidVars.angleYaw.f1);
-		pidAngleYaw.SetF2(pidVars.angleYaw.f2);
+		applyPidCommandAngleYaw();
+		break;
+
+	case pidCommandApplyAll:
+		applyPidCommandRatePitchRoll();
+		applyPidCommandAnglePitchRoll();
+		applyPidCommandRateYaw();
+		applyPidCommandAngleYaw();
 		break;
 	default:break;
 	}
+
+	batteryVoltageInVolts = float(MsgT01.message.coWorkerTxPacket.batteryVoltageInBits) * 0.00322 * (BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2;
 
 }
 
@@ -605,25 +562,12 @@ void checkMode()
 	{
 		modeQuad = modeQuadARMED;
 		//Serial.println("QUAD is ARMED");
-
-		pidRatePitch.SetFlightMode(true);
-		pidRateRoll.SetFlightMode(true);
-		pidRateYaw.SetFlightMode(true);
-		pidAnglePitch.SetFlightMode(true);
-		pidAngleRoll.SetFlightMode(true);
-		pidAngleYaw.SetFlightMode(true);
 	}
 	else if (cmdThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRoll < CMD_ROLL_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdPitch>CMD_PITCH_MAX - CMD_MODE_CHANGE_ANGLE_GAP)
 	{
 		modeQuad = modeQuadSAFE;
 		//Serial.println("QUAD is in SAFE Mode");
 
-		pidRatePitch.SetFlightMode(false);
-		pidRateRoll.SetFlightMode(false);
-		pidRateYaw.SetFlightMode(false);
-		pidAnglePitch.SetFlightMode(false);
-		pidAngleRoll.SetFlightMode(false);
-		pidAngleYaw.SetFlightMode(false);
 	}
 	else if (cmdThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRoll < CMD_ROLL_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdPitch<CMD_PITCH_MIN + CMD_MODE_CHANGE_ANGLE_GAP)
 	{
@@ -632,6 +576,25 @@ void checkMode()
 	else if (cmdThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRoll>CMD_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP && cmdPitch<CMD_PITCH_MIN + CMD_MODE_CHANGE_ANGLE_GAP)
 	{
 		modeQuad = modeQuadDirCmd;
+	}
+
+	if (modeQuad == modeQuadARMED && cmdThr > CMD_THR_TAKEOFF)
+	{
+		pidRatePitch.SetFlightMode(true);
+		pidRateRoll.SetFlightMode(true);
+		pidRateYaw.SetFlightMode(true);
+		pidAnglePitch.SetFlightMode(true);
+		pidAngleRoll.SetFlightMode(true);
+		pidAngleYaw.SetFlightMode(true);
+	}
+	else
+	{
+		pidRatePitch.SetFlightMode(false);
+		pidRateRoll.SetFlightMode(false);
+		pidRateYaw.SetFlightMode(false);
+		pidAnglePitch.SetFlightMode(false);
+		pidAngleRoll.SetFlightMode(false);
+		pidAngleYaw.SetFlightMode(false);
 	}
 }
 
@@ -657,13 +620,13 @@ void processPID()
 	pidVars.rateRoll.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroX;  //no need to change LSB to deg/sec
 	pidRateRoll.Compute();
 
-	pidVars.angleYaw.d_bypass = MsgT01.message.coWorkerTxPacket.mpuGyroX;
-	pidVars.angleYaw.setpoint = cmdYaw;
+	pidVars.angleYaw.d_bypass = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;
+	pidVars.angleYaw.setpoint = commandedYawAngle;
 	pidVars.angleYaw.sensedVal = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;  //no need to change LSB to deg/sec
 	pidAngleYaw.Compute();
 	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);
 
-	pidVars.rateYaw.setpoint = cmdYaw * 1.6;
+	pidVars.rateYaw.setpoint = pidVars.angleYaw.outputFiltered;
 	pidVars.rateYaw.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;  //no need to change LSB to deg/sec, //negative is added
 	pidRateYaw.Compute();
 
@@ -710,4 +673,104 @@ void calculate_pid_thr_batt_scale_factor() //this function will be modified to i
 		PID_THR_BATT_SCALE_FACTOR = (CMD_THR_MAX - cmdThr) / (CMD_THR_MAX - CMD_THR_MIN) + 0.2;
 	else
 		PID_THR_BATT_SCALE_FACTOR = 0.4;
+
+	//Use linear interpolation for battery voltage level compensation
+	//Make sure that voltage read is in valid range of operation
+	if (batteryVoltageInVolts > 9.0 && batteryVoltageInVolts < 13.2)
+	{
+		PID_THR_BATT_SCALE_FACTOR = PID_THR_BATT_SCALE_FACTOR * 12.2 / batteryVoltageInVolts;
+	}
+}
+
+void applyPidCommandRatePitchRoll()
+{
+	//Set Pitch Rate PID parameters
+	pidVars.ratePitch.Kp = MsgT01.message.udpT01RelayPacket.pidRatePitchRollKp * RESOLUTION_PID_RATE_KP;
+	pidVars.ratePitch.Ki = MsgT01.message.udpT01RelayPacket.pidRatePitchRollKi * RESOLUTION_PID_RATE_KI;
+	pidVars.ratePitch.Kd = MsgT01.message.udpT01RelayPacket.pidRatePitchRollKd * RESOLUTION_PID_RATE_KD;
+	pidVars.ratePitch.f1 = MsgT01.message.udpT01RelayPacket.pidRatePitchRollF1 * RESOLUTION_PID_F;
+	pidVars.ratePitch.f2 = MsgT01.message.udpT01RelayPacket.pidRatePitchRollF2 * RESOLUTION_PID_F;
+	pidRatePitch.SetTunings(pidVars.ratePitch.Kp, pidVars.ratePitch.Ki, pidVars.ratePitch.Kd);
+	pidRatePitch.SetF1(pidVars.ratePitch.f1);
+	pidRatePitch.SetF2(pidVars.ratePitch.f2);
+	//Set Roll Rate PID parameters
+	pidVars.rateRoll.Kp = pidVars.ratePitch.Kp;
+	pidVars.rateRoll.Ki = pidVars.ratePitch.Ki;
+	pidVars.rateRoll.Kd = pidVars.ratePitch.Kd;
+	pidVars.rateRoll.f1 = pidVars.ratePitch.f1;
+	pidVars.rateRoll.f2 = pidVars.ratePitch.f2;
+	pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
+	pidRateRoll.SetF1(pidVars.rateRoll.f1);
+	pidRateRoll.SetF2(pidVars.rateRoll.f2);
+}
+
+void applyPidCommandAnglePitchRoll()
+{
+	//Set Pitch Angle PID parameters
+	pidVars.anglePitch.Kp = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollKp * RESOLUTION_PID_ANGLE_KP;
+	pidVars.anglePitch.Ki = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollKi * RESOLUTION_PID_ANGLE_KI;
+	pidVars.anglePitch.Kd = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollKd * RESOLUTION_PID_ANGLE_KD;
+	pidVars.anglePitch.f1 = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollF1 * RESOLUTION_PID_F;
+	pidVars.anglePitch.f2 = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollF2 * RESOLUTION_PID_F;
+	pidVars.anglePitch.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidAnglePitchRollOutFilter * RESOLUTION_PID_F;
+	pidVars.angleRoll.outputFilterConstant = pidVars.anglePitch.outputFilterConstant;
+	pidAnglePitch.SetTunings(pidVars.anglePitch.Kp, pidVars.anglePitch.Ki, pidVars.anglePitch.Kd);
+	pidAnglePitch.SetF1(pidVars.anglePitch.f1);
+	pidAnglePitch.SetF2(pidVars.anglePitch.f2);
+	//Set Roll Angle PID parameters
+	pidVars.angleRoll.Kp = pidVars.anglePitch.Kp;
+	pidVars.angleRoll.Ki = pidVars.anglePitch.Ki;
+	pidVars.angleRoll.Kd = pidVars.anglePitch.Kd;
+	pidVars.angleRoll.f1 = pidVars.anglePitch.f1;
+	pidVars.angleRoll.f2 = pidVars.anglePitch.f2;
+	pidAngleRoll.SetTunings(pidVars.angleRoll.Kp, pidVars.angleRoll.Ki, pidVars.angleRoll.Kd);
+	pidAngleRoll.SetF1(pidVars.angleRoll.f1);
+	pidAngleRoll.SetF2(pidVars.angleRoll.f2);
+}
+
+void applyPidCommandRateYaw()
+{
+	//Set Yaw Rate PID parameters
+	pidVars.rateYaw.Kp = MsgT01.message.udpT01RelayPacket.pidRateYawKp * RESOLUTION_PID_RATE_KP;
+	pidVars.rateYaw.Ki = MsgT01.message.udpT01RelayPacket.pidRateYawKi * RESOLUTION_PID_RATE_KI;
+	pidVars.rateYaw.Kd = MsgT01.message.udpT01RelayPacket.pidRateYawKd * RESOLUTION_PID_RATE_KD;
+	pidVars.rateYaw.f1 = MsgT01.message.udpT01RelayPacket.pidRateYawF1 * RESOLUTION_PID_F;
+	pidVars.rateYaw.f2 = MsgT01.message.udpT01RelayPacket.pidRateYawF2 * RESOLUTION_PID_F;
+	pidRateYaw.SetTunings(pidVars.rateYaw.Kp, pidVars.rateYaw.Ki, pidVars.rateYaw.Kd);
+	pidRateYaw.SetF1(pidVars.rateYaw.f1);
+	pidRateYaw.SetF2(pidVars.rateYaw.f2);
+}
+
+void applyPidCommandAngleYaw()
+{
+	//Set Yaw Angle PID parameters
+	pidVars.angleYaw.Kp = MsgT01.message.udpT01RelayPacket.pidAngleYawKp * RESOLUTION_PID_ANGLE_KP;
+	pidVars.angleYaw.Ki = MsgT01.message.udpT01RelayPacket.pidAngleYawKi * RESOLUTION_PID_ANGLE_KI;
+	pidVars.angleYaw.Kd = MsgT01.message.udpT01RelayPacket.pidAngleYawKd * RESOLUTION_PID_ANGLE_KD;
+	pidVars.angleYaw.f1 = MsgT01.message.udpT01RelayPacket.pidAngleYawF1 * RESOLUTION_PID_F;
+	pidVars.angleYaw.f2 = MsgT01.message.udpT01RelayPacket.pidAngleYawF2 * RESOLUTION_PID_F;
+	pidVars.angleYaw.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidAngleYawOutFilter * RESOLUTION_PID_F;
+	pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
+	pidAngleYaw.SetF1(pidVars.angleYaw.f1);
+	pidAngleYaw.SetF2(pidVars.angleYaw.f2);
+}
+
+void calculateCommandedYawAngle()
+{
+	if (modeQuad == modeQuadARMED && cmdThr > CMD_THR_ARM_START)
+	{
+		if (abs(cmdYaw) > 4)
+		{
+			commandedYawAngle += cmdYaw / 30.0;
+
+			if (commandedYawAngle > 180)
+				commandedYawAngle -= 360;
+			else if (commandedYawAngle <= -180)
+				commandedYawAngle += 360;
+		}
+	}
+	else
+	{
+		commandedYawAngle = MsgT01.message.coWorkerTxPacket.mpuYaw;
+	}
 }

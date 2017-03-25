@@ -101,6 +101,12 @@ namespace Ground_Station
 
             ssMainLabel1.Text = "IP:" + qgsUdp.GetLocalIPv4();
             ssMainLabel2.Text = "Port#:" + qgsUdp.port.ToString();
+
+            tb_pid_angle_pitch_roll_kp_Scroll(this, e);
+            tb_pid_rate_pitch_roll_kp_Scroll(this, e);
+            tb_pid_angle_yaw_kp_Scroll(this, e);
+            tb_pid_rate_yaw_kp_Scroll(this, e);
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
         }
         
         

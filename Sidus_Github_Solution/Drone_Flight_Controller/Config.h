@@ -51,6 +51,8 @@ This header file define all the configurable variables including constants, pin 
 #define		DC_THR_MIN		1100.0
 #define		DC_THR_MAX		1900.0
 
+#define		CMD_THR_TAKEOFF 1380.0
+
 #define		CMD_YAW_MIN		-45.0
 #define		CMD_YAW_MAX		+45.0
 #define		DC_YAW_MIN		1100.0
@@ -119,6 +121,7 @@ This header file define all the configurable variables including constants, pin 
 
 
 
+
 #define		RX_MAX_PULSE_WIDTH			2000	//in microseconds
 
 #define		MPU_GYRO_DEG_SEC_TO_LSB		16.4     //This value can be used to convert deg/sec to LSB
@@ -134,7 +137,12 @@ This header file define all the configurable variables including constants, pin 
 #define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
 
+#define     BAT_VOLT_DIV_R1				51.0
+#define		BAT_VOLT_DIV_R2				10.0
+
 float		PID_THR_BATT_SCALE_FACTOR = 1.0;
+float		commandedYawAngle = 0;
+float		batteryVoltageInVolts;
 
 struct structPID
 {
@@ -191,6 +199,7 @@ typedef enum
 	pidCommandApplyAnglePitchRoll = 2,
 	pidCommandApplyRateYaw = 3,
 	pidCommandApplyAngleYaw = 4,
+	pidCommandApplyAll = 5,
 }pidCommandType;
 
 typedef enum
