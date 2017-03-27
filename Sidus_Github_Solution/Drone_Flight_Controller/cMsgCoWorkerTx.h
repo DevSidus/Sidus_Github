@@ -37,11 +37,5 @@ struct structMsgCoWorkerTx
 
 	short batteryVoltageInBits;
 
-	/*Not needed for now, to be implemented if required
-	//Euler Angles(psi, theta, phi) in Radians
-	float mpuEulerPsi;
-	float mpuEulerTheta;
-	float mpuEulerPhi;
-	*/
 };
 #pragma pack(pop)

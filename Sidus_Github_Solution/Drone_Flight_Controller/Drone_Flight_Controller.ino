@@ -536,6 +536,33 @@ void mapRxDCtoCmd()
 		cmdRoll = mapping(filterRxRoll.process(dutyCycle_Roll), DC_ROLL_MIN, DC_ROLL_MAX, CMD_ROLL_MIN, CMD_ROLL_MAX);
 		cmdYaw = mapping(filterRxYaw.process(dutyCycle_Yaw), DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
 		cmdThr = mapping(filterRxThr.process(dutyCycle_Thr), DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
+
+
+		//This below code segment is written to have smoother and much feasible commands for quadcopter
+		#ifdef COMMAND_CALIBRATION
+			double anglePitchRollCmd = atan(abs(cmdPitch/cmdRoll));
+			double cmdSF = cos(min(anglePitchRollCmd, M_PI_2 - anglePitchRollCmd));
+
+			double xFactor = sin(CMD_MAX_ATTITUDE_IN_RADIANS);
+
+			double cmdRollCalibratedInRadians = cmdRoll / CMD_ROLL_MAX * cmdSF * xFactor;
+			double cmdPitchCalibratedInRadians = cmdPitch / CMD_PITCH_MAX * cmdSF * xFactor;
+
+			cmdRollCalibratedInRadians = abs(asin(cmdRollCalibratedInRadians));
+			cmdPitchCalibratedInRadians = abs(asin(cmdPitchCalibratedInRadians / cos(cmdRollCalibratedInRadians)));
+
+			if (cmdPitch >= 0)
+				cmdPitch = cmdPitchCalibratedInRadians * 180.0 / M_PI;
+			else
+				cmdPitch = -cmdPitchCalibratedInRadians * 180.0 / M_PI;
+
+			if (cmdRoll >= 0)
+				cmdRoll = cmdRollCalibratedInRadians * 180.0 / M_PI;
+			else
+				cmdRoll = -cmdRollCalibratedInRadians * 180.0 / M_PI;
+		#endif
+
+
 	}
 	else
 	{

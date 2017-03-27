@@ -229,6 +229,7 @@ void processMpuTask()
 			mpu.dmpGetGyro(gg, fifoBuffer);
 			mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
 			mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+			mpu.dmpGetEuler(euler, &q);
 			mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
 			//Serial.println(millis() - mpuLastDataTime);
@@ -292,9 +293,16 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuAccRealY = aaReal.y;
 	MsgCoWorkerTx.mpuAccRealZ = aaReal.z;
 
-	MsgCoWorkerTx.mpuYaw = ypr[0];
-	MsgCoWorkerTx.mpuPitch = ypr[1];
-	MsgCoWorkerTx.mpuRoll = ypr[2];
+
+
+	//MsgCoWorkerTx.mpuYaw = ypr[0];
+	//MsgCoWorkerTx.mpuPitch = ypr[1];
+	//MsgCoWorkerTx.mpuRoll = ypr[2];	
+
+	//We will use euler angles for PIDs instead of defined tilt angles
+	MsgCoWorkerTx.mpuYaw = euler[0];
+	MsgCoWorkerTx.mpuPitch = euler[1];
+	MsgCoWorkerTx.mpuRoll = euler[2];
 #endif
 
 

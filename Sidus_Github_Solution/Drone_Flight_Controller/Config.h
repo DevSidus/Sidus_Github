@@ -3,6 +3,11 @@
 This header file define all the configurable variables including constants, pin mapping, etc.
 */
 
+
+//Comment out below line if you do not want command calibration
+#define		COMMAND_CALIBRATION
+#define		CMD_MAX_ATTITUDE_IN_RADIANS		M_PI_4		//define max attitude as 45 degrees
+
 //Wifi, UDP Definitions
 
 
@@ -35,6 +40,8 @@ This header file define all the configurable variables including constants, pin 
 #define		BUZZER_PWM_CHANNEL		5
 
 #define		RX_DATATIME_THESHOLD		1000
+
+#define		CMD_ATTITUDE_MAX 
 
 #define		CMD_PITCH_MIN	-45.0
 #define		CMD_PITCH_MAX	+45.0
