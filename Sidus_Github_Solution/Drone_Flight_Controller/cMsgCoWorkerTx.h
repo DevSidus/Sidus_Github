@@ -21,9 +21,9 @@ struct structMsgCoWorkerTx
 	short mpuAccZ;
 
 	//Accelerometer Measurements without Gravity
-	short mpuAccRealX;
-	short mpuAccRealY;
-	short mpuAccRealZ;
+	short mpuAccWorldX;
+	short mpuAccWorldY;
+	short mpuAccWorldZ;
 
 	//Yaw Pitch Roll Measurements in Radians
 	float mpuYaw;
@@ -36,6 +36,9 @@ struct structMsgCoWorkerTx
 	float compassHdg;
 
 	short batteryVoltageInBits;
+
+	float quadVelocityWorldZ;   //kalman filtered output
+	float quadPositionWorldZ;   //kalman filtered output
 
 };
 #pragma pack(pop)

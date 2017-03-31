@@ -37,6 +37,9 @@ PID pidAngleRoll(&pidVars.angleRoll.sensedVal, &pidVars.angleRoll.output, &pidVa
 PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rateYaw.setpoint);
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.d_bypass);
 
+PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.d_bypass);
+PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.d_bypass);
+
 cRxFilter filterRxThr, filterRxPitch, filterRxRoll, filterRxYaw;
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
@@ -149,6 +152,25 @@ void initVariables()
 	pidVars.angleYaw.f1 = PID_ANGLE_YAW_F1_DEFAULT;
 	pidVars.angleYaw.f2 = PID_ANGLE_YAW_F2_DEFAULT;
 	pidVars.angleYaw.outputFilterConstant = PID_ANGLE_YAW_OUT_FILT_CONSTANT;
+
+
+	pidVars.velAlt.Kp = PID_VEL_ALT_KP;
+	pidVars.velAlt.Ki = PID_VEL_ALT_KI;
+	pidVars.velAlt.Kd = PID_VEL_ALT_KD;
+	pidVars.velAlt.outputLimitMin = PID_VEL_ALT_OUTMIN;
+	pidVars.velAlt.outputLimitMax = PID_VEL_ALT_OUTMAX;
+	pidVars.velAlt.f1 = PID_VEL_ALT_F1_DEFAULT;
+	pidVars.velAlt.f2 = PID_VEL_ALT_F2_DEFAULT;
+	pidVars.velAlt.outputFilterConstant = PID_VEL_ALT_OUT_FILT_CONSTANT;
+
+	pidVars.posAlt.Kp = PID_POS_ALT_KP;
+	pidVars.posAlt.Ki = PID_POS_ALT_KI;
+	pidVars.posAlt.Kd = PID_POS_ALT_KD;
+	pidVars.posAlt.outputLimitMin = PID_POS_ALT_OUTMIN;
+	pidVars.posAlt.outputLimitMax = PID_POS_ALT_OUTMAX;
+	pidVars.posAlt.f1 = PID_POS_ALT_F1_DEFAULT;
+	pidVars.posAlt.f2 = PID_POS_ALT_F2_DEFAULT;
+	pidVars.posAlt.outputFilterConstant = PID_POS_ALT_OUT_FILT_CONSTANT;
 }
 
 void initPIDtuning()
@@ -182,6 +204,17 @@ void initPIDtuning()
 	pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
 	pidAngleYaw.SetF1(pidVars.angleYaw.f1);
 	pidAngleYaw.SetF2(pidVars.angleYaw.f2);
+
+
+	pidVelAlt.SetOutputLimits(pidVars.velAlt.outputLimitMin, pidVars.velAlt.outputLimitMax);
+	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
+	pidVelAlt.SetF1(pidVars.velAlt.f1);
+	pidVelAlt.SetF2(pidVars.velAlt.f2);
+
+	pidPosAlt.SetOutputLimits(pidVars.posAlt.outputLimitMin, pidVars.posAlt.outputLimitMax);
+	pidPosAlt.SetTunings(pidVars.posAlt.Kp, pidVars.posAlt.Ki, pidVars.posAlt.Kd);
+	pidPosAlt.SetF1(pidVars.posAlt.f1);
+	pidPosAlt.SetF2(pidVars.posAlt.f2);
 }
 
 void setupMotorPins()
@@ -436,6 +469,31 @@ void serialTransmit()
 	MsgR01.message.pidAngleYawF2 = pidVars.angleYaw.f2 / RESOLUTION_PID_F;
 	MsgR01.message.pidAngleYawOutFilter = pidVars.angleYaw.outputFilterConstant / RESOLUTION_PID_F;
 
+	MsgR01.message.commandedYawAngle = commandedYawAngle;
+
+
+	MsgR01.message.pidVelAltKp = pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
+	MsgR01.message.pidVelAltKi = pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
+	MsgR01.message.pidVelAltKd = pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
+	MsgR01.message.pidVelAltOutput = pidVars.velAlt.output;
+	MsgR01.message.pidVelAltPresult = pidVelAlt.Get_P_Result();
+	MsgR01.message.pidVelAltIresult = pidVelAlt.Get_I_Result();
+	MsgR01.message.pidVelAltDresult = pidVelAlt.Get_D_Result();
+	MsgR01.message.pidVelAltF1 = pidVars.velAlt.f1 / RESOLUTION_PID_F;
+	MsgR01.message.pidVelAltF2 = pidVars.velAlt.f2 / RESOLUTION_PID_F;
+
+	MsgR01.message.pidPosAltKp = pidVars.posAlt.Kp / RESOLUTION_PID_POS_KP;
+	MsgR01.message.pidPosAltKi = pidVars.posAlt.Ki / RESOLUTION_PID_POS_KI;
+	MsgR01.message.pidPosAltKd = pidVars.posAlt.Kd / RESOLUTION_PID_POS_KD;
+	MsgR01.message.pidPosAltOutput = pidVars.posAlt.output;
+	MsgR01.message.pidPosAltPresult = pidPosAlt.Get_P_Result();
+	MsgR01.message.pidPosAltIresult = pidPosAlt.Get_I_Result();
+	MsgR01.message.pidPosAltDresult = pidPosAlt.Get_D_Result();
+	MsgR01.message.pidPosAltF1 = pidVars.posAlt.f1 / RESOLUTION_PID_F;
+	MsgR01.message.pidPosAltF2 = pidVars.posAlt.f2 / RESOLUTION_PID_F;
+	MsgR01.message.pidPosAltOutFilter = pidVars.posAlt.outputFilterConstant / RESOLUTION_PID_F;
+
+
 	MsgR01.getPacket();
 	Serial.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
 
@@ -467,13 +525,23 @@ void updateMessageVariables()
 		applyPidCommandAnglePitchRoll();
 		applyPidCommandRateYaw();
 		applyPidCommandAngleYaw();
+		applyPidCommandVelAlt();
+		applyPidCommandPosAlt();
+		break;
+
+	case pidCommandApplyVelAlt:
+		applyPidCommandVelAlt();
+		break;
+
+	case pidCommandApplyPosAlt:
+		applyPidCommandPosAlt();
 		break;
 	default:break;
 	}
 
 	batteryVoltageInVolts = float(MsgT01.message.coWorkerTxPacket.batteryVoltageInBits) * 0.00336 * (BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2;
 
-}
+} 
 
 void runMotors()
 {
@@ -657,6 +725,20 @@ void processPID()
 	pidVars.rateYaw.setpoint = pidVars.angleYaw.outputFiltered;
 	pidVars.rateYaw.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;  //no need to change LSB to deg/sec, //negative is added
 	pidRateYaw.Compute();
+	
+
+	//pidVars.posAlt.d_bypass = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // meters/second
+	//pidVars.posAlt.setpoint = ;
+	//pidVars.posAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;  // barometric altitude in meters
+	//pidPosAlt.Compute();
+	//pidVars.posAlt.outputFiltered = basicFilter(pidVars.posAlt.output, pidVars.posAlt.outputFilterConstant, pidVars.posAlt.outputFiltered);
+
+	pidVars.velAlt.d_bypass = MsgT01.message.coWorkerTxPacket.mpuAccWorldZ / 836.0;  // meters/second^2
+	pidVars.velAlt.setpoint = 0; // pidVars.posAlt.outputFiltered;   //this line will change after test of alt vel PID
+	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  //no need to change LSB to deg/sec
+	pidVelAlt.Compute();
+
+
 
 
 	//Serial.print(cmdPitch);
@@ -669,9 +751,6 @@ void processPID()
 	//Serial.print("  ");
 	//Serial.println(pidVars.ratePitch.output);
 	
-	//pidVars.rateRoll.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroX / MPU_GYRO_DEG_SEC_TO_LSB;
-	//pidVars.rateRoll.setpoint = cmdRoll;
-	//pidRateRoll.Compute();
 
 }
 
@@ -801,4 +880,32 @@ void calculateCommandedYawAngle()
 	{
 		commandedYawAngle = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;
 	}
+}
+
+
+void applyPidCommandVelAlt()
+{
+	//Set Altitude Velocity PID parameters
+	pidVars.velAlt.Kp = MsgT01.message.udpT01RelayPacket.pidVelAltKp * RESOLUTION_PID_VEL_KP;
+	pidVars.velAlt.Ki = MsgT01.message.udpT01RelayPacket.pidVelAltKi * RESOLUTION_PID_VEL_KI;
+	pidVars.velAlt.Kd = MsgT01.message.udpT01RelayPacket.pidVelAltKd * RESOLUTION_PID_VEL_KD;
+	pidVars.velAlt.f1 = MsgT01.message.udpT01RelayPacket.pidVelAltF1 * RESOLUTION_PID_F;
+	pidVars.velAlt.f2 = MsgT01.message.udpT01RelayPacket.pidVelAltF2 * RESOLUTION_PID_F;
+	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
+	pidVelAlt.SetF1(pidVars.velAlt.f1);
+	pidVelAlt.SetF2(pidVars.velAlt.f2);
+}
+
+void applyPidCommandPosAlt()
+{
+	//Set Altitude Position PID parameters
+	pidVars.posAlt.Kp = MsgT01.message.udpT01RelayPacket.pidPosAltKp * RESOLUTION_PID_POS_KP;
+	pidVars.posAlt.Ki = MsgT01.message.udpT01RelayPacket.pidPosAltKi * RESOLUTION_PID_POS_KI;
+	pidVars.posAlt.Kd = MsgT01.message.udpT01RelayPacket.pidPosAltKd * RESOLUTION_PID_POS_KD;
+	pidVars.posAlt.f1 = MsgT01.message.udpT01RelayPacket.pidPosAltF1 * RESOLUTION_PID_F;
+	pidVars.posAlt.f2 = MsgT01.message.udpT01RelayPacket.pidPosAltF2 * RESOLUTION_PID_F;
+	pidVars.posAlt.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidPosAltOutFilter * RESOLUTION_PID_F;
+	pidPosAlt.SetTunings(pidVars.posAlt.Kp, pidVars.posAlt.Ki, pidVars.posAlt.Kd);
+	pidPosAlt.SetF1(pidVars.posAlt.f1);
+	pidPosAlt.SetF2(pidVars.posAlt.f2);
 }

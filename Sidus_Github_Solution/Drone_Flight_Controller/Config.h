@@ -127,6 +127,24 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_YAW_OUT_FILT_CONSTANT	0.3
 
 
+#define		PID_VEL_ALT_KP			2.55
+#define		PID_VEL_ALT_KI			0.0
+#define		PID_VEL_ALT_KD			0.12
+#define		PID_VEL_ALT_OUTMIN		-150
+#define		PID_VEL_ALT_OUTMAX		150
+#define		PID_VEL_ALT_F1_DEFAULT	0.0
+#define		PID_VEL_ALT_F2_DEFAULT	0.3
+#define		PID_VEL_ALT_OUT_FILT_CONSTANT		0
+
+#define		PID_POS_ALT_KP			25.5
+#define		PID_POS_ALT_KI			0.0
+#define		PID_POS_ALT_KD			0.255
+#define		PID_POS_ALT_OUTMIN		-10
+#define		PID_POS_ALT_OUTMAX		10
+#define		PID_POS_ALT_F1_DEFAULT	0.0
+#define		PID_POS_ALT_F2_DEFAULT	0.9
+#define		PID_POS_ALT_OUT_FILT_CONSTANT	0.3
+
 
 
 #define		RX_MAX_PULSE_WIDTH			2000	//in microseconds
@@ -140,6 +158,14 @@ This header file define all the configurable variables including constants, pin 
 #define		RESOLUTION_PID_ANGLE_KI			0.01
 #define		RESOLUTION_PID_ANGLE_KD			0.001
 #define		RESOLUTION_PID_F			0.01
+
+#define		RESOLUTION_PID_VEL_KP			1.0
+#define		RESOLUTION_PID_VEL_KI			0.1
+#define		RESOLUTION_PID_VEL_KD			0.1
+#define		RESOLUTION_PID_POS_KP			0.01
+#define		RESOLUTION_PID_POS_KI			0.001
+#define		RESOLUTION_PID_POS_KD			0.0001
+
 
 #define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
@@ -173,9 +199,11 @@ struct structSuperPID
 	structPID ratePitch;
 	structPID rateRoll;
 	structPID rateYaw;
+	structPID velAlt;
 	structPID anglePitch;
 	structPID angleRoll;
 	structPID angleYaw;	
+	structPID posAlt;
 }pidVars;
 
 
@@ -207,6 +235,8 @@ typedef enum
 	pidCommandApplyRateYaw = 3,
 	pidCommandApplyAngleYaw = 4,
 	pidCommandApplyAll = 5,
+	pidCommandApplyVelAlt = 6,
+	pidCommandApplyPosAlt = 7,
 }pidCommandType;
 
 typedef enum

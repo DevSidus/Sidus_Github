@@ -66,6 +66,9 @@
     <ClInclude Include="..\Drone_Flight_Controller\cMsgCoWorkerTx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Drone_Flight_Controller\cAltitudeFusion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Drone_Flight_Controller\cMsgR01.cpp">
@@ -99,6 +102,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Drone_Flight_Controller\cMsgUdpT01.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Drone_Flight_Controller\cAltitudeFusion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

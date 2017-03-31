@@ -22,7 +22,9 @@ namespace Ground_Station
                             pidCommandApplyAnglePitchRoll = 2,
                             pidCommandApplyRateYaw = 3,
                             pidCommandApplyAngleYaw = 4,
-                            pidCommandApplyAll = 5
-                        }
+                            pidCommandApplyAll = 5,
+                            pidCommandApplyVelAlt = 6,
+                            pidCommandApplyPosAlt = 7,
+    }
 
 }

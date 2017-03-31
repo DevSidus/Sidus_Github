@@ -78,6 +78,30 @@ struct structMsgR01
 	unsigned char pidAngleYawF2;
 	unsigned char pidAngleYawOutFilter;
 
+	short commandedYawAngle;
+
+	unsigned char pidVelAltKp;
+	unsigned char pidVelAltKi;
+	unsigned char pidVelAltKd;
+	short pidVelAltOutput;
+	short pidVelAltPresult;
+	short pidVelAltIresult;
+	short pidVelAltDresult;
+	unsigned char pidVelAltF1;
+	unsigned char pidVelAltF2;
+
+	unsigned char pidPosAltKp;
+	unsigned char pidPosAltKi;
+	unsigned char pidPosAltKd;
+	short pidPosAltOutput;
+	short pidPosAltPresult;
+	short pidPosAltIresult;
+	short pidPosAltDresult;
+	unsigned char pidPosAltF1;
+	unsigned char pidPosAltF2;
+	unsigned char pidPosAltOutFilter;
+
+
 	char endChar;
 };
 #pragma pack(pop)

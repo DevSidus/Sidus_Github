@@ -25,9 +25,17 @@ namespace Ground_Station
         public float R1_mpuPitch { get; set; }
         public float R1_mpuRoll { get; set; }
         //public float R1_baroTemp { get; set; }
-        //public float R1_baroAlt { get; set; }
+        public float R1_baroAlt { get; set; }
         //public float R1_compassHdg { get; set; }
         public double R1_batteryVoltageInBits { get; set; }
+
+        //Accelerometer Measurements without Gravity wrt world coordinates
+        public short R1_mpuAccWorldX { get; set; }
+        public short R1_mpuAccWorldY { get; set; }
+        public short R1_mpuAccWorldZ { get; set; }
+
+        public float R1_quadVelocityWorldZ { get; set; }
+        public float R1_quadPositionWorldZ { get; set; }
 
         //MsgR01 Members
         public byte R2_modeQuad { get; set; }
@@ -99,6 +107,29 @@ namespace Ground_Station
         public byte R2_pidAngleYawF2 { get; set; }
         public byte R2_pidAngleYawOutFilter { get; set; }
 
+        public short R2_commandedYawAngle { get; set; }
+
+
+        public byte R2_pidVelAltKp { get; set; }
+        public byte R2_pidVelAltKi { get; set; }
+        public byte R2_pidVelAltKd { get; set; }
+        public short R2_pidVelAltOutput { get; set; }
+        public short R2_pidVelAltPresult { get; set; }
+        public short R2_pidVelAltIresult { get; set; }
+        public short R2_pidVelAltDresult { get; set; }
+        public byte R2_pidVelAltF1 { get; set; }
+        public byte R2_pidVelAltF2 { get; set; }
+
+        public byte R2_pidPosAltKp { get; set; }
+        public byte R2_pidPosAltKi { get; set; }
+        public byte R2_pidPosAltKd { get; set; }
+        public short R2_pidPosAltOutput { get; set; }
+        public short R2_pidPosAltPresult { get; set; }
+        public short R2_pidPosAltIresult { get; set; }
+        public short R2_pidPosAltDresult { get; set; }
+        public byte R2_pidPosAltF1 { get; set; }
+        public byte R2_pidPosAltF2 { get; set; }
+        public byte R2_pidPosAltOutFilter { get; set; }
 
     }
 

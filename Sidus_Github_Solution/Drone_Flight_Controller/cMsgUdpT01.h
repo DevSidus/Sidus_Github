@@ -33,6 +33,20 @@ struct structMsgUdpT01
 	unsigned char pidAnglePitchRollOutFilter;
 	unsigned char pidAngleYawOutFilter;
 
+	unsigned char pidVelAltKp;
+	unsigned char pidVelAltKi;
+	unsigned char pidVelAltKd;
+	unsigned char pidVelAltF1;
+	unsigned char pidVelAltF2;
+
+	unsigned char pidPosAltKp;
+	unsigned char pidPosAltKi;
+	unsigned char pidPosAltKd;
+	unsigned char pidPosAltF1;
+	unsigned char pidPosAltF2;
+
+	unsigned char pidPosAltOutFilter;
+
 };
 #pragma pack(pop)
 

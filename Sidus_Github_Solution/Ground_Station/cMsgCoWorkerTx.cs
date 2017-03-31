@@ -26,9 +26,9 @@ namespace Ground_Station
         public short mpuAccZ { get; set; }
 
         //Accelerometer Measurements without Gravity
-        public short mpuAccRealX { get; set; }
-        public short mpuAccRealY { get; set; }
-        public short mpuAccRealZ { get; set; }
+        public short mpuAccWorldX { get; set; }
+        public short mpuAccWorldY { get; set; }
+        public short mpuAccWorldZ { get; set; }
 
         //Yaw Pitch Roll Measurements in Radians
         public float mpuYaw { get; set; }
@@ -42,11 +42,9 @@ namespace Ground_Station
 
         public short batteryVoltageInBits { get; set; }
 
-        /*Not needed for now, to be implemented if required
-        //Euler Angles(psi, theta, phi) in Radians
-        public float mpuEulerPsi;
-        public float mpuEulerTheta;
-        public float mpuEulerPhi;
-        */
+
+        public float quadVelocityWorldZ { get; set; }
+        public float quadPositionWorldZ { get; set; }
+        
     }
 }

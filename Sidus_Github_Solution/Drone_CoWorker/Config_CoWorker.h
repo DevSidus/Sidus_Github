@@ -4,19 +4,19 @@ This header file define all the configurable variables including constants, pin 
 */
 
 //Wifi, UDP Definitions
-//#define		WIFI_SSID	"khorfo_net"
-//#define		WIFI_PASS	"ahmet_ipek_12082004"
+#define		WIFI_SSID	"khorfo_net"
+#define		WIFI_PASS	"ahmet_ipek_12082004"
 //#define		WIFI_SSID	"AndroidAP"
 //#define		WIFI_PASS	"Yavuzzz."
 //#define		WIFI_SSID	"kulucka"
 //#define		WIFI_PASS	"girisim*"
-#define		WIFI_SSID	"AAGCA"
-#define		WIFI_PASS	"ahmet(12082004)"
+//#define		WIFI_SSID	"AAGCA"
+//#define		WIFI_PASS	"ahmet(12082004)"
 
 #define		UDP_PORT	8080
 //#define		DEFAULT_GROUND_STATION_IP	"192.168.43.84"
-//#define		DEFAULT_GROUND_STATION_IP	"192.168.1.9"
-#define		DEFAULT_GROUND_STATION_IP	"172.20.10.2"
+#define		DEFAULT_GROUND_STATION_IP	"192.168.1.4"
+//#define		DEFAULT_GROUND_STATION_IP	"172.20.10.2"
 
 //If your IMU is placed inverse, you should uncomment the below definition
 //#define		INVERSE_IMU
@@ -71,7 +71,8 @@ double mpuPitchAngle, mpuRollAngle, mpuYawAngle;
 uint32_t mpuLastDataTime, mpuFirstDataTime;
 bool mpuFirstDataCheck;
 
-float barometerTemp, barometerAlt;
+float barometerTemp = 0.0;
+double barometerAlt=0.0;
 int32_t barometerPress;
 
 float compassHdg;

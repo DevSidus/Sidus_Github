@@ -22,6 +22,7 @@
 #include "Local_MS5611.h"
 #include "Local_HMC5883L.h"
 #include "cUdpInterfaceClass.h"
+#include "cAltitudeFusion.h"
 
 //Global Class Definitions
 Agenda scheduler;
@@ -35,6 +36,8 @@ MPU6050 mpu;
 MS5611 barometer;
 HMC5883L compass;
 UdpInterfaceClass myUdp(WIFI_SSID, WIFI_PASS, UDP_PORT, DEFAULT_GROUND_STATION_IP);
+cAltitudeFusion altitudeFusionObj(900, 0, 0, 6, 1, 0.015);
+
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -55,14 +58,14 @@ void setup() {
 	initMPU();
 	initBarometer();
 	initCompass();
-
 	//Insert all tasks into scheduler
 	//scheduler.insert(test_task, 5000000);
 	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(processMpuTask, 9500);
 	scheduler.insert(setCoWorkerTxDataFields, 9500);
 	scheduler.insert(serialTransmit, 9500);
-	scheduler.insert(updateBarometerData, 19000);
+	scheduler.insert(updateBarometerData, 15000);
+	scheduler.insert(altitudeFusionProcess, 15000);
 	scheduler.insert(updateCompassData, 37000);
 	scheduler.insert(udpTransmit, 33000);
 	scheduler.insert(udpCheck, 25000);
@@ -119,14 +122,13 @@ bool initMPU()
 	devStatus = mpu.dmpInitialize();
 
 	// supply your own gyro offsets here, scaled for min sensitivity
-	/*
-	mpu.setXGyroOffset(153);
-	mpu.setYGyroOffset(-60);
-	mpu.setZGyroOffset(18);
-	mpu.setXAccelOffset(-2714);
-	mpu.setYAccelOffset(-714);
-	mpu.setZAccelOffset(1551);
-	*/
+	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
+	mpu.setXGyroOffset(171);
+	mpu.setYGyroOffset(55);
+	mpu.setZGyroOffset(13);
+	mpu.setXAccelOffset(-2068);
+	mpu.setYAccelOffset(-228);
+	mpu.setZAccelOffset(1067);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
@@ -273,13 +275,13 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuAccY = -aa.y;
 	MsgCoWorkerTx.mpuAccZ = -aa.z;
 
-	MsgCoWorkerTx.mpuAccRealX = aaReal.x;
-	MsgCoWorkerTx.mpuAccRealY = -aaReal.y;
-	MsgCoWorkerTx.mpuAccRealZ = -aaReal.z;
+	MsgCoWorkerTx.mpuAccWorldX = aaWorld.x;
+	MsgCoWorkerTx.mpuAccWorldY = -aaWorld.y;
+	MsgCoWorkerTx.mpuAccWorldZ = -aaWorld.z;
 
-	MsgCoWorkerTx.mpuYaw = -ypr[0];
-	MsgCoWorkerTx.mpuPitch = ypr[1];
-	MsgCoWorkerTx.mpuRoll = -ypr[2];
+	MsgCoWorkerTx.mpuYaw = -euler[0];
+	MsgCoWorkerTx.mpuPitch = euler[1];
+	MsgCoWorkerTx.mpuRoll = euler[2];
 #else
 	MsgCoWorkerTx.mpuGyroX = gg[0];
 	MsgCoWorkerTx.mpuGyroY = gg[1];
@@ -289,24 +291,15 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuAccY = aa.y;
 	MsgCoWorkerTx.mpuAccZ = aa.z;
 
-	MsgCoWorkerTx.mpuAccRealX = aaReal.x;
-	MsgCoWorkerTx.mpuAccRealY = aaReal.y;
-	MsgCoWorkerTx.mpuAccRealZ = aaReal.z;
-
-
-
-	//MsgCoWorkerTx.mpuYaw = ypr[0];
-	//MsgCoWorkerTx.mpuPitch = ypr[1];
-	//MsgCoWorkerTx.mpuRoll = ypr[2];	
-
+	MsgCoWorkerTx.mpuAccWorldX = aaWorld.x;
+	MsgCoWorkerTx.mpuAccWorldY = aaWorld.y;
+	MsgCoWorkerTx.mpuAccWorldZ = aaWorld.z;
+	
 	//We will use euler angles for PIDs instead of defined tilt angles
-	MsgCoWorkerTx.mpuYaw = euler[0];
-	MsgCoWorkerTx.mpuPitch = euler[1];
-	MsgCoWorkerTx.mpuRoll = euler[2];
+	MsgCoWorkerTx.mpuYaw = euler[0];    //MsgCoWorkerTx.mpuYaw = ypr[0];
+	MsgCoWorkerTx.mpuPitch = euler[1];  //MsgCoWorkerTx.mpuPitch = ypr[1];
+	MsgCoWorkerTx.mpuRoll = -euler[2];   //MsgCoWorkerTx.mpuRoll = ypr[2];
 #endif
-
-
-
 
 	MsgCoWorkerTx.baroTemp = barometerTemp;
 	MsgCoWorkerTx.baroAlt = barometerAlt;
@@ -314,6 +307,10 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.compassHdg = compassHdg;
 
 	MsgCoWorkerTx.batteryVoltageInBits = batteryVoltageInBits;
+
+	MsgCoWorkerTx.quadVelocityWorldZ = altitudeFusionObj.X[1][0];
+	MsgCoWorkerTx.quadPositionWorldZ = altitudeFusionObj.X[0][0];
+
 }
 
 void serialCheck()
@@ -460,4 +457,11 @@ void updateCompassData()
 void readBatteryVoltage()
 {
 	batteryVoltageInBits = analogRead(A0);
+}
+
+void altitudeFusionProcess()
+{
+	double acc = double(aaWorld.z) / 836.0;  // 1 m/s^2 ~= 836 bits
+	if(!isnan(barometerAlt) && !isnan(acc))
+		altitudeFusionObj.update(barometerAlt, acc);
 }

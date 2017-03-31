@@ -38,6 +38,21 @@ namespace Ground_Station
         public byte pidAnglePitchRollOutFilter { get; set; }
         public byte pidAngleYawOutFilter { get; set; }
 
+
+        public byte pidVelAltKp { get; set; }
+        public byte pidVelAltKi { get; set; }
+        public byte pidVelAltKd { get; set; }
+        public byte pidVelAltF1 { get; set; }
+        public byte pidVelAltF2 { get; set; }
+
+        public byte pidPosAltKp { get; set; }
+        public byte pidPosAltKi { get; set; }
+        public byte pidPosAltKd { get; set; }
+        public byte pidPosAltF1 { get; set; }
+        public byte pidPosAltF2 { get; set; }
+
+        public byte pidPosAltOutFilter { get; set; }
+
     }
     class cMsgUdpT01
     {
