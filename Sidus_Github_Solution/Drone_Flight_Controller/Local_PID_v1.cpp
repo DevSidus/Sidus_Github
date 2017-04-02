@@ -82,6 +82,9 @@ bool PID::Compute()
 	  //Calculate Proportional Term
 	  P_Result = Kp * errorSmooth;
 
+	  if (P_Result > outMax) P_Result = outMax;
+	  else if (P_Result < outMin) P_Result = outMin;
+
 	  //Calculate Integral Term
 	  if (inFlight)
 	  {

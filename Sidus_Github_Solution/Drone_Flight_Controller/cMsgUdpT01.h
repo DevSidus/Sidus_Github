@@ -5,6 +5,8 @@ using namespace std;
 #pragma pack(push, 1)
 struct structMsgUdpT01
 {
+	unsigned char autoModeCommand;
+
 	unsigned char pidCommandState;
 	unsigned char pidRatePitchRollKp;
 	unsigned char pidRatePitchRollKi;

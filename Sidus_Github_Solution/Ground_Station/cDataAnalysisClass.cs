@@ -12,6 +12,7 @@ namespace Ground_Station
     struct structData
     {
         //MsgCoWorkerTx Members
+        public byte R1_statusGS { get; set; }
         public short R1_mpuGyroX { get; set; }
         public short R1_mpuGyroY { get; set; }
         public short R1_mpuGyroZ { get; set; }
@@ -39,6 +40,7 @@ namespace Ground_Station
 
         //MsgR01 Members
         public byte R2_modeQuad { get; set; }
+        public byte R2_autoModeStatus { get; set; }
         public short R2_rxThrottle { get; set; }
         public short R2_rxPitch { get; set; }
         public short R2_rxRoll { get; set; }

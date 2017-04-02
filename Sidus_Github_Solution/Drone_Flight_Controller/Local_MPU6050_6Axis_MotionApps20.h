@@ -690,9 +690,14 @@ uint8_t MPU6050::dmpGetGravity(VectorFloat *v, Quaternion *q) {
 // uint8_t MPU6050::dmpGetEIS(long *data, const uint8_t* packet);
 
 uint8_t MPU6050::dmpGetEuler(float *data, Quaternion *q) {
-	data[0] = atan2(2 * q->x*q->y - 2 * q->w*q->z, 2 * q->w*q->w + 2 * q->x*q->x - 1);   // psi
-	data[1] = -asin(2 * q->x*q->z + 2 * q->w*q->y);                              // theta
-	data[2] = atan2(2 * q->y*q->z - 2 * q->w*q->x, 2 * q->w*q->w + 2 * q->z*q->z - 1);   // phi
+//	data[0] = atan2(2 * q->x*q->y - 2 * q->w*q->z, 2 * q->w*q->w + 2 * q->x*q->x - 1);   // psi
+//	data[1] = -asin(2 * q->x*q->z + 2 * q->w*q->y);                              // theta
+//	data[2] = atan2(2 * q->y*q->z - 2 * q->w*q->x, 2 * q->w*q->w + 2 * q->z*q->z - 1);   // phi
+
+	//Edit by aagca referenced with wiki quaternion to euler angles information
+	data[0] = atan2(2*(q->w*q->z + q->x*q->y), 1-2*(q->y*q->y + q->z*q->z));   // psi
+	data[1] = asin(2*(q->w*q->y - q->z*q->x));    // theta
+	data[2] = atan2(2*(q->w*q->x + q->y*q->z),1-2*(q->x*q->x+q->y*q->y));   // phi
 	return 0;
 }
 uint8_t MPU6050::dmpGetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity) {

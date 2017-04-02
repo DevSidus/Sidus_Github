@@ -7,7 +7,11 @@ cRxFilter::cRxFilter()
 	dataArray[0] = 0;
 	dataArray[1] = 0;
 	dataArray[2] = 0;
-
+	dataArray[3] = 0;
+	dataArray[4] = 0;
+	dataArray[5] = 0;
+	dataArray[6] = 0;
+	size = 7;
 	counter = 0;
 
 }
@@ -17,11 +21,25 @@ cRxFilter::~cRxFilter()
 {
 }
 
-unsigned short cRxFilter::process(unsigned short _newData)
+int cRxFilter::process(int _newData)
 {
 	dataArray[counter] = _newData;
-	counter = (counter + 1) % 3;
+	counter = (counter + 1) % size;
 
-	return max(min(dataArray[0], dataArray[1]), min(max(dataArray[0], dataArray[1]), dataArray[2]));
+	sort();
 
+	//return _newData;
+	return dataArray[((size-1)/2)];
+}
+
+void cRxFilter::sort() {
+	for (int i = 0; i<(size - 1); i++) {
+		for (int o = 0; o<(size - (i + 1)); o++) {
+			if (dataArray[o] > dataArray[o + 1]) {
+				int t = dataArray[o];
+				dataArray[o] = dataArray[o + 1];
+				dataArray[o + 1] = t;
+			}
+		}
+	}
 }

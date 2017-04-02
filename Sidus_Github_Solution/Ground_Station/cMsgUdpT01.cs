@@ -10,6 +10,7 @@ namespace Ground_Station
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     struct structMsgUdpT01
     {
+        public byte autoModeCommand { get; set; }
         public byte pidCommandState { get; set; }
         public byte pidRatePitchRollKp { get; set; }
         public byte pidRatePitchRollKi { get; set; }

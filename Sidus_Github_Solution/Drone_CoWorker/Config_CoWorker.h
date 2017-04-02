@@ -38,7 +38,8 @@ This header file define all the configurable variables including constants, pin 
 #define		PIN_MCU_SDA			12
 #define		PIN_MCU_SCL			14
 
-#define		MPU_DATATIME_THESHOLD		1000
+#define		MPU_DATATIME_THRESHOLD		500
+#define		GS_CON_LOST_THRESHOLD      500
 
 
 
@@ -79,6 +80,9 @@ float compassHdg;
 
 short batteryVoltageInBits;
 
+uint32_t udpLastMessageTime;
+
+
 
 //Enum Type Definitions, two mcu config files may be merged!
 typedef enum
@@ -95,3 +99,4 @@ unsigned char statusBaro;
 unsigned char statusMpu;
 unsigned char statusCompass;
 unsigned char statusUdp;
+unsigned char statusGS;

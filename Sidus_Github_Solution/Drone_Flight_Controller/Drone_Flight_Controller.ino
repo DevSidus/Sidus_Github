@@ -68,7 +68,6 @@ void setup() {
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 1000000);
 	scheduler.insert(mapRxDCtoCmd, 20000);
-	scheduler.insert(calculateCommandedYawAngle, 20000);
 	scheduler.insert(serialCheck, 9000);
 	scheduler.insert(processPID, 9000);
 	scheduler.insert(runMotors, 9000);
@@ -91,6 +90,7 @@ void loop() {
 void initVariables()
 {
 	modeQuad = modeQuadSAFE;
+	autoModeStatus = autoModeOFF;
 	statusRx = statusType_NotInitiated;
 
 	startTime_Thr = micros();
@@ -107,6 +107,8 @@ void initVariables()
 	pidVars.ratePitch.f1 = PID_RATE_PITCH_F1_DEFAULT;
 	pidVars.ratePitch.f2 = PID_RATE_PITCH_F2_DEFAULT;
 	pidVars.ratePitch.outputFilterConstant = PID_RATE_PITCH_OUT_FILT_CONSTANT;
+	pidVars.ratePitch.output = 0;
+	pidVars.ratePitch.outputCompensated = 0;
 
 	pidVars.anglePitch.Kp = PID_ANGLE_PITCH_KP;
 	pidVars.anglePitch.Ki = PID_ANGLE_PITCH_KI;
@@ -116,6 +118,8 @@ void initVariables()
 	pidVars.anglePitch.f1 = PID_ANGLE_PITCH_F1_DEFAULT;
 	pidVars.anglePitch.f2 = PID_ANGLE_PITCH_F2_DEFAULT;
 	pidVars.anglePitch.outputFilterConstant = PID_ANGLE_PITCH_OUT_FILT_CONSTANT;
+	pidVars.anglePitch.output = 0;
+	pidVars.anglePitch.outputCompensated = 0;
 
 	pidVars.rateRoll.Kp = PID_RATE_ROLL_KP;
 	pidVars.rateRoll.Ki = PID_RATE_ROLL_KI;
@@ -125,6 +129,8 @@ void initVariables()
 	pidVars.rateRoll.f1 = PID_RATE_ROLL_F1_DEFAULT;
 	pidVars.rateRoll.f2 = PID_RATE_ROLL_F2_DEFAULT;
 	pidVars.rateRoll.outputFilterConstant = PID_RATE_ROLL_OUT_FILT_CONSTANT;
+	pidVars.rateRoll.output = 0;
+	pidVars.rateRoll.outputCompensated = 0;
 
 	pidVars.angleRoll.Kp = PID_ANGLE_ROLL_KP;
 	pidVars.angleRoll.Ki = PID_ANGLE_ROLL_KI;
@@ -134,6 +140,8 @@ void initVariables()
 	pidVars.angleRoll.f1 = PID_ANGLE_ROLL_F1_DEFAULT;
 	pidVars.angleRoll.f2 = PID_ANGLE_ROLL_F2_DEFAULT;
 	pidVars.angleRoll.outputFilterConstant = PID_ANGLE_ROLL_OUT_FILT_CONSTANT;
+	pidVars.angleRoll.output = 0;
+	pidVars.angleRoll.outputCompensated = 0;
 
 	pidVars.rateYaw.Kp = PID_RATE_YAW_KP;
 	pidVars.rateYaw.Ki = PID_RATE_YAW_KI;
@@ -143,6 +151,8 @@ void initVariables()
 	pidVars.rateYaw.f1 = PID_RATE_YAW_F1_DEFAULT;
 	pidVars.rateYaw.f2 = PID_RATE_YAW_F2_DEFAULT;
 	pidVars.rateYaw.outputFilterConstant = PID_RATE_YAW_OUT_FILT_CONSTANT;
+	pidVars.rateYaw.output = 0;
+	pidVars.rateYaw.outputCompensated = 0;
 
 	pidVars.angleYaw.Kp = PID_ANGLE_YAW_KP;
 	pidVars.angleYaw.Ki = PID_ANGLE_YAW_KI;
@@ -152,6 +162,8 @@ void initVariables()
 	pidVars.angleYaw.f1 = PID_ANGLE_YAW_F1_DEFAULT;
 	pidVars.angleYaw.f2 = PID_ANGLE_YAW_F2_DEFAULT;
 	pidVars.angleYaw.outputFilterConstant = PID_ANGLE_YAW_OUT_FILT_CONSTANT;
+	pidVars.angleYaw.output = 0;
+	pidVars.angleYaw.outputCompensated = 0;
 
 
 	pidVars.velAlt.Kp = PID_VEL_ALT_KP;
@@ -162,6 +174,8 @@ void initVariables()
 	pidVars.velAlt.f1 = PID_VEL_ALT_F1_DEFAULT;
 	pidVars.velAlt.f2 = PID_VEL_ALT_F2_DEFAULT;
 	pidVars.velAlt.outputFilterConstant = PID_VEL_ALT_OUT_FILT_CONSTANT;
+	pidVars.velAlt.output = 0;
+	pidVars.velAlt.outputCompensated = 0;
 
 	pidVars.posAlt.Kp = PID_POS_ALT_KP;
 	pidVars.posAlt.Ki = PID_POS_ALT_KI;
@@ -171,6 +185,8 @@ void initVariables()
 	pidVars.posAlt.f1 = PID_POS_ALT_F1_DEFAULT;
 	pidVars.posAlt.f2 = PID_POS_ALT_F2_DEFAULT;
 	pidVars.posAlt.outputFilterConstant = PID_POS_ALT_OUT_FILT_CONSTANT;
+	pidVars.posAlt.output = 0;
+	pidVars.posAlt.outputCompensated = 0;
 }
 
 void initPIDtuning()
@@ -258,6 +274,7 @@ void isrTHR()
 	if (digitalRead(PIN_RX_THR) == HIGH)
 	{
 		startTime_Thr = micros();
+		
 	}
 	else
 	{
@@ -309,60 +326,11 @@ void test_task()
 	if (test_task_counter % 2 == 0)
 	{
 		digitalWrite(PIN_LED, HIGH);
-		
-		
-		//Serial.print("Mpu Pitch:");
-		//Serial.print(MsgT01.message.coWorkerTxPacket.mpuPitch*180/M_PI);
-		//Serial.print("   Compass Hdg:");
-		//Serial.print(MsgT01.message.coWorkerTxPacket.compassHdg*180/M_PI);
-		//Serial.print("   Baro Alt:");
-		//Serial.print(MsgT01.message.coWorkerTxPacket.baroAlt);
-		//Serial.print("   Baro Temp:");
-		//Serial.println(MsgT01.message.coWorkerTxPacket.baroTemp);
-		
-		
-		/*
-		Serial.print("Thr:");
-		Serial.print(dutyCycle_Thr);
-		Serial.print("   Pitch:");
-		Serial.print(dutyCycle_Pitch);
-		Serial.print("   Roll:");
-		Serial.print(dutyCycle_Roll);
-		Serial.print("   Yaw:");
-		Serial.println(dutyCycle_Yaw);
-		*/
-		/*
-		Serial.print("Thr:");
-		Serial.print(MsgR01.message.rxThrottle);
-		Serial.print("   Pitch");
-		Serial.println(MsgR01.message.rxPitch);
-		*/
-		
-		//Serial.print("Thr:");
-		//Serial.print(cmdThr);
-		//Serial.print("   Pitch:");
-		//Serial.print(cmdPitch);
-		//Serial.print("   Roll:");
-		//Serial.print(cmdRoll);
-		//Serial.print("   Yaw:");
-		//Serial.println(cmdYaw);
-		
-
-
 	}
 	else
 	{
 		digitalWrite(PIN_LED, LOW);
 	}
-	/*
-	if (abs(cmdThr - 1200) > 10)
-	{
-		Serial.println("HATA!!");
-	}
-	Serial.println("");
-	Serial.println(hataCount);
-	Serial.println(cmdThr);
-	*/
 }
 
 void serialCheck()
@@ -370,11 +338,10 @@ void serialCheck()
 	int numberofbytes = Serial.available();
 	if (numberofbytes > 0)
 	{
+
 		//If available number of bytes is less than our buffer size, normal case
 		if (numberofbytes <= sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT)
 		{
-			//long st_time = micros();
-
 			unsigned char buffer[sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT];
 			Serial.readBytes(buffer, numberofbytes);
 			serialParse.Push(buffer, numberofbytes);
@@ -384,7 +351,6 @@ void serialCheck()
 				updateMessageVariables();
 			}
 
-			//Serial.println(micros() - st_time);
 		}
 		//Else if buffer overflow, abnormal case
 		else
@@ -393,18 +359,20 @@ void serialCheck()
 			unsigned char buffer[sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT];
 			Serial.readBytes(buffer, sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT);
 		}
+
 	}
 }
 
 void serialTransmit()
 {
 	MsgR01.message.modeQuad = modeQuad;
+	MsgR01.message.autoModeStatus = autoModeStatus;
 	MsgR01.message.statusRx = statusRx;
 
-	MsgR01.message.rxThrottle = cmdThr;
-	MsgR01.message.rxPitch = cmdPitch;
-	MsgR01.message.rxRoll = cmdRoll;
-	MsgR01.message.rxYaw = cmdYaw;
+	MsgR01.message.rxThrottle = cmdRxThr;
+	MsgR01.message.rxPitch = cmdRxPitch;
+	MsgR01.message.rxRoll = cmdRxRoll;
+	MsgR01.message.rxYaw = cmdRxYaw;
 
 	MsgR01.message.pidRatePitchKp = pidVars.ratePitch.Kp / RESOLUTION_PID_RATE_KP;
 	MsgR01.message.pidRatePitchKi = pidVars.ratePitch.Ki / RESOLUTION_PID_RATE_KI;
@@ -469,7 +437,7 @@ void serialTransmit()
 	MsgR01.message.pidAngleYawF2 = pidVars.angleYaw.f2 / RESOLUTION_PID_F;
 	MsgR01.message.pidAngleYawOutFilter = pidVars.angleYaw.outputFilterConstant / RESOLUTION_PID_F;
 
-	MsgR01.message.commandedYawAngle = commandedYawAngle;
+	MsgR01.message.commandedYawAngle = cmdMotorYaw;
 
 
 	MsgR01.message.pidVelAltKp = pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
@@ -496,7 +464,6 @@ void serialTransmit()
 
 	MsgR01.getPacket();
 	Serial.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
-
 }
 
 void updateMessageVariables()
@@ -541,24 +508,36 @@ void updateMessageVariables()
 
 	batteryVoltageInVolts = float(MsgT01.message.coWorkerTxPacket.batteryVoltageInBits) * 0.00336 * (BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2;
 
+	if (modeQuad == modeQuadARMED && MsgT01.message.coWorkerTxPacket.statusGS == statusType_Normal)
+	{
+		autoModeStatus = MsgT01.message.udpT01RelayPacket.autoModeCommand;
+	}
+	else
+	{
+		autoModeStatus = autoModeOFF;
+	}
 } 
 
 void runMotors()
 {
 
-	if (modeQuad == modeQuadARMED)
+	if (modeQuad == modeQuadARMED)//modeQuad == modeQuadARMED
 	{
-		if (cmdThr > CMD_THR_ARM_START)
+		if (cmdMotorThr > CMD_THR_ARM_START)
 		{
 			calculate_pid_thr_batt_scale_factor();
-			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output * PID_THR_BATT_SCALE_FACTOR;
-			pidVars.rateRoll.outputCompensated = pidVars.rateRoll.output * PID_THR_BATT_SCALE_FACTOR;
-			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output * PID_THR_BATT_SCALE_FACTOR;
-			
-			pwmMicroSeconds(M_FL_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_FR_CHANNEL, cmdThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_BR_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_BL_CHANNEL, cmdThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
+
+			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output* PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateRoll.outputCompensated = pidVars.rateRoll.output*PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output*PID_THR_BATT_SCALE_FACTOR;
+			pidVars.velAlt.outputCompensated = pidVars.velAlt.output*PID_THR_BATT_SCALE_FACTOR;
+
+			pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
+
+		
 		}
 		else
 		{
@@ -570,10 +549,10 @@ void runMotors()
 	}
 	else if (modeQuad == modeQuadDirCmd)
 	{ 
-		pwmMicroSeconds(M_FL_CHANNEL, cmdThr);
-		pwmMicroSeconds(M_FR_CHANNEL, cmdThr);
-		pwmMicroSeconds(M_BR_CHANNEL, cmdThr);
-		pwmMicroSeconds(M_BL_CHANNEL, cmdThr);
+		pwmMicroSeconds(M_FL_CHANNEL, cmdRxThr);
+		pwmMicroSeconds(M_FR_CHANNEL, cmdRxThr);
+		pwmMicroSeconds(M_BR_CHANNEL, cmdRxThr);
+		pwmMicroSeconds(M_BL_CHANNEL, cmdRxThr);
 	}
 	else
 	{
@@ -582,6 +561,7 @@ void runMotors()
 		pwmMicroSeconds(M_BR_CHANNEL, CMD_THR_MIN);
 		pwmMicroSeconds(M_BL_CHANNEL, CMD_THR_MIN);
 	}
+
 }
 
 void checkRxStatus()
@@ -600,44 +580,49 @@ void mapRxDCtoCmd()
 {
 	if (statusRx == statusType_Normal)
 	{
-		cmdPitch = mapping(filterRxPitch.process(dutyCycle_Pitch), DC_PITCH_MIN, DC_PITCH_MAX, CMD_PITCH_MIN, CMD_PITCH_MAX);
-		cmdRoll = mapping(filterRxRoll.process(dutyCycle_Roll), DC_ROLL_MIN, DC_ROLL_MAX, CMD_ROLL_MIN, CMD_ROLL_MAX);
-		cmdYaw = mapping(filterRxYaw.process(dutyCycle_Yaw), DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
-		cmdThr = mapping(filterRxThr.process(dutyCycle_Thr), DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
-
+		cmdRxPitch = mapping(filterRxPitch.process(dutyCycle_Pitch), DC_PITCH_MIN, DC_PITCH_MAX, -CMD_RX_PITCH_ROLL_MAX, CMD_RX_PITCH_ROLL_MAX);  //filterRxRoll.process(dutyCycle_Pitch)
+		cmdRxRoll = mapping(filterRxRoll.process(dutyCycle_Roll), DC_ROLL_MIN, DC_ROLL_MAX, -CMD_RX_PITCH_ROLL_MAX, CMD_RX_PITCH_ROLL_MAX);
+		cmdRxYaw = mapping(filterRxYaw.process(dutyCycle_Yaw), DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
+		cmdRxThr = mapping(filterRxThr.process(dutyCycle_Thr), DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
 
 		//This below code segment is written to have smoother and much feasible commands for quadcopter
 		#ifdef COMMAND_CALIBRATION
-			double anglePitchRollCmd = atan(abs(cmdPitch/cmdRoll));
-			double cmdSF = cos(min(anglePitchRollCmd, M_PI_2 - anglePitchRollCmd));
+		if (abs(cmdRxRoll) > 1)
+		{
+			cmdRxPitchRollAngle = atan(abs(cmdRxPitch / cmdRxRoll));
+			cmdRxPitchRollSF = cos(min(cmdRxPitchRollAngle, M_PI_2 - cmdRxPitchRollAngle));
+			
 
-			double xFactor = sin(CMD_MAX_ATTITUDE_IN_RADIANS);
+			cmdRxPitchRollXfactor = sin(CMD_MAX_ATTITUDE_IN_RADIANS);
 
-			double cmdRollCalibratedInRadians = cmdRoll / CMD_ROLL_MAX * cmdSF * xFactor;
-			double cmdPitchCalibratedInRadians = cmdPitch / CMD_PITCH_MAX * cmdSF * xFactor;
+			cmdRxRollCalibratedInRad = cmdRxRoll / CMD_RX_PITCH_ROLL_MAX * cmdRxPitchRollSF * cmdRxPitchRollXfactor;
+			cmdRxPitchCalibratedInRad = cmdRxPitch / CMD_RX_PITCH_ROLL_MAX * cmdRxPitchRollSF * cmdRxPitchRollXfactor;
+			
+			cmdRxRollCalibratedInRad = asin(cmdRxRollCalibratedInRad);
+			cmdRxPitchCalibratedInRad = asin(cmdRxPitchCalibratedInRad / cos(cmdRxRollCalibratedInRad));
 
-			cmdRollCalibratedInRadians = abs(asin(cmdRollCalibratedInRadians));
-			cmdPitchCalibratedInRadians = abs(asin(cmdPitchCalibratedInRadians / cos(cmdRollCalibratedInRadians)));
 
-			if (cmdPitch >= 0)
-				cmdPitch = cmdPitchCalibratedInRadians * 180.0 / M_PI;
+			if (cmdRxPitch >= 0)
+				cmdRxPitchCalibrated = abs(cmdRxPitchCalibratedInRad) * 180.0 / M_PI;
 			else
-				cmdPitch = -cmdPitchCalibratedInRadians * 180.0 / M_PI;
+				cmdRxPitchCalibrated = -abs(cmdRxPitchCalibratedInRad) * 180.0 / M_PI;
 
-			if (cmdRoll >= 0)
-				cmdRoll = cmdRollCalibratedInRadians * 180.0 / M_PI;
+			if (cmdRxRoll >= 0)
+				cmdRxPitchCalibrated = abs(cmdRxRollCalibratedInRad) * 180.0 / M_PI;
 			else
-				cmdRoll = -cmdRollCalibratedInRadians * 180.0 / M_PI;
+				cmdRxPitchCalibrated = -abs(cmdRxRollCalibratedInRad) * 180.0 / M_PI;
+
+		}
 		#endif
 
 
 	}
 	else
 	{
-		cmdPitch = 0;
-		cmdRoll = 0;
-		cmdYaw = 0;
-		cmdThr = CMD_THR_MIN;
+		cmdRxPitch = 0;
+		cmdRxRoll = 0;
+		cmdRxYaw = 0;
+		cmdRxThr = CMD_THR_MIN;
 	}
 }
 
@@ -646,35 +631,31 @@ void checkMode()
 	if (statusRx != statusType_Normal)
 	{
 		modeQuad = modeQuadSAFE;
-		cmdPitch = 0;
-		cmdRoll = 0;
-		cmdYaw = 0;
-		cmdThr = CMD_THR_MIN;
 		//Serial.println("QUAD is in SAFE Mode Check Rx!");
 		return;
 	}
 
-	if (cmdThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdYaw<CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRoll > CMD_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP && cmdPitch>CMD_PITCH_MAX - CMD_MODE_CHANGE_ANGLE_GAP)
+	if (cmdRxThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdRxYaw<CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxRoll > CMD_RX_PITCH_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP && cmdRxPitch>CMD_RX_PITCH_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP)
 	{
 		modeQuad = modeQuadARMED;
 		//Serial.println("QUAD is ARMED");
 	}
-	else if (cmdThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRoll < CMD_ROLL_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdPitch>CMD_PITCH_MAX - CMD_MODE_CHANGE_ANGLE_GAP)
+	else if (cmdRxThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdRxYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxRoll < -CMD_RX_PITCH_ROLL_MAX + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxPitch>CMD_RX_PITCH_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP)
 	{
 		modeQuad = modeQuadSAFE;
 		//Serial.println("QUAD is in SAFE Mode");
 
 	}
-	else if (cmdThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRoll < CMD_ROLL_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdPitch<CMD_PITCH_MIN + CMD_MODE_CHANGE_ANGLE_GAP)
+	else if (cmdRxThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdRxYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxRoll < -CMD_RX_PITCH_ROLL_MAX + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxPitch<-CMD_RX_PITCH_ROLL_MAX + CMD_MODE_CHANGE_ANGLE_GAP)
 	{
 		//Left for spare usage
 	}
-	else if (cmdThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRoll>CMD_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP && cmdPitch<CMD_PITCH_MIN + CMD_MODE_CHANGE_ANGLE_GAP)
+	else if (cmdRxThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdRxYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxRoll>CMD_RX_PITCH_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP && cmdRxPitch<-CMD_RX_PITCH_ROLL_MAX + CMD_MODE_CHANGE_ANGLE_GAP)
 	{
 		modeQuad = modeQuadDirCmd;
 	}
 
-	if (modeQuad == modeQuadARMED && cmdThr > CMD_THR_TAKEOFF)
+	if (modeQuad == modeQuadARMED && cmdMotorThr > CMD_THR_TAKEOFF)
 	{
 		pidRatePitch.SetFlightMode(true);
 		pidRateRoll.SetFlightMode(true);
@@ -682,6 +663,8 @@ void checkMode()
 		pidAnglePitch.SetFlightMode(true);
 		pidAngleRoll.SetFlightMode(true);
 		pidAngleYaw.SetFlightMode(true);
+		pidVelAlt.SetFlightMode(true);
+		pidPosAlt.SetFlightMode(true);
 	}
 	else
 	{
@@ -691,23 +674,27 @@ void checkMode()
 		pidAnglePitch.SetFlightMode(false);
 		pidAngleRoll.SetFlightMode(false);
 		pidAngleYaw.SetFlightMode(false);
+		pidVelAlt.SetFlightMode(false);
+		pidPosAlt.SetFlightMode(false);
 	}
 }
 
 void processPID()
 {
+	handleModeTransition();
+
 	pidVars.anglePitch.d_bypass = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  // negative is important
-	pidVars.anglePitch.setpoint = cmdPitch;
+	pidVars.anglePitch.setpoint = cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI;  //no need to change LSB to deg/sec
 	pidAnglePitch.Compute();
 	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
-	
+
 	pidVars.ratePitch.setpoint = pidVars.anglePitch.outputFiltered;
 	pidVars.ratePitch.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec, negative is important
 	pidRatePitch.Compute();
 
 	pidVars.angleRoll.d_bypass = MsgT01.message.coWorkerTxPacket.mpuGyroX; 
-	pidVars.angleRoll.setpoint = cmdRoll;
+	pidVars.angleRoll.setpoint = cmdMotorRoll;
 	pidVars.angleRoll.sensedVal = MsgT01.message.coWorkerTxPacket.mpuRoll * 180 / M_PI;  //no need to change LSB to deg/sec
 	pidAngleRoll.Compute();
 	pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
@@ -717,7 +704,7 @@ void processPID()
 	pidRateRoll.Compute();
 
 	pidVars.angleYaw.d_bypass = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;
-	pidVars.angleYaw.setpoint = commandedYawAngle;
+	pidVars.angleYaw.setpoint = cmdMotorYaw;
 	pidVars.angleYaw.sensedVal = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;  //no need to change LSB to deg/sec
 	pidAngleYaw.Compute();
 	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);
@@ -725,38 +712,62 @@ void processPID()
 	pidVars.rateYaw.setpoint = pidVars.angleYaw.outputFiltered;
 	pidVars.rateYaw.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;  //no need to change LSB to deg/sec, //negative is added
 	pidRateYaw.Compute();
-	
 
-	//pidVars.posAlt.d_bypass = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // meters/second
-	//pidVars.posAlt.setpoint = ;
-	//pidVars.posAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;  // barometric altitude in meters
-	//pidPosAlt.Compute();
-	//pidVars.posAlt.outputFiltered = basicFilter(pidVars.posAlt.output, pidVars.posAlt.outputFilterConstant, pidVars.posAlt.outputFiltered);
+	pidVars.posAlt.d_bypass = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // cm/second
+	pidVars.posAlt.setpoint = commandedAltitude;
+	pidVars.posAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;  // barometric altitude in meters
+	pidPosAlt.Compute();
+	pidVars.posAlt.outputFiltered = basicFilter(pidVars.posAlt.output, pidVars.posAlt.outputFilterConstant, pidVars.posAlt.outputFiltered);
 
-	pidVars.velAlt.d_bypass = MsgT01.message.coWorkerTxPacket.mpuAccWorldZ / 836.0;  // meters/second^2
-	pidVars.velAlt.setpoint = 0; // pidVars.posAlt.outputFiltered;   //this line will change after test of alt vel PID
+	pidVars.velAlt.d_bypass = (MsgT01.message.coWorkerTxPacket.mpuAccWorldZ) / 8.36;  // cm/second^2
+	pidVars.velAlt.setpoint = pidVars.posAlt.outputFiltered; // pidVars.posAlt.outputFiltered;   //this line will change after test of alt vel PID
 	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  //no need to change LSB to deg/sec
 	pidVelAlt.Compute();
 
 
 
+	//if (MsgT01.message.udpT01RelayPacket.autoModeCommand == autoModeAltitude)//autoModeStatus == autoModeAltitude
+	//{
 
-	//Serial.print(cmdPitch);
-	//Serial.print("  P:");
-	//Serial.print(pidRatePitch.Get_P_Result());
-	//Serial.print("  I:");
-	//Serial.print(pidRatePitch.Get_I_Result());
-	//Serial.print("  D:");
-	//Serial.print(pidRatePitch.Get_D_Result());
-	//Serial.print("  ");
-	//Serial.println(pidVars.ratePitch.output);
-	
+	//	pidVars.posAlt.d_bypass = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // cm/second
+	//	pidVars.posAlt.setpoint = commandedAltitude;
+	//	pidVars.posAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;  // barometric altitude in meters
+	//	pidPosAlt.Compute();
+	//	pidVars.posAlt.outputFiltered = basicFilter(pidVars.posAlt.output, pidVars.posAlt.outputFilterConstant, pidVars.posAlt.outputFiltered);
+	//	
+	//	pidVars.velAlt.d_bypass = (MsgT01.message.coWorkerTxPacket.mpuAccWorldZ) / 8.36;  // cm/second^2
+	//	pidVars.velAlt.setpoint = pidVars.posAlt.outputFiltered; // pidVars.posAlt.outputFiltered;   //this line will change after test of alt vel PID
+	//	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  //no need to change LSB to deg/sec
+	//	pidVelAlt.Compute();
+	//}
+	//else
+	//{
+
+
+	//	commandedAltitude = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;
+
+	//	if (pidVars.velAlt.output != 0)
+	//	{
+	//		if (pidVars.velAlt.output > 2)
+	//		{
+	//			pidVars.velAlt.output -= 0.04;
+	//		}
+	//		else if (pidVars.velAlt.output < -2)
+	//		{
+	//			pidVars.velAlt.output += 0.04;
+	//		}
+	//		else
+	//		{
+	//			pidVars.velAlt.output = 0;
+	//		}
+	//	}
+	//}
 
 }
 
 void playMelody()
 {
-	if (modeQuad == modeQuadARMED && cmdThr<=CMD_THR_ARM_START)
+	if (modeQuad == modeQuadARMED && cmdMotorThr<=CMD_THR_ARM_START)
 		buzzer.play(buzzerMelodyArmWarning);
 	else
 		buzzer.play(buzzerMelodyNoTone);	
@@ -776,8 +787,10 @@ float basicFilter(float data, float filterConstant, float filteredData)
 
 void calculate_pid_thr_batt_scale_factor() //this function will be modified to include battery voltage compensation also
 {
-	if (cmdThr <= CMD_THR_MAX && cmdThr >= CMD_THR_MIN)
-		PID_THR_BATT_SCALE_FACTOR = (CMD_THR_MAX - cmdThr) / (CMD_THR_MAX - CMD_THR_MIN) + 0.2;
+	float total_thr_cmd = cmdMotorThr + pidVars.velAlt.outputCompensated;   // compensated output or normal output, will be discussed later
+
+	if (total_thr_cmd <= CMD_THR_MAX && total_thr_cmd >= CMD_THR_MIN)
+		PID_THR_BATT_SCALE_FACTOR = (CMD_THR_MAX - total_thr_cmd) / (CMD_THR_MAX - CMD_THR_MIN) + 0.2;
 	else
 		PID_THR_BATT_SCALE_FACTOR = 0.4;
 
@@ -862,27 +875,6 @@ void applyPidCommandAngleYaw()
 	pidAngleYaw.SetF2(pidVars.angleYaw.f2);
 }
 
-void calculateCommandedYawAngle()
-{
-	if (modeQuad == modeQuadARMED && cmdThr > CMD_THR_ARM_START)
-	{
-		if (abs(cmdYaw) > 4)
-		{
-			commandedYawAngle += cmdYaw / 30.0;
-
-			if (commandedYawAngle > 180)
-				commandedYawAngle -= 360;
-			else if (commandedYawAngle <= -180)
-				commandedYawAngle += 360;
-		}
-	}
-	else
-	{
-		commandedYawAngle = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;
-	}
-}
-
-
 void applyPidCommandVelAlt()
 {
 	//Set Altitude Velocity PID parameters
@@ -908,4 +900,28 @@ void applyPidCommandPosAlt()
 	pidPosAlt.SetTunings(pidVars.posAlt.Kp, pidVars.posAlt.Ki, pidVars.posAlt.Kd);
 	pidPosAlt.SetF1(pidVars.posAlt.f1);
 	pidPosAlt.SetF2(pidVars.posAlt.f2);
+}
+
+void handleModeTransition()
+{
+	cmdMotorPitch = cmdRxPitchCalibrated;
+	cmdMotorRoll = cmdRxRollCalibrated;
+	cmdMotorThr = cmdRxThr;
+
+	if (modeQuad == modeQuadARMED)
+	{
+		if (abs(cmdRxYaw) > 6)
+		{
+			cmdMotorYaw += cmdRxYaw / 40.0;
+
+			if (cmdMotorYaw > 180)
+				cmdMotorYaw -= 360;
+			else if (cmdMotorYaw <= -180)
+				cmdMotorYaw += 360;
+		}
+	}
+	else
+	{
+		cmdMotorYaw = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;
+	}
 }

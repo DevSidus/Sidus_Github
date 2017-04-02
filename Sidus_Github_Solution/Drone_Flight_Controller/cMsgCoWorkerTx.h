@@ -9,6 +9,7 @@ struct structMsgCoWorkerTx
 	unsigned char statusBaro;
 	unsigned char statusCompass;
 	unsigned char statusUdp;
+	unsigned char statusGS;
 
 	//Gyro Measurements
 	short mpuGyroX;

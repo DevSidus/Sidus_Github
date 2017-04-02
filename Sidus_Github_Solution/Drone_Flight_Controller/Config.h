@@ -43,13 +43,10 @@ This header file define all the configurable variables including constants, pin 
 
 #define		CMD_ATTITUDE_MAX 
 
-#define		CMD_PITCH_MIN	-45.0
-#define		CMD_PITCH_MAX	+45.0
+#define		CMD_RX_PITCH_ROLL_MAX	+45.0
 #define		DC_PITCH_MIN	1100.0
 #define		DC_PITCH_MAX	1900.0
 
-#define		CMD_ROLL_MIN	-45.0
-#define		CMD_ROLL_MAX	+45.0
 #define		DC_ROLL_MIN		1100.0
 #define		DC_ROLL_MAX		1900.0
 
@@ -68,7 +65,7 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_THR_ARM_START	CMD_THR_MIN+(CMD_THR_MAX-CMD_THR_MIN)/10
 
 #define		CMD_MODE_CHANGE_THR_GAP		50
-#define		CMD_MODE_CHANGE_ANGLE_GAP	10
+#define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
 
 #define		PID_RATE_PITCH_KP			0.85
@@ -136,11 +133,11 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_VEL_ALT_F2_DEFAULT	0.3
 #define		PID_VEL_ALT_OUT_FILT_CONSTANT		0
 
-#define		PID_POS_ALT_KP			25.5
+#define		PID_POS_ALT_KP			0.5
 #define		PID_POS_ALT_KI			0.0
-#define		PID_POS_ALT_KD			0.255
-#define		PID_POS_ALT_OUTMIN		-10
-#define		PID_POS_ALT_OUTMAX		10
+#define		PID_POS_ALT_KD			0.01
+#define		PID_POS_ALT_OUTMIN		-250
+#define		PID_POS_ALT_OUTMAX		250
 #define		PID_POS_ALT_F1_DEFAULT	0.0
 #define		PID_POS_ALT_F2_DEFAULT	0.9
 #define		PID_POS_ALT_OUT_FILT_CONSTANT	0.3
@@ -159,12 +156,12 @@ This header file define all the configurable variables including constants, pin 
 #define		RESOLUTION_PID_ANGLE_KD			0.001
 #define		RESOLUTION_PID_F			0.01
 
-#define		RESOLUTION_PID_VEL_KP			1.0
-#define		RESOLUTION_PID_VEL_KI			0.1
-#define		RESOLUTION_PID_VEL_KD			0.1
-#define		RESOLUTION_PID_POS_KP			0.01
-#define		RESOLUTION_PID_POS_KI			0.001
-#define		RESOLUTION_PID_POS_KD			0.0001
+#define		RESOLUTION_PID_VEL_KP			0.01
+#define		RESOLUTION_PID_VEL_KI			0.001
+#define		RESOLUTION_PID_VEL_KD			0.001
+#define		RESOLUTION_PID_POS_KP			1
+#define		RESOLUTION_PID_POS_KI			0.1
+#define		RESOLUTION_PID_POS_KD			0.01
 
 
 #define		SERIAL_COM_SPEED			921600
@@ -173,9 +170,9 @@ This header file define all the configurable variables including constants, pin 
 #define     BAT_VOLT_DIV_R1				51.0
 #define		BAT_VOLT_DIV_R2				10.0
 
-float		PID_THR_BATT_SCALE_FACTOR = 1.0;
-float		commandedYawAngle = 0;
+double		PID_THR_BATT_SCALE_FACTOR = 1.0;
 float		batteryVoltageInVolts;
+double		commandedAltitude = 0;
 
 struct structPID
 {
@@ -229,6 +226,12 @@ typedef enum
 
 typedef enum
 {
+	autoModeOFF = 0,
+	autoModeAltitude = 1,
+}autoModeType;
+
+typedef enum
+{
 	pidCommandNoAction = 0,
 	pidCommandApplyRatePitchRoll = 1,
 	pidCommandApplyAnglePitchRoll = 2,
@@ -262,8 +265,14 @@ volatile unsigned short dutyCycle_Yaw;
 
 volatile uint32_t rxLastDataTime;
 
-float cmdPitch = 0, cmdRoll = 0, cmdThr = 0, cmdYaw = 0;
+double cmdRxPitch = 0, cmdRxRoll = 0, cmdRxThr = 0, cmdRxYaw = 0;
+double cmdRxPitchCalibrated = 0, cmdRxRollCalibrated = 0;
+double cmdRxPitchCalibratedInRad = 0, cmdRxRollCalibratedInRad = 0;
+double cmdRxPitchRollAngle=0, cmdRxPitchRollSF=0, cmdRxPitchRollXfactor;
+
+double cmdMotorPitch = 0, cmdMotorRoll = 0, cmdMotorThr = CMD_THR_MIN, cmdMotorYaw = 0;
 
 //Status related declarations
 unsigned char modeQuad;
+unsigned char autoModeStatus;
 unsigned char statusRx;

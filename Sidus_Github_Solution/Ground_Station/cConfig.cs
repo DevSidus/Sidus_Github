@@ -27,4 +27,11 @@ namespace Ground_Station
                             pidCommandApplyPosAlt = 7,
     }
 
+
+    enum autoModeType
+    {
+        autoModeOFF = 0,
+        autoModeAltitude = 1,
+    }
+
 }

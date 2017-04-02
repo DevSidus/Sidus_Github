@@ -36,7 +36,7 @@ MPU6050 mpu;
 MS5611 barometer;
 HMC5883L compass;
 UdpInterfaceClass myUdp(WIFI_SSID, WIFI_PASS, UDP_PORT, DEFAULT_GROUND_STATION_IP);
-cAltitudeFusion altitudeFusionObj(900, 0, 0, 6, 1, 0.015);
+cAltitudeFusion altitudeFusionObj(900, 0, 0, 0.5, 0.1, 0.015);
 
 
 // the setup function runs once when you press reset or power the board
@@ -69,7 +69,7 @@ void setup() {
 	scheduler.insert(updateCompassData, 37000);
 	scheduler.insert(udpTransmit, 33000);
 	scheduler.insert(udpCheck, 25000);
-	scheduler.insert(checkMpuHealth, 1000000);
+	scheduler.insert(checkMpuGSHealth, 500000);
 	scheduler.insert(checkBaroDataReliability, 1000000);
 	scheduler.insert(readBatteryVoltage, 770000);
 
@@ -91,6 +91,7 @@ void initVariables()
 	statusMpu = statusType_NotInitiated;
 	statusCompass = statusType_NotInitiated;
 	statusUdp = statusType_NotInitiated;
+	statusGS = statusType_NotInitiated;
 	
 }
 
@@ -127,7 +128,7 @@ bool initMPU()
 	mpu.setYGyroOffset(55);
 	mpu.setZGyroOffset(13);
 	mpu.setXAccelOffset(-2068);
-	mpu.setYAccelOffset(-228);
+	mpu.setYAccelOffset(-250);
 	mpu.setZAccelOffset(1067);
 
 	// make sure it worked (returns 0 if so)
@@ -244,10 +245,9 @@ void processMpuTask()
 
 	}
 }
-
-void checkMpuHealth()
+void checkMpuGSHealth()
 {
-	if (millis() - mpuLastDataTime> MPU_DATATIME_THESHOLD)
+	if (millis() - mpuLastDataTime> MPU_DATATIME_THRESHOLD)
 	{
 		statusMpu = statusType_Fail;
 		//try to restart MPU
@@ -257,6 +257,16 @@ void checkMpuHealth()
 	{
 		statusMpu = statusType_Normal;
 	}
+
+
+	if (millis() - udpLastMessageTime > GS_CON_LOST_THRESHOLD)
+	{
+		statusGS = statusType_Fail;
+	}
+	else
+	{
+		statusGS = statusType_Normal;
+	}
 }
 
 void setCoWorkerTxDataFields()
@@ -264,6 +274,7 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.statusMpu = statusMpu;
 	MsgCoWorkerTx.statusBaro = statusBaro;
 	MsgCoWorkerTx.statusCompass = statusCompass;
+	MsgCoWorkerTx.statusGS = statusGS;
 
 
 #ifdef INVERSE_IMU
@@ -280,8 +291,13 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuAccWorldZ = -aaWorld.z;
 
 	MsgCoWorkerTx.mpuYaw = -euler[0];
-	MsgCoWorkerTx.mpuPitch = euler[1];
-	MsgCoWorkerTx.mpuRoll = euler[2];
+	MsgCoWorkerTx.mpuPitch = -euler[1];
+	float tempRoll = euler[2] + M_PI;
+	if (tempRoll > M_PI)
+		tempRoll -= M_PI * 2;
+	else if (tempRoll <= -M_PI)
+		tempRoll += M_PI * 2;
+	MsgCoWorkerTx.mpuRoll = tempRoll;
 #else
 	MsgCoWorkerTx.mpuGyroX = gg[0];
 	MsgCoWorkerTx.mpuGyroY = gg[1];
@@ -296,9 +312,9 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuAccWorldZ = aaWorld.z;
 	
 	//We will use euler angles for PIDs instead of defined tilt angles
-	MsgCoWorkerTx.mpuYaw = euler[0];    //MsgCoWorkerTx.mpuYaw = ypr[0];
-	MsgCoWorkerTx.mpuPitch = euler[1];  //MsgCoWorkerTx.mpuPitch = ypr[1];
-	MsgCoWorkerTx.mpuRoll = -euler[2];   //MsgCoWorkerTx.mpuRoll = ypr[2];
+	MsgCoWorkerTx.mpuYaw = -euler[0];    //MsgCoWorkerTx.mpuYaw = ypr[0];
+	MsgCoWorkerTx.mpuPitch = -euler[1];  //MsgCoWorkerTx.mpuPitch = ypr[1];
+	MsgCoWorkerTx.mpuRoll = euler[2];   //MsgCoWorkerTx.mpuRoll = ypr[2];
 #endif
 
 	MsgCoWorkerTx.baroTemp = barometerTemp;
@@ -308,7 +324,7 @@ void setCoWorkerTxDataFields()
 
 	MsgCoWorkerTx.batteryVoltageInBits = batteryVoltageInBits;
 
-	MsgCoWorkerTx.quadVelocityWorldZ = altitudeFusionObj.X[1][0];
+	MsgCoWorkerTx.quadVelocityWorldZ = altitudeFusionObj.X[1][0]*100;  // cm/s
 	MsgCoWorkerTx.quadPositionWorldZ = altitudeFusionObj.X[0][0];
 
 }
@@ -371,6 +387,7 @@ void udpCheck()
 	{
 		myUdp.udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
 		MsgUdpT01.setPacket();
+		udpLastMessageTime = millis();
 	}
 
 }

@@ -4,11 +4,13 @@
 class cRxFilter
 {
 private:
-	unsigned short dataArray[3];
-	short counter;
+	int size=7;
+	int dataArray[7];
+	int counter;
+	void sort();
 
 public:
-	unsigned short process(unsigned short);
+	int process(int);
 	cRxFilter();
 	~cRxFilter();
 };

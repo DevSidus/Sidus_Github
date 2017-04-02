@@ -9,6 +9,7 @@ struct structMsgR01
 	char startChar2;
 
 	unsigned char modeQuad;
+	unsigned char autoModeStatus;
 	unsigned char statusRx;
 	short rxThrottle;
 	short rxPitch;

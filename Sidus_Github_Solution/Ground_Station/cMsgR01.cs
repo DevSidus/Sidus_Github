@@ -13,6 +13,7 @@ namespace Ground_Station
         public char startChar1 { get; set; }
         public char startChar2 { get; set; }
         public byte modeQuad { get; set; }
+        public byte autoModeStatus { get; set; }
         public byte statusRx { get; set; }
         public short rxThrottle { get; set; }
         public short rxPitch { get; set; }

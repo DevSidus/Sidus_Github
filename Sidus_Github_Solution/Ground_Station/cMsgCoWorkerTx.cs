@@ -14,6 +14,7 @@ namespace Ground_Station
         public byte statusBaro { get; set; }
         public byte statusCompass { get; set; }
         public byte statusUdp { get; set; }
+        public byte statusGS { get; set; }
 
         //Gyro Measurements
         public short mpuGyroX { get; set; }

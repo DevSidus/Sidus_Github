@@ -77,7 +77,7 @@ namespace Ground_Station
                 
 
                 counter++;
-                System.Threading.Thread.Sleep(10);
+                System.Threading.Thread.Sleep(8);
             }
         }
 
@@ -110,6 +110,8 @@ namespace Ground_Station
             tb_pid_rate_pitch_roll_kp_Scroll(this, e);
             tb_pid_angle_yaw_kp_Scroll(this, e);
             tb_pid_rate_yaw_kp_Scroll(this, e);
+            tb_pid_vel_alt_kp_Scroll(this, e);
+            tb_pid_pos_alt_kp_Scroll(this, e);
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
         }
         
@@ -138,9 +140,11 @@ namespace Ground_Station
         private void updateMessagesForDataAnalysis()
         {
             MsgUdpR01.setPacket();
-            
+
             //DataAnalysisObj.data.R1_baroTemp = MsgUdpR01.message.coWorkerTxPacket.baroTemp;
             //DataAnalysisObj.data.R1_compassHdg = MsgUdpR01.message.coWorkerTxPacket.compassHdg;
+
+            DataAnalysisObj.data.R1_statusGS = MsgUdpR01.message.coWorkerTxPacket.statusGS;
             DataAnalysisObj.data.R1_mpuGyroX = MsgUdpR01.message.coWorkerTxPacket.mpuGyroX;
             DataAnalysisObj.data.R1_mpuGyroY = MsgUdpR01.message.coWorkerTxPacket.mpuGyroY;
             DataAnalysisObj.data.R1_mpuGyroZ = MsgUdpR01.message.coWorkerTxPacket.mpuGyroZ;
@@ -157,6 +161,7 @@ namespace Ground_Station
             DataAnalysisObj.data.R1_quadPositionWorldZ = (float)MsgUdpR01.message.coWorkerTxPacket.quadPositionWorldZ-897;
 
             DataAnalysisObj.data.R2_modeQuad = MsgUdpR01.message.serialR01RelayPacket.modeQuad;
+            DataAnalysisObj.data.R2_autoModeStatus = MsgUdpR01.message.serialR01RelayPacket.autoModeStatus;
             DataAnalysisObj.data.R2_rxThrottle = MsgUdpR01.message.serialR01RelayPacket.rxThrottle;
             DataAnalysisObj.data.R2_rxPitch = MsgUdpR01.message.serialR01RelayPacket.rxPitch;
             DataAnalysisObj.data.R2_rxRoll = MsgUdpR01.message.serialR01RelayPacket.rxRoll;
@@ -788,6 +793,18 @@ namespace Ground_Station
             MsgUdpT01.message.pidPosAltF1 = Convert.ToByte(tb_pid_pos_alt_f1.Value);
             MsgUdpT01.message.pidPosAltF2 = Convert.ToByte(tb_pid_pos_alt_f2.Value);
             MsgUdpT01.message.pidPosAltOutFilter = Convert.ToByte(tb_pid_pos_alt_out_filter.Value);
+        }
+
+        private void cb_AltitudeHold_CheckedChanged(object sender, EventArgs e)
+        {
+            if(cb_AltitudeHold.Checked)
+            {
+                MsgUdpT01.message.autoModeCommand = Convert.ToByte(autoModeType.autoModeAltitude);
+            }
+            else
+            {
+                MsgUdpT01.message.autoModeCommand = Convert.ToByte(autoModeType.autoModeOFF);
+            }
         }
     }
 }
