@@ -8,10 +8,11 @@ private:
 	int dataArray[7];
 	int counter;
 	void sort();
+	int maxVal;
 
 public:
 	int process(int);
-	cRxFilter();
+	cRxFilter(int);
 	~cRxFilter();
 };
 

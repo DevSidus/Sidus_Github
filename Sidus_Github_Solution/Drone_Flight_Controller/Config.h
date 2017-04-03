@@ -157,7 +157,7 @@ This header file define all the configurable variables including constants, pin 
 
 
 
-#define		RX_MAX_PULSE_WIDTH			2000	//in microseconds
+#define		RX_MAX_PULSE_WIDTH			2075	//in microseconds
 
 #define		MPU_GYRO_DEG_SEC_TO_LSB		16.4     //This value can be used to convert deg/sec to LSB
 
@@ -265,24 +265,26 @@ typedef enum
 //Global Variable Declarations
 int test_task_counter = 0;
 
-volatile uint32_t startTime_Thr;
-volatile uint32_t startTime_Pitch;
-volatile uint32_t startTime_Roll;
-volatile uint32_t startTime_Yaw;
+uint32_t now_microsec = 0;
 
-volatile unsigned short dutyCycle_Thr;
-volatile unsigned short dutyCycle_Pitch;
-volatile unsigned short dutyCycle_Roll;
-volatile unsigned short dutyCycle_Yaw;
+uint32_t startTime_Thr;
+uint32_t startTime_Pitch;
+uint32_t startTime_Roll;
+uint32_t startTime_Yaw;
+
+unsigned short dutyCycle_Thr;
+unsigned short dutyCycle_Pitch;
+unsigned short dutyCycle_Roll;
+unsigned short dutyCycle_Yaw;
 
 #ifdef MY_RX_TX_IS_6_CHANNEL
-	volatile uint32_t startTime_Rx5thCh;
-	volatile uint32_t startTime_Rx6thCh;
-	volatile unsigned short dutyCycle_Rx5thCh;
-	volatile unsigned short dutyCycle_Rx6thCh;
+	uint32_t startTime_Rx5thCh;
+	uint32_t startTime_Rx6thCh;
+	unsigned short dutyCycle_Rx5thCh;
+	unsigned short dutyCycle_Rx6thCh;
 #endif
 
-volatile uint32_t rxLastDataTime;
+uint32_t rxLastDataTime;
 
 double cmdRxPitch = 0, cmdRxRoll = 0, cmdRxThr = 0, cmdRxYaw = 0;
 double cmdRx5thCh = 0, cmdRx6thCh = 0;

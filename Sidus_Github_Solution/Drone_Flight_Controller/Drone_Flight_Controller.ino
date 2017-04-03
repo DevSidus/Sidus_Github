@@ -40,9 +40,9 @@ PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, 
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.d_bypass);
 PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.d_bypass);
 
-cRxFilter filterRxThr, filterRxPitch, filterRxRoll, filterRxYaw;
+cRxFilter filterRxThr(RX_MAX_PULSE_WIDTH), filterRxPitch(RX_MAX_PULSE_WIDTH), filterRxRoll(RX_MAX_PULSE_WIDTH), filterRxYaw(RX_MAX_PULSE_WIDTH);
 
-cRxFilter filterRx5thCh, filterRx6thCh;
+cRxFilter filterRx5thCh(RX_MAX_PULSE_WIDTH), filterRx6thCh(RX_MAX_PULSE_WIDTH);
 
 
 
@@ -286,6 +286,7 @@ float mapping(float input, float inputMin, float inputMax, float outputMin, floa
 //Interrupt Service Routine Functions, used for rx pwm inputs
 void isrTHR()
 {
+	now_microsec = micros();
 	if (digitalRead(PIN_RX_THR) == HIGH)
 	{
 		startTime_Thr = micros();
@@ -293,72 +294,76 @@ void isrTHR()
 	}
 	else
 	{
-		if(micros() - startTime_Thr < RX_MAX_PULSE_WIDTH)
-			dutyCycle_Thr = micros() - startTime_Thr;
+		//if((micros() - startTime_Thr) < RX_MAX_PULSE_WIDTH)
+		dutyCycle_Thr = micros() - startTime_Thr;
 		rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
 	}
 }
 void isrPITCH()
 {
+	now_microsec = micros();
 	if (digitalRead(PIN_RX_PITCH) == HIGH)
 	{
-		startTime_Pitch = micros();
+		startTime_Pitch = now_microsec;
 	}
 	else
 	{
-		if (micros() - startTime_Pitch < RX_MAX_PULSE_WIDTH)
-			dutyCycle_Pitch = micros() - startTime_Pitch;
+		//if ((micros() - startTime_Pitch) < RX_MAX_PULSE_WIDTH)
+		dutyCycle_Pitch = now_microsec - startTime_Pitch;
 	}
 }
 void isrROLL()
 {
+	now_microsec = micros();
 	if (digitalRead(PIN_RX_ROLL) == HIGH)
 	{
-		startTime_Roll = micros();
+		startTime_Roll = now_microsec;
 	}
 	else
 	{
-		if (micros() - startTime_Roll < RX_MAX_PULSE_WIDTH)
-			dutyCycle_Roll = micros() - startTime_Roll;
+		//if ((micros() - startTime_Roll) < RX_MAX_PULSE_WIDTH)
+		dutyCycle_Roll = now_microsec - startTime_Roll;
 	}
 }
 void isrYAW()
 {
+	now_microsec = micros();
 	if (digitalRead(PIN_RX_YAW) == HIGH)
 	{
-		startTime_Yaw = micros();
+		startTime_Yaw = now_microsec;
 	}
 	else
 	{
-		if (micros() - startTime_Yaw < RX_MAX_PULSE_WIDTH)
-			dutyCycle_Yaw = micros() - startTime_Yaw;
+		//if ((micros() - startTime_Yaw) < RX_MAX_PULSE_WIDTH)
+		dutyCycle_Yaw = now_microsec - startTime_Yaw;
 	}
 }
 
-
 void isrRx5thCh()
 {
+	now_microsec = micros();
 	if (digitalRead(PIN_RX_5TH_CHAN) == HIGH)
 	{
-		startTime_Rx5thCh = micros();
+		startTime_Rx5thCh = now_microsec;
 	}
 	else
 	{
-		if ((micros() - startTime_Rx5thCh) < RX_MAX_PULSE_WIDTH)
-			dutyCycle_Rx5thCh = micros() - startTime_Rx5thCh;
+		//if ((micros() - startTime_Rx5thCh) < RX_MAX_PULSE_WIDTH)
+		dutyCycle_Rx5thCh = now_microsec - startTime_Rx5thCh;
 	}
 }
 
 void isrRx6thCh()
 {
+	now_microsec = micros();
 	if (digitalRead(PIN_RX_6TH_CHAN) == HIGH)
 	{
-		startTime_Rx6thCh = micros();
+		startTime_Rx6thCh = now_microsec;
 	}
 	else
 	{
-		if (micros() - startTime_Rx6thCh < RX_MAX_PULSE_WIDTH)
-			dutyCycle_Rx6thCh = micros() - startTime_Rx6thCh;
+		//if ((micros() - startTime_Rx6thCh) < RX_MAX_PULSE_WIDTH)
+		dutyCycle_Rx6thCh = now_microsec - startTime_Rx6thCh;
 	}
 }
 
@@ -985,7 +990,7 @@ void postPIDprocesses()
 void handleAutoModeCommands()
 {
 #ifdef MY_RX_TX_IS_6_CHANNEL
-	if (modeQuad == modeQuadARMED && (statusRx == statusType_Normal) && (cmdRx5thCh > 90))
+	if (modeQuad == modeQuadARMED && (statusRx == statusType_Normal) && (cmdRx5thCh > (CMD_5TH_CH_MAX-10)))
 	{
 		autoModeStatus = autoModeAltitude;
 	}

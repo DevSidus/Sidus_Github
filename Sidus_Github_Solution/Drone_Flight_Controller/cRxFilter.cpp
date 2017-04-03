@@ -2,7 +2,7 @@
 
 
 
-cRxFilter::cRxFilter()
+cRxFilter::cRxFilter(int _maxVal)
 {
 	dataArray[0] = 0;
 	dataArray[1] = 0;
@@ -13,6 +13,7 @@ cRxFilter::cRxFilter()
 	dataArray[6] = 0;
 	size = 7;
 	counter = 0;
+	maxVal = _maxVal;
 
 }
 
@@ -23,12 +24,16 @@ cRxFilter::~cRxFilter()
 
 int cRxFilter::process(int _newData)
 {
-	dataArray[counter] = _newData;
-	counter = (counter + 1) % size;
+	//ignore new coming data if it is larger than defined max_pulse_width
+	if (_newData < maxVal)
+	{
+		dataArray[counter] = _newData;
+		counter = (counter + 1) % size;
 
-	sort();
+		sort();
 
-	//return _newData;
+		//return _newData;
+	}
 	return dataArray[((size-1)/2)];
 }
 
