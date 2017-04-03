@@ -41,6 +41,11 @@ PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt
 PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.d_bypass);
 
 cRxFilter filterRxThr, filterRxPitch, filterRxRoll, filterRxYaw;
+
+cRxFilter filterRx5thCh, filterRx6thCh;
+
+
+
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
 // the setup function runs once when you press reset or power the board
@@ -55,6 +60,8 @@ void setup() {
 	pinMode(PIN_RX_PITCH, INPUT);
 	pinMode(PIN_RX_ROLL, INPUT);
 	pinMode(PIN_RX_YAW, INPUT);
+	pinMode(PIN_RX_5TH_CHAN, INPUT);
+	pinMode(PIN_RX_6TH_CHAN, INPUT);
 
 	pinMode(PIN_BUZZER, OUTPUT);
 	
@@ -65,16 +72,22 @@ void setup() {
 	attachInterrupt(PIN_RX_ROLL, isrROLL, CHANGE);
 	attachInterrupt(PIN_RX_YAW, isrYAW, CHANGE);
 
+	attachInterrupt(PIN_RX_5TH_CHAN, isrRx5thCh, CHANGE);
+	attachInterrupt(PIN_RX_6TH_CHAN, isrRx6thCh, CHANGE);
+
+
+
 	//Insert all tasks into scheduler
 	scheduler.insert(test_task, 1000000);
 	scheduler.insert(mapRxDCtoCmd, 20000);
-	scheduler.insert(serialCheck, 9000);
+	scheduler.insert(serialCheck, 8000);
 	scheduler.insert(processPID, 9000);
 	scheduler.insert(runMotors, 9000);
 	scheduler.insert(serialTransmit, 19000);
 	scheduler.insert(checkRxStatus, 1000000);
 	scheduler.insert(checkMode, 310000);
 	scheduler.insert(playMelody, 100000);
+	scheduler.insert(handleAutoModeCommands, 100000);
 
 	initVariables();
 	initPIDtuning();
@@ -97,6 +110,8 @@ void initVariables()
 	startTime_Pitch = micros();
 	startTime_Roll = micros();
 	startTime_Yaw = micros();
+	startTime_Rx5thCh = micros();
+	startTime_Rx6thCh = micros();
 
 	//PID related variable initializations
 	pidVars.ratePitch.Kp = PID_RATE_PITCH_KP;
@@ -320,6 +335,34 @@ void isrYAW()
 	}
 }
 
+
+void isrRx5thCh()
+{
+	if (digitalRead(PIN_RX_5TH_CHAN) == HIGH)
+	{
+		startTime_Rx5thCh = micros();
+	}
+	else
+	{
+		if ((micros() - startTime_Rx5thCh) < RX_MAX_PULSE_WIDTH)
+			dutyCycle_Rx5thCh = micros() - startTime_Rx5thCh;
+	}
+}
+
+void isrRx6thCh()
+{
+	if (digitalRead(PIN_RX_6TH_CHAN) == HIGH)
+	{
+		startTime_Rx6thCh = micros();
+	}
+	else
+	{
+		if (micros() - startTime_Rx6thCh < RX_MAX_PULSE_WIDTH)
+			dutyCycle_Rx6thCh = micros() - startTime_Rx6thCh;
+	}
+}
+
+	
 void test_task()
 {
 	test_task_counter++;
@@ -368,7 +411,7 @@ void serialTransmit()
 	MsgR01.message.modeQuad = modeQuad;
 	MsgR01.message.autoModeStatus = autoModeStatus;
 	MsgR01.message.statusRx = statusRx;
-
+	
 	MsgR01.message.rxThrottle = cmdRxThr;
 	MsgR01.message.rxPitch = cmdRxPitch;
 	MsgR01.message.rxRoll = cmdRxRoll;
@@ -508,14 +551,6 @@ void updateMessageVariables()
 
 	batteryVoltageInVolts = float(MsgT01.message.coWorkerTxPacket.batteryVoltageInBits) * 0.00336 * (BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2;
 
-	if (modeQuad == modeQuadARMED && MsgT01.message.coWorkerTxPacket.statusGS == statusType_Normal)
-	{
-		autoModeStatus = MsgT01.message.udpT01RelayPacket.autoModeCommand;
-	}
-	else
-	{
-		autoModeStatus = autoModeOFF;
-	}
 } 
 
 void runMotors()
@@ -566,7 +601,7 @@ void runMotors()
 
 void checkRxStatus()
 {
-	if (millis() - rxLastDataTime > RX_DATATIME_THESHOLD)
+	if (millis() - rxLastDataTime > RX_DATATIME_THRESHOLD)
 	{
 		statusRx = statusType_Fail;
 	}
@@ -585,8 +620,13 @@ void mapRxDCtoCmd()
 		cmdRxYaw = mapping(filterRxYaw.process(dutyCycle_Yaw), DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
 		cmdRxThr = mapping(filterRxThr.process(dutyCycle_Thr), DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
 
-		//This below code segment is written to have smoother and much feasible commands for quadcopter
-		#ifdef COMMAND_CALIBRATION
+		cmdRx5thCh = mapping(filterRx5thCh.process(dutyCycle_Rx5thCh), DC_5TH_CH_MIN, DC_5TH_CH_MAX, -CMD_5TH_CH_MAX, CMD_5TH_CH_MAX);
+		cmdRx6thCh = mapping(filterRx6thCh.process(dutyCycle_Rx6thCh), DC_6TH_CH_MIN, DC_6TH_CH_MAX, -CMD_6TH_CH_MAX, CMD_6TH_CH_MAX);
+
+
+
+//This below code segment is written to have smoother and much feasible commands for quadcopter
+#ifdef COMMAND_CALIBRATION
 		if (abs(cmdRxRoll) > 1)
 		{
 			cmdRxPitchRollAngle = atan(abs(cmdRxPitch / cmdRxRoll));
@@ -613,7 +653,7 @@ void mapRxDCtoCmd()
 				cmdRxPitchCalibrated = -abs(cmdRxRollCalibratedInRad) * 180.0 / M_PI;
 
 		}
-		#endif
+#endif  //COMMAND_CALIBRATION
 
 
 	}
@@ -623,7 +663,18 @@ void mapRxDCtoCmd()
 		cmdRxRoll = 0;
 		cmdRxYaw = 0;
 		cmdRxThr = CMD_THR_MIN;
+		cmdRx5thCh = 0;
+		cmdRx6thCh = 0;
 	}
+
+	//Serial.print("p:");
+	//Serial.print(dutyCycle_Pitch);
+	//Serial.print("t:");
+	//Serial.print(dutyCycle_Thr);
+	//Serial.print("f:");
+	//Serial.print(dutyCycle_Rx5thCh);
+	//Serial.print("s:");
+	//Serial.println(dutyCycle_Rx6thCh);
 }
 
 void checkMode()
@@ -681,7 +732,7 @@ void checkMode()
 
 void processPID()
 {
-	handleModeTransition();
+	prePIDprocesses();
 
 	pidVars.anglePitch.d_bypass = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  // negative is important
 	pidVars.anglePitch.setpoint = cmdMotorPitch;
@@ -724,7 +775,7 @@ void processPID()
 	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  //no need to change LSB to deg/sec
 	pidVelAlt.Compute();
 
-
+	postPIDprocesses();
 
 	//if (MsgT01.message.udpT01RelayPacket.autoModeCommand == autoModeAltitude)//autoModeStatus == autoModeAltitude
 	//{
@@ -902,7 +953,7 @@ void applyPidCommandPosAlt()
 	pidPosAlt.SetF2(pidVars.posAlt.f2);
 }
 
-void handleModeTransition()
+void prePIDprocesses()
 {
 	cmdMotorPitch = cmdRxPitchCalibrated;
 	cmdMotorRoll = cmdRxRollCalibrated;
@@ -924,4 +975,34 @@ void handleModeTransition()
 	{
 		cmdMotorYaw = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;
 	}
+}
+
+void postPIDprocesses()
+{
+
+}
+
+void handleAutoModeCommands()
+{
+#ifdef MY_RX_TX_IS_6_CHANNEL
+	if (modeQuad == modeQuadARMED && (statusRx == statusType_Normal) && (cmdRx5thCh > 90))
+	{
+		autoModeStatus = autoModeAltitude;
+	}
+	else
+	{
+		autoModeStatus = autoModeOFF;
+	}	
+#else	
+	if (modeQuad == modeQuadARMED && MsgT01.message.coWorkerTxPacket.statusGS == statusType_Normal)
+	{
+		autoModeStatus = MsgT01.message.udpT01RelayPacket.autoModeCommand;
+	}
+	else
+	{
+		autoModeStatus = autoModeOFF;
+	}
+
+#endif // MY_RX_TX_IS_6_CHANNEL
+
 }

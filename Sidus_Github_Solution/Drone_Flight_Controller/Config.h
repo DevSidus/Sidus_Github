@@ -8,6 +8,9 @@ This header file define all the configurable variables including constants, pin 
 #define		COMMAND_CALIBRATION
 #define		CMD_MAX_ATTITUDE_IN_RADIANS		M_PI_4		//define max attitude as 45 degrees
 
+//Comment out below line if you have 6 CH RX_TX
+#define		MY_RX_TX_IS_6_CHANNEL
+
 //Wifi, UDP Definitions
 
 
@@ -39,11 +42,12 @@ This header file define all the configurable variables including constants, pin 
 #define		M_BL_CHANNEL		4
 #define		BUZZER_PWM_CHANNEL		5
 
-#define		RX_DATATIME_THESHOLD		1000
+#define		RX_DATATIME_THRESHOLD		800
 
 #define		CMD_ATTITUDE_MAX 
 
 #define		CMD_RX_PITCH_ROLL_MAX	+45.0
+
 #define		DC_PITCH_MIN	1100.0
 #define		DC_PITCH_MAX	1900.0
 
@@ -61,6 +65,15 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_YAW_MAX		+45.0
 #define		DC_YAW_MIN		1100.0
 #define		DC_YAW_MAX		1900.0
+
+#define		CMD_5TH_CH_MAX		+100.0
+#define		DC_5TH_CH_MIN		1050.0
+#define		DC_5TH_CH_MAX		1950.0
+
+#define		CMD_6TH_CH_MAX		+100.0
+#define		DC_6TH_CH_MIN		1050.0
+#define		DC_6TH_CH_MAX		1950.0
+
 
 #define		CMD_THR_ARM_START	CMD_THR_MIN+(CMD_THR_MAX-CMD_THR_MIN)/10
 
@@ -262,10 +275,20 @@ volatile unsigned short dutyCycle_Pitch;
 volatile unsigned short dutyCycle_Roll;
 volatile unsigned short dutyCycle_Yaw;
 
+#ifdef MY_RX_TX_IS_6_CHANNEL
+	volatile uint32_t startTime_Rx5thCh;
+	volatile uint32_t startTime_Rx6thCh;
+	volatile unsigned short dutyCycle_Rx5thCh;
+	volatile unsigned short dutyCycle_Rx6thCh;
+#endif
 
 volatile uint32_t rxLastDataTime;
 
 double cmdRxPitch = 0, cmdRxRoll = 0, cmdRxThr = 0, cmdRxYaw = 0;
+double cmdRx5thCh = 0, cmdRx6thCh = 0;
+
+
+
 double cmdRxPitchCalibrated = 0, cmdRxRollCalibrated = 0;
 double cmdRxPitchCalibratedInRad = 0, cmdRxRollCalibratedInRad = 0;
 double cmdRxPitchRollAngle=0, cmdRxPitchRollSF=0, cmdRxPitchRollXfactor;

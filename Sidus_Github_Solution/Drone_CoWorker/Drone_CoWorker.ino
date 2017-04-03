@@ -63,7 +63,7 @@ void setup() {
 	scheduler.insert(serialCheck, 15000);
 	scheduler.insert(processMpuTask, 9500);
 	scheduler.insert(setCoWorkerTxDataFields, 9500);
-	scheduler.insert(serialTransmit, 9500);
+	scheduler.insert(serialTransmit, 9000);
 	scheduler.insert(updateBarometerData, 15000);
 	scheduler.insert(altitudeFusionProcess, 15000);
 	scheduler.insert(updateCompassData, 37000);
