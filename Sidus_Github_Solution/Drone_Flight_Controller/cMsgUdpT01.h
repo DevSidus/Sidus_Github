@@ -41,13 +41,13 @@ struct structMsgUdpT01
 	unsigned char pidVelAltF1;
 	unsigned char pidVelAltF2;
 
-	unsigned char pidPosAltKp;
-	unsigned char pidPosAltKi;
-	unsigned char pidPosAltKd;
-	unsigned char pidPosAltF1;
-	unsigned char pidPosAltF2;
+	unsigned char pidAccAltKp;
+	unsigned char pidAccAltKi;
+	unsigned char pidAccAltKd;
+	unsigned char pidAccAltF1;
+	unsigned char pidAccAltF2;
 
-	unsigned char pidPosAltOutFilter;
+	unsigned char pidVelAltOutFilter;
 
 };
 #pragma pack(pop)

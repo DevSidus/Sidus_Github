@@ -118,42 +118,40 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_ROLL_OUT_FILT_CONSTANT	0.88
 
 
-#define		PID_RATE_YAW_KP			2.55
+#define		PID_RATE_YAW_KP			1.4
 #define		PID_RATE_YAW_KI			0.0
 #define		PID_RATE_YAW_KD			0.12
-#define		PID_RATE_YAW_OUTMIN		-250
-#define		PID_RATE_YAW_OUTMAX		250
+#define		PID_RATE_YAW_OUTMIN		-300
+#define		PID_RATE_YAW_OUTMAX		300
 #define		PID_RATE_YAW_F1_DEFAULT	0.0
 #define		PID_RATE_YAW_F2_DEFAULT	0.3
 #define		PID_RATE_YAW_OUT_FILT_CONSTANT		0
 
-#define		PID_ANGLE_YAW_KP			25.5
+#define		PID_ANGLE_YAW_KP			3.0
 #define		PID_ANGLE_YAW_KI			0.0
 #define		PID_ANGLE_YAW_KD			0.255
-#define		PID_ANGLE_YAW_OUTMIN		-250
-#define		PID_ANGLE_YAW_OUTMAX		250
+#define		PID_ANGLE_YAW_OUTMIN		-150
+#define		PID_ANGLE_YAW_OUTMAX		150
 #define		PID_ANGLE_YAW_F1_DEFAULT	0.0
 #define		PID_ANGLE_YAW_F2_DEFAULT	0.9
 #define		PID_ANGLE_YAW_OUT_FILT_CONSTANT	0.3
 
 
-#define		PID_VEL_ALT_KP			2.55
+#define		PID_VEL_ALT_KP			2.0
 #define		PID_VEL_ALT_KI			0.0
-#define		PID_VEL_ALT_KD			0.12
-#define		PID_VEL_ALT_OUTMIN		-150
-#define		PID_VEL_ALT_OUTMAX		150
+#define		PID_VEL_ALT_KD			0.0
+#define		PID_VEL_ALT_OUTMIN		-500
+#define		PID_VEL_ALT_OUTMAX		500
 #define		PID_VEL_ALT_F1_DEFAULT	0.0
 #define		PID_VEL_ALT_F2_DEFAULT	0.3
 #define		PID_VEL_ALT_OUT_FILT_CONSTANT		0
 
-#define		PID_POS_ALT_KP			0.5
-#define		PID_POS_ALT_KI			0.0
-#define		PID_POS_ALT_KD			0.01
-#define		PID_POS_ALT_OUTMIN		-250
-#define		PID_POS_ALT_OUTMAX		250
-#define		PID_POS_ALT_F1_DEFAULT	0.0
-#define		PID_POS_ALT_F2_DEFAULT	0.9
-#define		PID_POS_ALT_OUT_FILT_CONSTANT	0.3
+#define		PID_ACC_ALT_KP			0.2
+#define		PID_ACC_ALT_KI			0.0
+#define		PID_ACC_ALT_KD			0.0
+#define		PID_ACC_ALT_F1_DEFAULT	0.0
+#define		PID_ACC_ALT_F2_DEFAULT	0.8
+#define		PID_ACC_ALT_OUT_FILT_CONSTANT	0.3
 
 
 
@@ -167,14 +165,15 @@ This header file define all the configurable variables including constants, pin 
 #define		RESOLUTION_PID_ANGLE_KP			0.1
 #define		RESOLUTION_PID_ANGLE_KI			0.01
 #define		RESOLUTION_PID_ANGLE_KD			0.001
-#define		RESOLUTION_PID_F			0.01
+#define		RESOLUTION_PID_ANGLE_YAW_KD     0.01
+#define		RESOLUTION_PID_F				0.01
 
-#define		RESOLUTION_PID_VEL_KP			0.01
-#define		RESOLUTION_PID_VEL_KI			0.001
-#define		RESOLUTION_PID_VEL_KD			0.001
-#define		RESOLUTION_PID_POS_KP			1
-#define		RESOLUTION_PID_POS_KI			0.1
-#define		RESOLUTION_PID_POS_KD			0.01
+#define		RESOLUTION_PID_VEL_KP			0.1
+#define		RESOLUTION_PID_VEL_KI			0.01
+#define		RESOLUTION_PID_VEL_KD			0.01
+#define		RESOLUTION_PID_POS_KP			0.01
+#define		RESOLUTION_PID_POS_KI			0.001
+#define		RESOLUTION_PID_POS_KD			0.001
 
 
 #define		SERIAL_COM_SPEED			921600
@@ -213,10 +212,34 @@ struct structSuperPID
 	structPID anglePitch;
 	structPID angleRoll;
 	structPID angleYaw;	
-	structPID posAlt;
+	structPID accAlt;
 }pidVars;
 
+struct structEuler
+{
+	double psi;
+	double theta;
+	double phi;
+};
+struct struct3Daxis
+{
+	double x;
+	double y;
+	double z;
+};
 
+struct structIMU
+{
+	structEuler euler;
+	structEuler eulerRate;
+	struct3Daxis gyro;
+	struct3Daxis accelWorld;
+	struct3Daxis accelBody;
+
+}mpu;
+
+struct3Daxis rateCmd;
+struct3Daxis accelCmd;
 
 //Enum Type Definitions, two mcu config files may be merged!
 typedef enum
@@ -241,6 +264,7 @@ typedef enum
 {
 	autoModeOFF = 0,
 	autoModeAltitude = 1,
+	autoModeAltToOFF = 2,
 }autoModeType;
 
 typedef enum
@@ -252,7 +276,7 @@ typedef enum
 	pidCommandApplyAngleYaw = 4,
 	pidCommandApplyAll = 5,
 	pidCommandApplyVelAlt = 6,
-	pidCommandApplyPosAlt = 7,
+	pidCommandApplyAccAlt = 7,
 }pidCommandType;
 
 typedef enum

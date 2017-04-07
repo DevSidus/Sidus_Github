@@ -42,7 +42,6 @@ This header file define all the configurable variables including constants, pin 
 #define		GS_CON_LOST_THRESHOLD      500
 
 
-
 //Global Variable Declarations
 int test_task_counter = 0;
 

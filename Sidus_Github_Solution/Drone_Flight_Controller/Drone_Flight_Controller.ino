@@ -19,6 +19,7 @@
 #include "cSerialParse.h"
 #include "Local_PID_v1.h"
 #include "PID_YawAngle.h"
+#include "PID_AccAlt.h"
 #include "cRxFilter.h"
 #include "cBuzzerMelody.h"
 
@@ -38,7 +39,7 @@ PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rat
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.d_bypass);
 
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.d_bypass);
-PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.d_bypass);
+PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint);
 
 cRxFilter filterRxThr(RX_MAX_PULSE_WIDTH), filterRxPitch(RX_MAX_PULSE_WIDTH), filterRxRoll(RX_MAX_PULSE_WIDTH), filterRxYaw(RX_MAX_PULSE_WIDTH);
 
@@ -192,16 +193,16 @@ void initVariables()
 	pidVars.velAlt.output = 0;
 	pidVars.velAlt.outputCompensated = 0;
 
-	pidVars.posAlt.Kp = PID_POS_ALT_KP;
-	pidVars.posAlt.Ki = PID_POS_ALT_KI;
-	pidVars.posAlt.Kd = PID_POS_ALT_KD;
-	pidVars.posAlt.outputLimitMin = PID_POS_ALT_OUTMIN;
-	pidVars.posAlt.outputLimitMax = PID_POS_ALT_OUTMAX;
-	pidVars.posAlt.f1 = PID_POS_ALT_F1_DEFAULT;
-	pidVars.posAlt.f2 = PID_POS_ALT_F2_DEFAULT;
-	pidVars.posAlt.outputFilterConstant = PID_POS_ALT_OUT_FILT_CONSTANT;
-	pidVars.posAlt.output = 0;
-	pidVars.posAlt.outputCompensated = 0;
+	pidVars.accAlt.Kp = PID_ACC_ALT_KP;
+	pidVars.accAlt.Ki = PID_ACC_ALT_KI;
+	pidVars.accAlt.Kd = PID_ACC_ALT_KD;
+	pidVars.accAlt.outputLimitMin = CMD_THR_ARM_START;
+	pidVars.accAlt.outputLimitMax = CMD_THR_MAX;
+	pidVars.accAlt.f1 = PID_ACC_ALT_F1_DEFAULT;
+	pidVars.accAlt.f2 = PID_ACC_ALT_F2_DEFAULT;
+	pidVars.accAlt.outputFilterConstant = PID_ACC_ALT_OUT_FILT_CONSTANT;
+	pidVars.accAlt.output = 0;
+	pidVars.accAlt.outputCompensated = 0;
 }
 
 void initPIDtuning()
@@ -242,10 +243,10 @@ void initPIDtuning()
 	pidVelAlt.SetF1(pidVars.velAlt.f1);
 	pidVelAlt.SetF2(pidVars.velAlt.f2);
 
-	pidPosAlt.SetOutputLimits(pidVars.posAlt.outputLimitMin, pidVars.posAlt.outputLimitMax);
-	pidPosAlt.SetTunings(pidVars.posAlt.Kp, pidVars.posAlt.Ki, pidVars.posAlt.Kd);
-	pidPosAlt.SetF1(pidVars.posAlt.f1);
-	pidPosAlt.SetF2(pidVars.posAlt.f2);
+	pidAccAlt.SetOutputLimits(pidVars.accAlt.outputLimitMin, pidVars.accAlt.outputLimitMax);
+	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
+	pidAccAlt.SetF1(pidVars.accAlt.f1);
+	pidAccAlt.SetF2(pidVars.accAlt.f2);
 }
 
 void setupMotorPins()
@@ -289,13 +290,13 @@ void isrTHR()
 	now_microsec = micros();
 	if (digitalRead(PIN_RX_THR) == HIGH)
 	{
-		startTime_Thr = micros();
+		startTime_Thr = now_microsec;
 		
 	}
 	else
 	{
 		//if((micros() - startTime_Thr) < RX_MAX_PULSE_WIDTH)
-		dutyCycle_Thr = micros() - startTime_Thr;
+		dutyCycle_Thr = now_microsec - startTime_Thr;
 		rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
 	}
 }
@@ -366,7 +367,6 @@ void isrRx6thCh()
 		dutyCycle_Rx6thCh = now_microsec - startTime_Rx6thCh;
 	}
 }
-
 	
 void test_task()
 {
@@ -476,7 +476,7 @@ void serialTransmit()
 
 	MsgR01.message.pidAngleYawKp = pidVars.angleYaw.Kp / RESOLUTION_PID_ANGLE_KP;
 	MsgR01.message.pidAngleYawKi = pidVars.angleYaw.Ki / RESOLUTION_PID_ANGLE_KI;
-	MsgR01.message.pidAngleYawKd = pidVars.angleYaw.Kd / RESOLUTION_PID_ANGLE_KD;
+	MsgR01.message.pidAngleYawKd = pidVars.angleYaw.Kd / RESOLUTION_PID_ANGLE_YAW_KD;
 	MsgR01.message.pidAngleYawOutput = pidVars.angleYaw.output;
 	MsgR01.message.pidAngleYawPresult = pidAngleYaw.Get_P_Result();
 	MsgR01.message.pidAngleYawIresult = pidAngleYaw.Get_I_Result();
@@ -495,19 +495,22 @@ void serialTransmit()
 	MsgR01.message.pidVelAltPresult = pidVelAlt.Get_P_Result();
 	MsgR01.message.pidVelAltIresult = pidVelAlt.Get_I_Result();
 	MsgR01.message.pidVelAltDresult = pidVelAlt.Get_D_Result();
+
+
 	MsgR01.message.pidVelAltF1 = pidVars.velAlt.f1 / RESOLUTION_PID_F;
 	MsgR01.message.pidVelAltF2 = pidVars.velAlt.f2 / RESOLUTION_PID_F;
 
-	MsgR01.message.pidPosAltKp = pidVars.posAlt.Kp / RESOLUTION_PID_POS_KP;
-	MsgR01.message.pidPosAltKi = pidVars.posAlt.Ki / RESOLUTION_PID_POS_KI;
-	MsgR01.message.pidPosAltKd = pidVars.posAlt.Kd / RESOLUTION_PID_POS_KD;
-	MsgR01.message.pidPosAltOutput = pidVars.posAlt.output;
-	MsgR01.message.pidPosAltPresult = pidPosAlt.Get_P_Result();
-	MsgR01.message.pidPosAltIresult = pidPosAlt.Get_I_Result();
-	MsgR01.message.pidPosAltDresult = pidPosAlt.Get_D_Result();
-	MsgR01.message.pidPosAltF1 = pidVars.posAlt.f1 / RESOLUTION_PID_F;
-	MsgR01.message.pidPosAltF2 = pidVars.posAlt.f2 / RESOLUTION_PID_F;
-	MsgR01.message.pidPosAltOutFilter = pidVars.posAlt.outputFilterConstant / RESOLUTION_PID_F;
+	MsgR01.message.pidAccAltKp = pidVars.accAlt.Kp / RESOLUTION_PID_POS_KP;
+	MsgR01.message.pidAccAltKi = pidVars.accAlt.Ki / RESOLUTION_PID_POS_KI;
+	MsgR01.message.pidAccAltKd = pidVars.accAlt.Kd / RESOLUTION_PID_POS_KD;
+	MsgR01.message.pidAccAltOutput = pidVars.accAlt.output;
+	MsgR01.message.pidAccAltPresult = pidAccAlt.Get_P_Result();
+	MsgR01.message.pidAccAltIresult = pidAccAlt.Get_I_Result();
+	MsgR01.message.pidAccAltDresult = pidAccAlt.Get_D_Result();
+
+	MsgR01.message.pidAccAltF1 = pidVars.accAlt.f1 / RESOLUTION_PID_F;
+	MsgR01.message.pidAccAltF2 = pidVars.accAlt.f2 / RESOLUTION_PID_F;
+	MsgR01.message.pidAccAltOutFilter = pidVars.accAlt.outputFilterConstant / RESOLUTION_PID_F;
 
 
 	MsgR01.getPacket();
@@ -516,6 +519,28 @@ void serialTransmit()
 
 void updateMessageVariables()
 {
+
+	mpu.euler.psi = MsgT01.message.coWorkerTxPacket.mpuYaw;  //in radians
+	mpu.euler.theta = MsgT01.message.coWorkerTxPacket.mpuPitch;  //in radians
+	mpu.euler.phi = MsgT01.message.coWorkerTxPacket.mpuRoll;  //in radians
+
+	mpu.gyro.x = MsgT01.message.coWorkerTxPacket.mpuGyroX;  // in deg/sec
+	mpu.gyro.y = MsgT01.message.coWorkerTxPacket.mpuGyroY; // in deg/sec
+	mpu.gyro.z = MsgT01.message.coWorkerTxPacket.mpuGyroZ; // in deg/sec
+
+	mpu.accelBody.x = MsgT01.message.coWorkerTxPacket.mpuAccX;
+	mpu.accelBody.y = MsgT01.message.coWorkerTxPacket.mpuAccY;
+	mpu.accelBody.z = MsgT01.message.coWorkerTxPacket.mpuAccZ;
+
+	mpu.accelWorld.x = MsgT01.message.coWorkerTxPacket.mpuAccWorldX;
+	mpu.accelWorld.y = MsgT01.message.coWorkerTxPacket.mpuAccWorldY;
+	mpu.accelWorld.z = MsgT01.message.coWorkerTxPacket.mpuAccWorldZ;
+
+	//Serial.print("theta:");
+	//Serial.print(MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI);
+	//Serial.print("   phi:");
+	//Serial.println(MsgT01.message.coWorkerTxPacket.mpuRoll * 180 / M_PI);
+
 	/// !!! Do not forget to add multiplication to following identities with correct resolution values
 	switch (MsgT01.message.udpT01RelayPacket.pidCommandState)
 	{
@@ -541,15 +566,15 @@ void updateMessageVariables()
 		applyPidCommandRateYaw();
 		applyPidCommandAngleYaw();
 		applyPidCommandVelAlt();
-		applyPidCommandPosAlt();
+		applyPidCommandAccAlt();
 		break;
 
 	case pidCommandApplyVelAlt:
 		applyPidCommandVelAlt();
 		break;
 
-	case pidCommandApplyPosAlt:
-		applyPidCommandPosAlt();
+	case pidCommandApplyAccAlt:
+		applyPidCommandAccAlt();
 		break;
 	default:break;
 	}
@@ -640,6 +665,9 @@ void mapRxDCtoCmd()
 
 			cmdRxPitchRollXfactor = sin(CMD_MAX_ATTITUDE_IN_RADIANS);
 
+
+
+
 			cmdRxRollCalibratedInRad = cmdRxRoll / CMD_RX_PITCH_ROLL_MAX * cmdRxPitchRollSF * cmdRxPitchRollXfactor;
 			cmdRxPitchCalibratedInRad = cmdRxPitch / CMD_RX_PITCH_ROLL_MAX * cmdRxPitchRollSF * cmdRxPitchRollXfactor;
 			
@@ -653,12 +681,19 @@ void mapRxDCtoCmd()
 				cmdRxPitchCalibrated = -abs(cmdRxPitchCalibratedInRad) * 180.0 / M_PI;
 
 			if (cmdRxRoll >= 0)
-				cmdRxPitchCalibrated = abs(cmdRxRollCalibratedInRad) * 180.0 / M_PI;
+				cmdRxRollCalibrated = abs(cmdRxRollCalibratedInRad) * 180.0 / M_PI;
 			else
-				cmdRxPitchCalibrated = -abs(cmdRxRollCalibratedInRad) * 180.0 / M_PI;
+				cmdRxRollCalibrated = -abs(cmdRxRollCalibratedInRad) * 180.0 / M_PI;
+
+		}
+		else
+		{
+			cmdRxPitchCalibrated = cmdRxPitch;
+			cmdRxRollCalibrated = cmdRxRoll;
 
 		}
 #endif  //COMMAND_CALIBRATION
+
 
 
 	}
@@ -672,14 +707,6 @@ void mapRxDCtoCmd()
 		cmdRx6thCh = 0;
 	}
 
-	//Serial.print("p:");
-	//Serial.print(dutyCycle_Pitch);
-	//Serial.print("t:");
-	//Serial.print(dutyCycle_Thr);
-	//Serial.print("f:");
-	//Serial.print(dutyCycle_Rx5thCh);
-	//Serial.print("s:");
-	//Serial.println(dutyCycle_Rx6thCh);
 }
 
 void checkMode()
@@ -720,7 +747,7 @@ void checkMode()
 		pidAngleRoll.SetFlightMode(true);
 		pidAngleYaw.SetFlightMode(true);
 		pidVelAlt.SetFlightMode(true);
-		pidPosAlt.SetFlightMode(true);
+		pidAccAlt.SetFlightMode(true);
 	}
 	else
 	{
@@ -731,7 +758,7 @@ void checkMode()
 		pidAngleRoll.SetFlightMode(false);
 		pidAngleYaw.SetFlightMode(false);
 		pidVelAlt.SetFlightMode(false);
-		pidPosAlt.SetFlightMode(false);
+		pidAccAlt.SetFlightMode(false);
 	}
 }
 
@@ -739,85 +766,68 @@ void processPID()
 {
 	prePIDprocesses();
 
-	pidVars.anglePitch.d_bypass = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  // negative is important
-	pidVars.anglePitch.setpoint = cmdMotorPitch;
-	pidVars.anglePitch.sensedVal = MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI;  //no need to change LSB to deg/sec
-	pidAnglePitch.Compute();
-	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
+	getBodyToEulerAngularRates();
 
-	pidVars.ratePitch.setpoint = pidVars.anglePitch.outputFiltered;
-	pidVars.ratePitch.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroY;  //no need to change LSB to deg/sec, negative is important
-	pidRatePitch.Compute();
+	//Set bypass values to euler angle rates
+	pidVars.angleRoll.d_bypass  = mpu.eulerRate.phi;
+	pidVars.anglePitch.d_bypass = mpu.eulerRate.theta;
+	pidVars.angleYaw.d_bypass   = mpu.eulerRate.psi;
 
-	pidVars.angleRoll.d_bypass = MsgT01.message.coWorkerTxPacket.mpuGyroX; 
+	//Pitch Roll Yaw Angle PID
+
 	pidVars.angleRoll.setpoint = cmdMotorRoll;
-	pidVars.angleRoll.sensedVal = MsgT01.message.coWorkerTxPacket.mpuRoll * 180 / M_PI;  //no need to change LSB to deg/sec
+	pidVars.angleRoll.sensedVal = mpu.euler.phi * 180 / M_PI;
 	pidAngleRoll.Compute();
 	pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
 
-	pidVars.rateRoll.setpoint = pidVars.angleRoll.outputFiltered;
-	pidVars.rateRoll.sensedVal = MsgT01.message.coWorkerTxPacket.mpuGyroX;  //no need to change LSB to deg/sec
-	pidRateRoll.Compute();
 
-	pidVars.angleYaw.d_bypass = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;
+	pidVars.anglePitch.setpoint = cmdMotorPitch;
+	pidVars.anglePitch.sensedVal = mpu.euler.theta * 180 / M_PI;
+	pidAnglePitch.Compute();
+	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
+	
 	pidVars.angleYaw.setpoint = cmdMotorYaw;
-	pidVars.angleYaw.sensedVal = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;  //no need to change LSB to deg/sec
+	pidVars.angleYaw.sensedVal = mpu.euler.psi * 180 / M_PI;
 	pidAngleYaw.Compute();
 	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);
 
-	pidVars.rateYaw.setpoint = pidVars.angleYaw.outputFiltered;
-	pidVars.rateYaw.sensedVal = -MsgT01.message.coWorkerTxPacket.mpuGyroZ;  //no need to change LSB to deg/sec, //negative is added
-	pidRateYaw.Compute();
+	//Transform angle pid outputs to body coordinate axis in order to get correct body angular rate setpoints
+	transformAnglePIDoutputsToBody();
 
-	pidVars.posAlt.d_bypass = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // cm/second
-	pidVars.posAlt.setpoint = commandedAltitude;
-	pidVars.posAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;  // barometric altitude in meters
-	pidPosAlt.Compute();
-	pidVars.posAlt.outputFiltered = basicFilter(pidVars.posAlt.output, pidVars.posAlt.outputFilterConstant, pidVars.posAlt.outputFiltered);
+	//Pitch Roll Yaw Rate PID
+
+	pidVars.ratePitch.setpoint = rateCmd.y;
+	pidVars.ratePitch.sensedVal = mpu.gyro.y; 
+	pidRatePitch.Compute();
+
+
+	pidVars.rateRoll.setpoint = rateCmd.x;
+	pidVars.rateRoll.sensedVal = mpu.gyro.x;
+	pidRateRoll.Compute();
+
+
+	pidVars.rateYaw.setpoint = rateCmd.z;
+	pidVars.rateYaw.sensedVal = mpu.gyro.z;
+	pidRateYaw.Compute();
+	
+
 
 	pidVars.velAlt.d_bypass = (MsgT01.message.coWorkerTxPacket.mpuAccWorldZ) / 8.36;  // cm/second^2
-	pidVars.velAlt.setpoint = pidVars.posAlt.outputFiltered; // pidVars.posAlt.outputFiltered;   //this line will change after test of alt vel PID
-	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  //no need to change LSB to deg/sec
+	pidVars.velAlt.setpoint = cmdRx6thCh;
+	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // cm/second
 	pidVelAlt.Compute();
+	pidVars.velAlt.outputFiltered = basicFilter(pidVars.velAlt.output, pidVars.velAlt.outputFilterConstant, pidVars.velAlt.outputFiltered);
+
+
+	//Transform vel pid outputs to body coordinate axis in order to get correct acceleration wrt world
+	transformVelPIDoutputsToBody();
+
+	pidVars.accAlt.setpoint = accelCmd.z;   // cmd/second^2
+	pidVars.accAlt.sensedVal = (MsgT01.message.coWorkerTxPacket.mpuAccWorldZ) / 8.36;  // cm/second^2
+	pidAccAlt.Compute();
 
 	postPIDprocesses();
 
-	//if (MsgT01.message.udpT01RelayPacket.autoModeCommand == autoModeAltitude)//autoModeStatus == autoModeAltitude
-	//{
-
-	//	pidVars.posAlt.d_bypass = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // cm/second
-	//	pidVars.posAlt.setpoint = commandedAltitude;
-	//	pidVars.posAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;  // barometric altitude in meters
-	//	pidPosAlt.Compute();
-	//	pidVars.posAlt.outputFiltered = basicFilter(pidVars.posAlt.output, pidVars.posAlt.outputFilterConstant, pidVars.posAlt.outputFiltered);
-	//	
-	//	pidVars.velAlt.d_bypass = (MsgT01.message.coWorkerTxPacket.mpuAccWorldZ) / 8.36;  // cm/second^2
-	//	pidVars.velAlt.setpoint = pidVars.posAlt.outputFiltered; // pidVars.posAlt.outputFiltered;   //this line will change after test of alt vel PID
-	//	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  //no need to change LSB to deg/sec
-	//	pidVelAlt.Compute();
-	//}
-	//else
-	//{
-
-
-	//	commandedAltitude = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;
-
-	//	if (pidVars.velAlt.output != 0)
-	//	{
-	//		if (pidVars.velAlt.output > 2)
-	//		{
-	//			pidVars.velAlt.output -= 0.04;
-	//		}
-	//		else if (pidVars.velAlt.output < -2)
-	//		{
-	//			pidVars.velAlt.output += 0.04;
-	//		}
-	//		else
-	//		{
-	//			pidVars.velAlt.output = 0;
-	//		}
-	//	}
-	//}
 
 }
 
@@ -922,7 +932,7 @@ void applyPidCommandAngleYaw()
 	//Set Yaw Angle PID parameters
 	pidVars.angleYaw.Kp = MsgT01.message.udpT01RelayPacket.pidAngleYawKp * RESOLUTION_PID_ANGLE_KP;
 	pidVars.angleYaw.Ki = MsgT01.message.udpT01RelayPacket.pidAngleYawKi * RESOLUTION_PID_ANGLE_KI;
-	pidVars.angleYaw.Kd = MsgT01.message.udpT01RelayPacket.pidAngleYawKd * RESOLUTION_PID_ANGLE_KD;
+	pidVars.angleYaw.Kd = MsgT01.message.udpT01RelayPacket.pidAngleYawKd * RESOLUTION_PID_ANGLE_YAW_KD;
 	pidVars.angleYaw.f1 = MsgT01.message.udpT01RelayPacket.pidAngleYawF1 * RESOLUTION_PID_F;
 	pidVars.angleYaw.f2 = MsgT01.message.udpT01RelayPacket.pidAngleYawF2 * RESOLUTION_PID_F;
 	pidVars.angleYaw.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidAngleYawOutFilter * RESOLUTION_PID_F;
@@ -939,36 +949,37 @@ void applyPidCommandVelAlt()
 	pidVars.velAlt.Kd = MsgT01.message.udpT01RelayPacket.pidVelAltKd * RESOLUTION_PID_VEL_KD;
 	pidVars.velAlt.f1 = MsgT01.message.udpT01RelayPacket.pidVelAltF1 * RESOLUTION_PID_F;
 	pidVars.velAlt.f2 = MsgT01.message.udpT01RelayPacket.pidVelAltF2 * RESOLUTION_PID_F;
+	pidVars.velAlt.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidVelAltOutFilter * RESOLUTION_PID_F;
 	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
 	pidVelAlt.SetF1(pidVars.velAlt.f1);
 	pidVelAlt.SetF2(pidVars.velAlt.f2);
 }
 
-void applyPidCommandPosAlt()
+void applyPidCommandAccAlt()
 {
 	//Set Altitude Position PID parameters
-	pidVars.posAlt.Kp = MsgT01.message.udpT01RelayPacket.pidPosAltKp * RESOLUTION_PID_POS_KP;
-	pidVars.posAlt.Ki = MsgT01.message.udpT01RelayPacket.pidPosAltKi * RESOLUTION_PID_POS_KI;
-	pidVars.posAlt.Kd = MsgT01.message.udpT01RelayPacket.pidPosAltKd * RESOLUTION_PID_POS_KD;
-	pidVars.posAlt.f1 = MsgT01.message.udpT01RelayPacket.pidPosAltF1 * RESOLUTION_PID_F;
-	pidVars.posAlt.f2 = MsgT01.message.udpT01RelayPacket.pidPosAltF2 * RESOLUTION_PID_F;
-	pidVars.posAlt.outputFilterConstant = MsgT01.message.udpT01RelayPacket.pidPosAltOutFilter * RESOLUTION_PID_F;
-	pidPosAlt.SetTunings(pidVars.posAlt.Kp, pidVars.posAlt.Ki, pidVars.posAlt.Kd);
-	pidPosAlt.SetF1(pidVars.posAlt.f1);
-	pidPosAlt.SetF2(pidVars.posAlt.f2);
+	pidVars.accAlt.Kp = MsgT01.message.udpT01RelayPacket.pidAccAltKp * RESOLUTION_PID_POS_KP;
+	pidVars.accAlt.Ki = MsgT01.message.udpT01RelayPacket.pidAccAltKi * RESOLUTION_PID_POS_KI;
+	pidVars.accAlt.Kd = MsgT01.message.udpT01RelayPacket.pidAccAltKd * RESOLUTION_PID_POS_KD;
+	pidVars.accAlt.f1 = MsgT01.message.udpT01RelayPacket.pidAccAltF1 * RESOLUTION_PID_F;
+	pidVars.accAlt.f2 = MsgT01.message.udpT01RelayPacket.pidAccAltF2 * RESOLUTION_PID_F;
+	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
+	pidAccAlt.SetF1(pidVars.accAlt.f1);
+	pidAccAlt.SetF2(pidVars.accAlt.f2);
 }
 
 void prePIDprocesses()
 {
 	cmdMotorPitch = cmdRxPitchCalibrated;
 	cmdMotorRoll = cmdRxRollCalibrated;
-	cmdMotorThr = cmdRxThr;
 
-	if (modeQuad == modeQuadARMED)
+	
+
+	if (modeQuad == modeQuadARMED && cmdMotorThr > CMD_THR_TAKEOFF)
 	{
 		if (abs(cmdRxYaw) > 6)
 		{
-			cmdMotorYaw += cmdRxYaw / 40.0;
+			cmdMotorYaw += cmdRxYaw / 60.0;
 
 			if (cmdMotorYaw > 180)
 				cmdMotorYaw -= 360;
@@ -978,12 +989,36 @@ void prePIDprocesses()
 	}
 	else
 	{
-		cmdMotorYaw = MsgT01.message.coWorkerTxPacket.mpuYaw * 180 / M_PI;
+		cmdMotorYaw = mpu.euler.psi * 180 / M_PI;
 	}
 }
 
 void postPIDprocesses()
 {
+	if (autoModeStatus == autoModeAltitude)
+	{
+		cmdMotorThr = pidVars.accAlt.output;
+	}
+	else if (autoModeStatus == autoModeAltToOFF)
+	{
+		if (abs(cmdMotorThr - cmdRxThr) < 4)
+		{
+			autoModeStatus = autoModeOFF;
+		}
+		else if (cmdMotorThr > cmdRxThr)
+		{
+			cmdMotorThr -= 0.2;
+		}
+		else
+		{
+			cmdMotorThr += 0.2;
+		}
+	}
+	else
+	{
+		cmdMotorThr = cmdRxThr;
+		pidAccAlt.Set_I_Result(cmdMotorThr);
+	}
 
 }
 
@@ -994,9 +1029,10 @@ void handleAutoModeCommands()
 	{
 		autoModeStatus = autoModeAltitude;
 	}
-	else
+	else if(autoModeStatus != autoModeOFF)
 	{
-		autoModeStatus = autoModeOFF;
+		//If previous autoModeStatus is Altitude, then change to transition state
+		autoModeStatus = autoModeAltToOFF;
 	}	
 #else	
 	if (modeQuad == modeQuadARMED && MsgT01.message.coWorkerTxPacket.statusGS == statusType_Normal)
@@ -1009,5 +1045,45 @@ void handleAutoModeCommands()
 	}
 
 #endif // MY_RX_TX_IS_6_CHANNEL
+
+}
+
+void getBodyToEulerAngularRates()
+{
+
+	if (abs(cos(mpu.euler.theta)) > 0.0001)  
+	{
+		mpu.eulerRate.phi = mpu.gyro.x + sin(mpu.euler.phi) * tan(mpu.euler.theta) * mpu.gyro.y + cos(mpu.euler.phi) * tan(mpu.euler.theta) * mpu.gyro.z;
+		mpu.eulerRate.theta = cos(mpu.euler.phi)*mpu.gyro.y - sin(mpu.euler.phi)*mpu.gyro.z;
+		mpu.eulerRate.psi = sin(mpu.euler.phi) / cos(mpu.euler.theta) * mpu.gyro.y + cos(mpu.euler.phi) / cos(mpu.euler.theta)*mpu.gyro.z;
+	}
+
+
+}
+
+void transformAnglePIDoutputsToBody()
+{
+	rateCmd.x = pidVars.angleRoll.outputFiltered - sin(mpu.euler.theta) * pidVars.angleYaw.outputFiltered;
+	rateCmd.y = cos(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + sin(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
+	rateCmd.z = -sin(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + cos(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
+
+
+}
+
+void transformVelPIDoutputsToBody()
+{
+	double tempVar = cos(mpu.euler.phi)*cos(mpu.euler.theta);
+	if (abs(tempVar) > 0.5)
+	{
+		accelCmd.z = pidVars.velAlt.outputFiltered / tempVar;
+	}
+	else if (tempVar >= 0)
+	{
+		accelCmd.z = pidVars.velAlt.outputFiltered / 0.5;
+	}
+	else
+	{
+		accelCmd.z = pidVars.velAlt.outputFiltered / -0.5;
+	}
 
 }

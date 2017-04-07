@@ -64,7 +64,7 @@ bool PID::Compute()
    unsigned long now = millis();
    unsigned long dTime = (now - lastTime);
 
-   if(dTime >= 10)
+   if(dTime >= 2)
    {
       /*Compute all the working error variables*/
 
@@ -101,11 +101,6 @@ bool PID::Compute()
 
 		  if (!transientInterval)
 		  {
-			  //errorSum -= errorArray[errorArrayIndex];
-			  //errorSum += errorSmooth;
-			  //errorArray[errorArrayIndex] = errorSmooth;
-			  //errorArrayIndex = (errorArrayIndex + 1) % errorArraySize;
-			  //I_Result = Ki * dTimeInSec * errorSum;
 			  I_Result += (Ki * dTimeInSec * errorSmooth);
 
 			  //We may choose to limit the I term one third of maximum PID output
@@ -115,7 +110,6 @@ bool PID::Compute()
 	  }
 	  else
 	  {
-		  errorSum = 0;
 		  I_Result = 0;
 	  }
 	  
@@ -224,9 +218,6 @@ void PID::Initialize()
    errorSmooth = 0;
    errorDerivativeSmooth = 0;
    inFlight = false;
-   errorArrayIndex = 0;
-   errorArray[0] = 0;
-   errorSum = 0;
    transientInterval = true;
    transientSetpointThreshold = 5;
    transientStartTime = millis();
@@ -256,6 +247,8 @@ void PID::SetF2(float _f2) { f2 = _f2; }
 double PID::Get_P_Result() { return P_Result; }
 double PID::Get_I_Result() { return I_Result; }
 double PID::Get_D_Result() { return D_Result; }
+
+void PID::Set_I_Result(double val) { I_Result = val; }
 
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 

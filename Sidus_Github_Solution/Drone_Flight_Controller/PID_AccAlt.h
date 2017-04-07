@@ -1,5 +1,7 @@
-class PID_YawAngle
+
+class PID_AccAlt
 {
+
 
 public:
 
@@ -10,14 +12,12 @@ public:
 #define REVERSE  1
 
 	//commonly used functions **************************************************************************
-	PID_YawAngle(double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
-													//   Setpoint. 
-	PID_YawAngle(double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
-															//   Setpoint. 
+	PID_AccAlt(double*, double*, double*);		// * constructor.  links the PID_AccAlt to the Input, Output, and 
+										//   Setpoint. 
 
-	void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
+	void SetMode(int Mode);               // * sets PID_AccAlt to either Manual (0) or Auto (non-0)
 
-	bool Compute();                       // * performs the PID calculation.  it should be
+	bool Compute();                       // * performs the PID_AccAlt calculation.  it should be
 										  //   called every time loop() cycles. ON/OFF and
 										  //   calculation frequency can be set using SetMode
 										  //   SetSampleTime respectively
@@ -36,8 +36,8 @@ public:
 
 
 							  //Display functions ****************************************************************
-	double GetKp();						  // These functions query the PID for interal values.
-	double GetKi();						  //  they were created mainly for the PID front-end,
+	double GetKp();						  // These functions query the pid for interal values.
+	double GetKi();						  //  they were created mainly for the pid front-end,
 	double GetKd();						  // where it's important to know what is actually 
 
 	float GetF1();
@@ -54,7 +54,9 @@ public:
 	double Get_I_Result();
 	double Get_D_Result();
 
-	int GetMode();						  //  inside the PID.
+	void Set_I_Result(double);
+
+	int GetMode();						  //  inside the PID_AccAlt.
 	void SetFlightMode(bool);			  //For the I term computation enabling
 
 private:
@@ -72,7 +74,7 @@ private:
 
 	double *myMeasuredVal;              // * Pointers to the Input, Output, and Setpoint variables
 	double *myOutput;             //   This creates a hard link between the variables and the 
-	double *mySetpoint;           //   PID_YawAngle, freeing the user from having to constantly tell us
+	double *mySetpoint;           //   PID_AccAlt, freeing the user from having to constantly tell us
 								  //   what these values are.  with pointers we'll just know.
 	double *d_bypass;
 
@@ -84,6 +86,7 @@ private:
 	float f1, f2;
 
 	double outMin, outMax;
+	double range_2;
 	bool inAuto;
 	bool d_bypass_enabled;
 
@@ -95,4 +98,5 @@ private:
 
 
 };
+
 

@@ -660,9 +660,9 @@ uint8_t MPU6050::dmpGetGyro(VectorInt16 *v, const uint8_t* packet) {
 // uint8_t MPU6050::dmpGetLinearAccel(long *data, const uint8_t* packet);
 uint8_t MPU6050::dmpGetLinearAccel(VectorInt16 *v, VectorInt16 *vRaw, VectorFloat *gravity) {
 	// get rid of the gravity component (+1g = +8192 in standard DMP FIFO packet, sensitivity is 2g)
-	v->x = vRaw->x - gravity->x * 8192;
-	v->y = vRaw->y - gravity->y * 8192;
-	v->z = vRaw->z - gravity->z * 8192;
+	v->x = vRaw->x - gravity->x * 8300; //modified by aagca analysed with steady acc measurements old val 8192
+	v->y = vRaw->y - gravity->y * 8300; //modified by aagca analysed with steady acc measurements old val 8192
+	v->z = vRaw->z - gravity->z * 8300; //modified by aagca analysed with steady acc measurements old val 8192
 	return 0;
 }
 // uint8_t MPU6050::dmpGetLinearAccelInWorld(long *data, const uint8_t* packet);
@@ -690,9 +690,9 @@ uint8_t MPU6050::dmpGetGravity(VectorFloat *v, Quaternion *q) {
 // uint8_t MPU6050::dmpGetEIS(long *data, const uint8_t* packet);
 
 uint8_t MPU6050::dmpGetEuler(float *data, Quaternion *q) {
-//	data[0] = atan2(2 * q->x*q->y - 2 * q->w*q->z, 2 * q->w*q->w + 2 * q->x*q->x - 1);   // psi
-//	data[1] = -asin(2 * q->x*q->z + 2 * q->w*q->y);                              // theta
-//	data[2] = atan2(2 * q->y*q->z - 2 * q->w*q->x, 2 * q->w*q->w + 2 * q->z*q->z - 1);   // phi
+	//data[0] = atan2(2 * q->x*q->y - 2 * q->w*q->z, 2 * q->w*q->w + 2 * q->x*q->x - 1);   // psi
+	//data[1] = -asin(2 * q->x*q->z + 2 * q->w*q->y);                              // theta
+	//data[2] = atan2(2 * q->y*q->z - 2 * q->w*q->x, 2 * q->w*q->w + 2 * q->z*q->z - 1);   // phi
 
 	//Edit by aagca referenced with wiki quaternion to euler angles information
 	data[0] = atan2(2*(q->w*q->z + q->x*q->y), 1-2*(q->y*q->y + q->z*q->z));   // psi

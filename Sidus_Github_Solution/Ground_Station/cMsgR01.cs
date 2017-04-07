@@ -96,16 +96,16 @@ namespace Ground_Station
         public byte pidVelAltF1 { get; set; }
         public byte pidVelAltF2 { get; set; }
 
-        public byte pidPosAltKp { get; set; }
-        public byte pidPosAltKi { get; set; }
-        public byte pidPosAltKd { get; set; }
-        public short pidPosAltOutput { get; set; }
-        public short pidPosAltPresult { get; set; }
-        public short pidPosAltIresult { get; set; }
-        public short pidPosAltDresult { get; set; }
-        public byte pidPosAltF1 { get; set; }
-        public byte pidPosAltF2 { get; set; }
-        public byte pidPosAltOutFilter { get; set; }
+        public byte pidAccAltKp { get; set; }
+        public byte pidAccAltKi { get; set; }
+        public byte pidAccAltKd { get; set; }
+        public short pidAccAltOutput { get; set; }
+        public short pidAccAltPresult { get; set; }
+        public short pidAccAltIresult { get; set; }
+        public short pidAccAltDresult { get; set; }
+        public byte pidAccAltF1 { get; set; }
+        public byte pidAccAltF2 { get; set; }
+        public byte pidAccAltOutFilter { get; set; }
 
 
         public char endChar { get; set; }

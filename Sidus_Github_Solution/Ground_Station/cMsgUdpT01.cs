@@ -46,13 +46,13 @@ namespace Ground_Station
         public byte pidVelAltF1 { get; set; }
         public byte pidVelAltF2 { get; set; }
 
-        public byte pidPosAltKp { get; set; }
-        public byte pidPosAltKi { get; set; }
-        public byte pidPosAltKd { get; set; }
-        public byte pidPosAltF1 { get; set; }
-        public byte pidPosAltF2 { get; set; }
+        public byte pidAccAltKp { get; set; }
+        public byte pidAccAltKi { get; set; }
+        public byte pidAccAltKd { get; set; }
+        public byte pidAccAltF1 { get; set; }
+        public byte pidAccAltF2 { get; set; }
 
-        public byte pidPosAltOutFilter { get; set; }
+        public byte pidVelAltOutFilter { get; set; }
 
     }
     class cMsgUdpT01

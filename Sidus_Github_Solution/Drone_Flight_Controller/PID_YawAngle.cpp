@@ -21,7 +21,7 @@ PID_YawAngle::PID_YawAngle(double* MeasuredVal, double* Output, double* Setpoint
 	d_bypass = 0;
 	d_bypass_enabled = false;
 
-	PID_YawAngle::SetOutputLimits(-250, 250);				//default output limit corresponds to 
+	PID_YawAngle::SetOutputLimits(-150, 150);				//default output limit corresponds to 
 
 													//PID_YawAngle::SetTunings(Kp, Ki, Kd);
 	Kp = 1;
@@ -58,7 +58,7 @@ bool PID_YawAngle::Compute()
 	unsigned long now = millis();
 	unsigned long dTime = (now - lastTime);
 
-	if (dTime >= 10)
+	if (dTime >= 2)
 	{
 		/*Compute all the working error variables*/
 
@@ -91,6 +91,9 @@ bool PID_YawAngle::Compute()
 		//Calculate Proportional Term
 		P_Result = Kp * errorSmooth;
 
+		if (P_Result > outMax) P_Result = outMax;
+		else if (P_Result < outMin) P_Result = outMin;
+
 		//Calculate Integral Term
 		if (inFlight)
 		{
@@ -107,11 +110,6 @@ bool PID_YawAngle::Compute()
 
 			if (!transientInterval)
 			{
-				//errorSum -= errorArray[errorArrayIndex];
-				//errorSum += errorSmooth;
-				//errorArray[errorArrayIndex] = errorSmooth;
-				//errorArrayIndex = (errorArrayIndex + 1) % errorArraySize;
-				//I_Result = Ki * dTimeInSec * errorSum;
 				I_Result += (Ki * dTimeInSec * errorSmooth);
 
 				//We may choose to limit the I term one third of maximum PID output
@@ -121,7 +119,6 @@ bool PID_YawAngle::Compute()
 		}
 		else
 		{
-			errorSum = 0;
 			I_Result = 0;
 		}
 
@@ -130,7 +127,7 @@ bool PID_YawAngle::Compute()
 		if (d_bypass_enabled)
 		{
 			errorDerivative = (deltaSetpoint) / dTimeInSec;
-			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+			errorDerivativeSmooth =  errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
 			D_Result = Kd * (errorDerivativeSmooth + (-*d_bypass));
 		}
 		else
@@ -230,9 +227,6 @@ void PID_YawAngle::Initialize()
 	errorSmooth = 0;
 	errorDerivativeSmooth = 0;
 	inFlight = false;
-	errorArrayIndex = 0;
-	errorArray[0] = 0;
-	errorSum = 0;
 	transientInterval = true;
 	transientSetpointThreshold = 5;
 	transientStartTime = millis();
@@ -268,6 +262,8 @@ int PID_YawAngle::GetMode() { return  inAuto ? AUTOMATIC : MANUAL; }
 
 void PID_YawAngle::SetFlightMode(bool isInFlight)
 {
+
 	inFlight = isInFlight;
+
 }
 

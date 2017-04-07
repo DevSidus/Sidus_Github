@@ -279,8 +279,8 @@ void setCoWorkerTxDataFields()
 
 #ifdef INVERSE_IMU
 	MsgCoWorkerTx.mpuGyroX = gg[0];
-	MsgCoWorkerTx.mpuGyroY = -gg[1];
-	MsgCoWorkerTx.mpuGyroZ = -gg[2];
+	MsgCoWorkerTx.mpuGyroY = gg[1]; //neg
+	MsgCoWorkerTx.mpuGyroZ = gg[2]; //neg
 
 	MsgCoWorkerTx.mpuAccX = aa.x;
 	MsgCoWorkerTx.mpuAccY = -aa.y;
@@ -300,8 +300,8 @@ void setCoWorkerTxDataFields()
 	MsgCoWorkerTx.mpuRoll = tempRoll;
 #else
 	MsgCoWorkerTx.mpuGyroX = gg[0];
-	MsgCoWorkerTx.mpuGyroY = gg[1];
-	MsgCoWorkerTx.mpuGyroZ = gg[2];
+	MsgCoWorkerTx.mpuGyroY = -gg[1]; //neg
+	MsgCoWorkerTx.mpuGyroZ = -gg[2]; //neg
 
 	MsgCoWorkerTx.mpuAccX = aa.x;
 	MsgCoWorkerTx.mpuAccY = aa.y;

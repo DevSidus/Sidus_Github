@@ -60,6 +60,8 @@ class PID
 	double Get_I_Result();
 	double Get_D_Result();
 
+	void Set_I_Result(double);
+
 	int GetMode();						  //  inside the PID.
 	void SetFlightMode(bool);			  //For the I term computation enabling
 
@@ -94,10 +96,6 @@ class PID
 	bool d_bypass_enabled;
 
 	bool inFlight;
-	int errorArraySize = 320;
-	double errorArray[320];
-	short errorArrayIndex;
-	double errorSum;
 	bool transientInterval;
 	int transientSetpointThreshold;
 	unsigned long transientStartTime;

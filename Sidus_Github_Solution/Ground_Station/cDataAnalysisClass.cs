@@ -16,9 +16,9 @@ namespace Ground_Station
         public short R1_mpuGyroX { get; set; }
         public short R1_mpuGyroY { get; set; }
         public short R1_mpuGyroZ { get; set; }
-        //public short R1_mpuAccX { get; set; }
-        //public short R1_mpuAccY { get; set; }
-        //public short R1_mpuAccZ { get; set; }
+        public short R1_mpuAccX { get; set; }
+        public short R1_mpuAccY { get; set; }
+        public short R1_mpuAccZ { get; set; }
         //public short R1_mpuAccRealX { get; set; }
         //public short R1_mpuAccRealY { get; set; }
         //public short R1_mpuAccRealZ { get; set; }
@@ -122,16 +122,16 @@ namespace Ground_Station
         public byte R2_pidVelAltF1 { get; set; }
         public byte R2_pidVelAltF2 { get; set; }
 
-        public byte R2_pidPosAltKp { get; set; }
-        public byte R2_pidPosAltKi { get; set; }
-        public byte R2_pidPosAltKd { get; set; }
-        public short R2_pidPosAltOutput { get; set; }
-        public short R2_pidPosAltPresult { get; set; }
-        public short R2_pidPosAltIresult { get; set; }
-        public short R2_pidPosAltDresult { get; set; }
-        public byte R2_pidPosAltF1 { get; set; }
-        public byte R2_pidPosAltF2 { get; set; }
-        public byte R2_pidPosAltOutFilter { get; set; }
+        public byte R2_pidAccAltKp { get; set; }
+        public byte R2_pidAccAltKi { get; set; }
+        public byte R2_pidAccAltKd { get; set; }
+        public short R2_pidAccAltOutput { get; set; }
+        public short R2_pidAccAltPresult { get; set; }
+        public short R2_pidAccAltIresult { get; set; }
+        public short R2_pidAccAltDresult { get; set; }
+        public byte R2_pidAccAltF1 { get; set; }
+        public byte R2_pidAccAltF2 { get; set; }
+        public byte R2_pidAccAltOutFilter { get; set; }
 
     }
 

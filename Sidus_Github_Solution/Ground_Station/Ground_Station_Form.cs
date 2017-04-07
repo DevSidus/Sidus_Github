@@ -111,7 +111,7 @@ namespace Ground_Station
             tb_pid_angle_yaw_kp_Scroll(this, e);
             tb_pid_rate_yaw_kp_Scroll(this, e);
             tb_pid_vel_alt_kp_Scroll(this, e);
-            tb_pid_pos_alt_kp_Scroll(this, e);
+            tb_pid_acc_alt_kp_Scroll(this, e);
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
         }
         
@@ -148,6 +148,11 @@ namespace Ground_Station
             DataAnalysisObj.data.R1_mpuGyroX = MsgUdpR01.message.coWorkerTxPacket.mpuGyroX;
             DataAnalysisObj.data.R1_mpuGyroY = MsgUdpR01.message.coWorkerTxPacket.mpuGyroY;
             DataAnalysisObj.data.R1_mpuGyroZ = MsgUdpR01.message.coWorkerTxPacket.mpuGyroZ;
+
+            DataAnalysisObj.data.R1_mpuAccX = MsgUdpR01.message.coWorkerTxPacket.mpuAccX;
+            DataAnalysisObj.data.R1_mpuAccY = MsgUdpR01.message.coWorkerTxPacket.mpuAccY;
+            DataAnalysisObj.data.R1_mpuAccZ = MsgUdpR01.message.coWorkerTxPacket.mpuAccZ;
+            
             DataAnalysisObj.data.R1_mpuPitch = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuPitch * 180.0 / Math.PI);
             DataAnalysisObj.data.R1_mpuRoll = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuRoll * 180.0 / Math.PI);
             DataAnalysisObj.data.R1_mpuYaw = (float)(MsgUdpR01.message.coWorkerTxPacket.mpuYaw * 180.0 / Math.PI);
@@ -234,16 +239,16 @@ namespace Ground_Station
             DataAnalysisObj.data.R2_pidVelAltDresult = MsgUdpR01.message.serialR01RelayPacket.pidVelAltDresult;
             DataAnalysisObj.data.R2_pidVelAltF1 = MsgUdpR01.message.serialR01RelayPacket.pidVelAltF1;
             DataAnalysisObj.data.R2_pidVelAltF2 = MsgUdpR01.message.serialR01RelayPacket.pidVelAltF2;
-            DataAnalysisObj.data.R2_pidPosAltKp = MsgUdpR01.message.serialR01RelayPacket.pidPosAltKp;
-            DataAnalysisObj.data.R2_pidPosAltKi = MsgUdpR01.message.serialR01RelayPacket.pidPosAltKi;
-            DataAnalysisObj.data.R2_pidPosAltKd = MsgUdpR01.message.serialR01RelayPacket.pidPosAltKd;
-            DataAnalysisObj.data.R2_pidPosAltOutput = MsgUdpR01.message.serialR01RelayPacket.pidPosAltOutput;
-            DataAnalysisObj.data.R2_pidPosAltPresult = MsgUdpR01.message.serialR01RelayPacket.pidPosAltPresult;
-            DataAnalysisObj.data.R2_pidPosAltIresult = MsgUdpR01.message.serialR01RelayPacket.pidPosAltIresult;
-            DataAnalysisObj.data.R2_pidPosAltDresult = MsgUdpR01.message.serialR01RelayPacket.pidPosAltDresult;
-            DataAnalysisObj.data.R2_pidPosAltF1 = MsgUdpR01.message.serialR01RelayPacket.pidPosAltF1;
-            DataAnalysisObj.data.R2_pidPosAltF2 = MsgUdpR01.message.serialR01RelayPacket.pidPosAltF2;
-            DataAnalysisObj.data.R2_pidPosAltOutFilter = MsgUdpR01.message.serialR01RelayPacket.pidPosAltOutFilter;
+            DataAnalysisObj.data.R2_pidAccAltKp = MsgUdpR01.message.serialR01RelayPacket.pidAccAltKp;
+            DataAnalysisObj.data.R2_pidAccAltKi = MsgUdpR01.message.serialR01RelayPacket.pidAccAltKi;
+            DataAnalysisObj.data.R2_pidAccAltKd = MsgUdpR01.message.serialR01RelayPacket.pidAccAltKd;
+            DataAnalysisObj.data.R2_pidAccAltOutput = MsgUdpR01.message.serialR01RelayPacket.pidAccAltOutput;
+            DataAnalysisObj.data.R2_pidAccAltPresult = MsgUdpR01.message.serialR01RelayPacket.pidAccAltPresult;
+            DataAnalysisObj.data.R2_pidAccAltIresult = MsgUdpR01.message.serialR01RelayPacket.pidAccAltIresult;
+            DataAnalysisObj.data.R2_pidAccAltDresult = MsgUdpR01.message.serialR01RelayPacket.pidAccAltDresult;
+            DataAnalysisObj.data.R2_pidAccAltF1 = MsgUdpR01.message.serialR01RelayPacket.pidAccAltF1;
+            DataAnalysisObj.data.R2_pidAccAltF2 = MsgUdpR01.message.serialR01RelayPacket.pidAccAltF2;
+            DataAnalysisObj.data.R2_pidAccAltOutFilter = MsgUdpR01.message.serialR01RelayPacket.pidAccAltOutFilter;
 
 
         }
@@ -651,72 +656,67 @@ namespace Ground_Station
             MsgUdpT01.message.pidAngleYawOutFilter = Convert.ToByte(tb_pid_angle_yaw_out_filter.Value);
         }
 
-        private void tb_pid_pos_alt_kp_Scroll(object sender, EventArgs e)
+        private void tb_pid_acc_alt_kp_Scroll(object sender, EventArgs e)
         {
-            toolTip1.SetToolTip(tb_pid_pos_alt_kp, tb_pid_pos_alt_kp.Value.ToString());
-            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+            toolTip1.SetToolTip(tb_pid_acc_alt_kp, tb_pid_acc_alt_kp.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccAlt);
 
-            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
-            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
-            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
-            MsgUdpT01.message.pidPosAltF1 = Convert.ToByte(tb_pid_pos_alt_f1.Value);
-            MsgUdpT01.message.pidPosAltF2 = Convert.ToByte(tb_pid_pos_alt_f2.Value);
-            MsgUdpT01.message.pidPosAltOutFilter = Convert.ToByte(tb_pid_pos_alt_out_filter.Value);
+            MsgUdpT01.message.pidAccAltKp = Convert.ToByte(tb_pid_acc_alt_kp.Value);
+            MsgUdpT01.message.pidAccAltKi = Convert.ToByte(tb_pid_acc_alt_ki.Value);
+            MsgUdpT01.message.pidAccAltKd = Convert.ToByte(tb_pid_acc_alt_kd.Value);
+            MsgUdpT01.message.pidAccAltF1 = Convert.ToByte(tb_pid_acc_alt_f1.Value);
+            MsgUdpT01.message.pidAccAltF2 = Convert.ToByte(tb_pid_acc_alt_f2.Value);
         }
 
-        private void tb_pid_pos_alt_ki_Scroll(object sender, EventArgs e)
+        private void tb_pid_acc_alt_ki_Scroll(object sender, EventArgs e)
         {
-            toolTip1.SetToolTip(tb_pid_pos_alt_ki, tb_pid_pos_alt_ki.Value.ToString());
-            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+            toolTip1.SetToolTip(tb_pid_acc_alt_ki, tb_pid_acc_alt_ki.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccAlt);
 
-            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
-            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
-            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
-            MsgUdpT01.message.pidPosAltF1 = Convert.ToByte(tb_pid_pos_alt_f1.Value);
-            MsgUdpT01.message.pidPosAltF2 = Convert.ToByte(tb_pid_pos_alt_f2.Value);
-            MsgUdpT01.message.pidPosAltOutFilter = Convert.ToByte(tb_pid_pos_alt_out_filter.Value);
+            MsgUdpT01.message.pidAccAltKp = Convert.ToByte(tb_pid_acc_alt_kp.Value);
+            MsgUdpT01.message.pidAccAltKi = Convert.ToByte(tb_pid_acc_alt_ki.Value);
+            MsgUdpT01.message.pidAccAltKd = Convert.ToByte(tb_pid_acc_alt_kd.Value);
+            MsgUdpT01.message.pidAccAltF1 = Convert.ToByte(tb_pid_acc_alt_f1.Value);
+            MsgUdpT01.message.pidAccAltF2 = Convert.ToByte(tb_pid_acc_alt_f2.Value);
         }
 
-        private void tb_pid_pos_alt_kd_Scroll(object sender, EventArgs e)
+        private void tb_pid_acc_alt_kd_Scroll(object sender, EventArgs e)
         {
 
-            toolTip1.SetToolTip(tb_pid_pos_alt_kd, tb_pid_pos_alt_kd.Value.ToString());
-            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+            toolTip1.SetToolTip(tb_pid_acc_alt_kd, tb_pid_acc_alt_kd.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccAlt);
 
-            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
-            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
-            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
-            MsgUdpT01.message.pidPosAltF1 = Convert.ToByte(tb_pid_pos_alt_f1.Value);
-            MsgUdpT01.message.pidPosAltF2 = Convert.ToByte(tb_pid_pos_alt_f2.Value);
-            MsgUdpT01.message.pidPosAltOutFilter = Convert.ToByte(tb_pid_pos_alt_out_filter.Value);
+            MsgUdpT01.message.pidAccAltKp = Convert.ToByte(tb_pid_acc_alt_kp.Value);
+            MsgUdpT01.message.pidAccAltKi = Convert.ToByte(tb_pid_acc_alt_ki.Value);
+            MsgUdpT01.message.pidAccAltKd = Convert.ToByte(tb_pid_acc_alt_kd.Value);
+            MsgUdpT01.message.pidAccAltF1 = Convert.ToByte(tb_pid_acc_alt_f1.Value);
+            MsgUdpT01.message.pidAccAltF2 = Convert.ToByte(tb_pid_acc_alt_f2.Value);
         }
 
-        private void tb_pid_pos_alt_f1_Scroll(object sender, EventArgs e)
+        private void tb_pid_acc_alt_f1_Scroll(object sender, EventArgs e)
         {
 
-            toolTip1.SetToolTip(tb_pid_pos_alt_f1, tb_pid_pos_alt_f1.Value.ToString());
-            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+            toolTip1.SetToolTip(tb_pid_acc_alt_f1, tb_pid_acc_alt_f1.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccAlt);
 
-            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
-            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
-            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
-            MsgUdpT01.message.pidPosAltF1 = Convert.ToByte(tb_pid_pos_alt_f1.Value);
-            MsgUdpT01.message.pidPosAltF2 = Convert.ToByte(tb_pid_pos_alt_f2.Value);
-            MsgUdpT01.message.pidPosAltOutFilter = Convert.ToByte(tb_pid_pos_alt_out_filter.Value);
+            MsgUdpT01.message.pidAccAltKp = Convert.ToByte(tb_pid_acc_alt_kp.Value);
+            MsgUdpT01.message.pidAccAltKi = Convert.ToByte(tb_pid_acc_alt_ki.Value);
+            MsgUdpT01.message.pidAccAltKd = Convert.ToByte(tb_pid_acc_alt_kd.Value);
+            MsgUdpT01.message.pidAccAltF1 = Convert.ToByte(tb_pid_acc_alt_f1.Value);
+            MsgUdpT01.message.pidAccAltF2 = Convert.ToByte(tb_pid_acc_alt_f2.Value);
         }
 
-        private void tb_pid_pos_alt_f2_Scroll(object sender, EventArgs e)
+        private void tb_pid_acc_alt_f2_Scroll(object sender, EventArgs e)
         {
 
-            toolTip1.SetToolTip(tb_pid_pos_alt_f2, tb_pid_pos_alt_f2.Value.ToString());
-            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+            toolTip1.SetToolTip(tb_pid_acc_alt_f2, tb_pid_acc_alt_f2.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccAlt);
 
-            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
-            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
-            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
-            MsgUdpT01.message.pidPosAltF1 = Convert.ToByte(tb_pid_pos_alt_f1.Value);
-            MsgUdpT01.message.pidPosAltF2 = Convert.ToByte(tb_pid_pos_alt_f2.Value);
-            MsgUdpT01.message.pidPosAltOutFilter = Convert.ToByte(tb_pid_pos_alt_out_filter.Value);
+            MsgUdpT01.message.pidAccAltKp = Convert.ToByte(tb_pid_acc_alt_kp.Value);
+            MsgUdpT01.message.pidAccAltKi = Convert.ToByte(tb_pid_acc_alt_ki.Value);
+            MsgUdpT01.message.pidAccAltKd = Convert.ToByte(tb_pid_acc_alt_kd.Value);
+            MsgUdpT01.message.pidAccAltF1 = Convert.ToByte(tb_pid_acc_alt_f1.Value);
+            MsgUdpT01.message.pidAccAltF2 = Convert.ToByte(tb_pid_acc_alt_f2.Value);
         }
 
         private void tb_pid_vel_alt_kp_Scroll(object sender, EventArgs e)
@@ -729,6 +729,7 @@ namespace Ground_Station
             MsgUdpT01.message.pidVelAltKd = Convert.ToByte(tb_pid_vel_alt_kd.Value);
             MsgUdpT01.message.pidVelAltF1 = Convert.ToByte(tb_pid_vel_alt_f1.Value);
             MsgUdpT01.message.pidVelAltF2 = Convert.ToByte(tb_pid_vel_alt_f2.Value);
+            MsgUdpT01.message.pidVelAltOutFilter = Convert.ToByte(tb_pid_vel_alt_out_filter.Value);
         }
 
         private void tb_pid_vel_alt_ki_Scroll(object sender, EventArgs e)
@@ -741,6 +742,7 @@ namespace Ground_Station
             MsgUdpT01.message.pidVelAltKd = Convert.ToByte(tb_pid_vel_alt_kd.Value);
             MsgUdpT01.message.pidVelAltF1 = Convert.ToByte(tb_pid_vel_alt_f1.Value);
             MsgUdpT01.message.pidVelAltF2 = Convert.ToByte(tb_pid_vel_alt_f2.Value);
+            MsgUdpT01.message.pidVelAltOutFilter = Convert.ToByte(tb_pid_vel_alt_out_filter.Value);
         }
 
         private void tb_pid_vel_alt_kd_Scroll(object sender, EventArgs e)
@@ -754,6 +756,7 @@ namespace Ground_Station
             MsgUdpT01.message.pidVelAltKd = Convert.ToByte(tb_pid_vel_alt_kd.Value);
             MsgUdpT01.message.pidVelAltF1 = Convert.ToByte(tb_pid_vel_alt_f1.Value);
             MsgUdpT01.message.pidVelAltF2 = Convert.ToByte(tb_pid_vel_alt_f2.Value);
+            MsgUdpT01.message.pidVelAltOutFilter = Convert.ToByte(tb_pid_vel_alt_out_filter.Value);
         }
 
         private void tb_pid_vel_alt_f1_Scroll(object sender, EventArgs e)
@@ -767,6 +770,7 @@ namespace Ground_Station
             MsgUdpT01.message.pidVelAltKd = Convert.ToByte(tb_pid_vel_alt_kd.Value);
             MsgUdpT01.message.pidVelAltF1 = Convert.ToByte(tb_pid_vel_alt_f1.Value);
             MsgUdpT01.message.pidVelAltF2 = Convert.ToByte(tb_pid_vel_alt_f2.Value);
+            MsgUdpT01.message.pidVelAltOutFilter = Convert.ToByte(tb_pid_vel_alt_out_filter.Value);
         }
 
         private void tb_pid_vel_alt_f2_Scroll(object sender, EventArgs e)
@@ -780,19 +784,7 @@ namespace Ground_Station
             MsgUdpT01.message.pidVelAltKd = Convert.ToByte(tb_pid_vel_alt_kd.Value);
             MsgUdpT01.message.pidVelAltF1 = Convert.ToByte(tb_pid_vel_alt_f1.Value);
             MsgUdpT01.message.pidVelAltF2 = Convert.ToByte(tb_pid_vel_alt_f2.Value);
-        }
-
-        private void tb_pid_pos_alt_out_filter_Scroll(object sender, EventArgs e)
-        {
-            toolTip1.SetToolTip(tb_pid_pos_alt_out_filter, tb_pid_pos_alt_out_filter.Value.ToString());
-            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
-
-            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
-            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
-            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
-            MsgUdpT01.message.pidPosAltF1 = Convert.ToByte(tb_pid_pos_alt_f1.Value);
-            MsgUdpT01.message.pidPosAltF2 = Convert.ToByte(tb_pid_pos_alt_f2.Value);
-            MsgUdpT01.message.pidPosAltOutFilter = Convert.ToByte(tb_pid_pos_alt_out_filter.Value);
+            MsgUdpT01.message.pidVelAltOutFilter = Convert.ToByte(tb_pid_vel_alt_out_filter.Value);
         }
 
         private void cb_AltitudeHold_CheckedChanged(object sender, EventArgs e)
@@ -805,6 +797,20 @@ namespace Ground_Station
             {
                 MsgUdpT01.message.autoModeCommand = Convert.ToByte(autoModeType.autoModeOFF);
             }
+        }
+
+        private void tb_pid_vel_alt_out_filter_Scroll(object sender, EventArgs e)
+        {
+
+            toolTip1.SetToolTip(tb_pid_vel_alt_out_filter, tb_pid_vel_alt_out_filter.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyVelAlt);
+
+            MsgUdpT01.message.pidVelAltKp = Convert.ToByte(tb_pid_vel_alt_kp.Value);
+            MsgUdpT01.message.pidVelAltKi = Convert.ToByte(tb_pid_vel_alt_ki.Value);
+            MsgUdpT01.message.pidVelAltKd = Convert.ToByte(tb_pid_vel_alt_kd.Value);
+            MsgUdpT01.message.pidVelAltF1 = Convert.ToByte(tb_pid_vel_alt_f1.Value);
+            MsgUdpT01.message.pidVelAltF2 = Convert.ToByte(tb_pid_vel_alt_f2.Value);
+            MsgUdpT01.message.pidVelAltOutFilter = Convert.ToByte(tb_pid_vel_alt_out_filter.Value);
         }
     }
 }

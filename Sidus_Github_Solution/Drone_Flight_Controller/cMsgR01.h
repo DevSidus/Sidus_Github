@@ -91,16 +91,16 @@ struct structMsgR01
 	unsigned char pidVelAltF1;
 	unsigned char pidVelAltF2;
 
-	unsigned char pidPosAltKp;
-	unsigned char pidPosAltKi;
-	unsigned char pidPosAltKd;
-	short pidPosAltOutput;
-	short pidPosAltPresult;
-	short pidPosAltIresult;
-	short pidPosAltDresult;
-	unsigned char pidPosAltF1;
-	unsigned char pidPosAltF2;
-	unsigned char pidPosAltOutFilter;
+	unsigned char pidAccAltKp;
+	unsigned char pidAccAltKi;
+	unsigned char pidAccAltKd;
+	short pidAccAltOutput;
+	short pidAccAltPresult;
+	short pidAccAltIresult;
+	short pidAccAltDresult;
+	unsigned char pidAccAltF1;
+	unsigned char pidAccAltF2;
+	unsigned char pidAccAltOutFilter;
 
 
 	char endChar;

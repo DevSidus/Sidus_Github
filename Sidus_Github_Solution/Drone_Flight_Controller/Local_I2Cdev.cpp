@@ -240,7 +240,7 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
 #endif
 		}
 
-		Wire.endTransmission();
+		//Wire.endTransmission();  //I2CDevLib #265
 	}
 #elif (ARDUINO == 100)
 	// Arduino v1.0.0, Wire library
@@ -264,7 +264,7 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
 #endif
 		}
 
-		Wire.endTransmission();
+		//Wire.endTransmission();  //I2CDevLib #265
 	}
 #elif (ARDUINO > 100)
 	// Arduino v1.0.1+, Wire library
@@ -273,10 +273,10 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
 	// I2C/TWI subsystem uses internal buffer that breaks with large data requests
 	// so if user requests more than BUFFER_LENGTH bytes, we have to do it in
 	// smaller chunks instead of all at once
-	for (uint8_t k = 0; k < length; k += min(length, BUFFER_LENGTH)) {
+	for (uint8_t k = 0; k < length; k += min(length - k, BUFFER_LENGTH)) {    // I2CDevLib #265 issue
 		Wire.beginTransmission(devAddr);
 		Wire.write(regAddr);
-		Wire.endTransmission();
+		Wire.endTransmission(false);   // I2CDevLib #181 issue
 		Wire.beginTransmission(devAddr);
 		Wire.requestFrom(devAddr, (uint8_t)min(length - k, BUFFER_LENGTH));
 
@@ -305,7 +305,7 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
 #endif
 
 	// check for timeout
-	if (timeout > 0 && millis() - t1 >= timeout && count < length) count = -1; // timeout
+	if (count < length) count = -1; // timeout //I2CDevLib #265   //timeout > 0 && millis() - t1 >= timeout && 
 
 #ifdef I2CDEV_SERIAL_DEBUG
 	Serial.print(". Done (");
@@ -371,7 +371,7 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
 			msb = !msb;
 		}
 
-		Wire.endTransmission();
+		//Wire.endTransmission();   //I2CDevLib #265
 	}
 #elif (ARDUINO == 100)
 	// Arduino v1.0.0, Wire library
@@ -405,7 +405,7 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
 			msb = !msb;
 		}
 
-		Wire.endTransmission();
+		//Wire.endTransmission(); //I2CDevLib #265
 	}
 #elif (ARDUINO > 100)
 	// Arduino v1.0.1+, Wire library
@@ -439,7 +439,7 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
 			msb = !msb;
 		}
 
-		Wire.endTransmission();
+		//Wire.endTransmission(); //I2CDevLib #265
 	}
 #endif
 
