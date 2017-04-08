@@ -233,8 +233,11 @@ struct structIMU
 	structEuler euler;
 	structEuler eulerRate;
 	struct3Daxis gyro;
+	struct3Daxis accel;
 	struct3Daxis accelWorld;
 	struct3Daxis accelBody;
+	struct3Daxis velWorld;
+	struct3Daxis posWorld;
 
 }mpu;
 

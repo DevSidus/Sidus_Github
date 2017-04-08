@@ -528,6 +528,10 @@ void updateMessageVariables()
 	mpu.gyro.y = MsgT01.message.coWorkerTxPacket.mpuGyroY; // in deg/sec
 	mpu.gyro.z = MsgT01.message.coWorkerTxPacket.mpuGyroZ; // in deg/sec
 
+	mpu.accel.x = MsgT01.message.coWorkerTxPacket.mpuAccX;
+	mpu.accel.y = MsgT01.message.coWorkerTxPacket.mpuAccY;
+	mpu.accel.z = MsgT01.message.coWorkerTxPacket.mpuAccZ;
+
 	mpu.accelBody.x = MsgT01.message.coWorkerTxPacket.mpuAccX;
 	mpu.accelBody.y = MsgT01.message.coWorkerTxPacket.mpuAccY;
 	mpu.accelBody.z = MsgT01.message.coWorkerTxPacket.mpuAccZ;
@@ -535,6 +539,10 @@ void updateMessageVariables()
 	mpu.accelWorld.x = MsgT01.message.coWorkerTxPacket.mpuAccWorldX;
 	mpu.accelWorld.y = MsgT01.message.coWorkerTxPacket.mpuAccWorldY;
 	mpu.accelWorld.z = MsgT01.message.coWorkerTxPacket.mpuAccWorldZ;
+
+	mpu.velWorld.z = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;
+	mpu.posWorld.z = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;
+
 
 	//Serial.print("theta:");
 	//Serial.print(MsgT01.message.coWorkerTxPacket.mpuPitch * 180 / M_PI);
@@ -811,21 +819,20 @@ void processPID()
 	pidRateYaw.Compute();
 	
 
-
-	pidVars.velAlt.d_bypass = (MsgT01.message.coWorkerTxPacket.mpuAccWorldZ) / 8.36;  // cm/second^2
+	pidVars.velAlt.d_bypass = mpu.accelWorld.z / 8.36;  // cm/second^2
 	pidVars.velAlt.setpoint = cmdRx6thCh;
-	pidVars.velAlt.sensedVal = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;  // cm/second
+	pidVars.velAlt.sensedVal = mpu.velWorld.z;  // cm/second
 	pidVelAlt.Compute();
 	pidVars.velAlt.outputFiltered = basicFilter(pidVars.velAlt.output, pidVars.velAlt.outputFilterConstant, pidVars.velAlt.outputFiltered);
 
-
+	
 	//Transform vel pid outputs to body coordinate axis in order to get correct acceleration wrt world
 	transformVelPIDoutputsToBody();
 
 	pidVars.accAlt.setpoint = accelCmd.z;   // cmd/second^2
-	pidVars.accAlt.sensedVal = (MsgT01.message.coWorkerTxPacket.mpuAccWorldZ) / 8.36;  // cm/second^2
+	pidVars.accAlt.sensedVal = mpu.accel.z / 8.3;  // cm/second^2
 	pidAccAlt.Compute();
-
+	
 	postPIDprocesses();
 
 
@@ -1072,18 +1079,20 @@ void transformAnglePIDoutputsToBody()
 
 void transformVelPIDoutputsToBody()
 {
+
+	//this code will be modified according to the behaviour of quadcopter during flight tests
 	double tempVar = cos(mpu.euler.phi)*cos(mpu.euler.theta);
 	if (abs(tempVar) > 0.5)
 	{
-		accelCmd.z = pidVars.velAlt.outputFiltered / tempVar;
+		accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / tempVar) + 500;
 	}
 	else if (tempVar >= 0)
 	{
-		accelCmd.z = pidVars.velAlt.outputFiltered / 0.5;
+		accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / 0.5) + 500;
 	}
 	else
 	{
-		accelCmd.z = pidVars.velAlt.outputFiltered / -0.5;
+		accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / -0.5) -500;   //this condition should be discussed
 	}
 
 }
