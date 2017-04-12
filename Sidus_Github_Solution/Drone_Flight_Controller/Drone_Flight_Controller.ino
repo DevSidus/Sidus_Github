@@ -492,6 +492,7 @@ void serialTransmit()
 	MsgR01.message.pidVelAltKi = pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
 	MsgR01.message.pidVelAltKd = pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
 	MsgR01.message.pidVelAltOutput = pidVars.velAlt.output;
+
 	MsgR01.message.pidVelAltPresult = pidVelAlt.Get_P_Result();
 	MsgR01.message.pidVelAltIresult = pidVelAlt.Get_I_Result();
 	MsgR01.message.pidVelAltDresult = pidVelAlt.Get_D_Result();
@@ -504,6 +505,7 @@ void serialTransmit()
 	MsgR01.message.pidAccAltKi = pidVars.accAlt.Ki / RESOLUTION_PID_POS_KI;
 	MsgR01.message.pidAccAltKd = pidVars.accAlt.Kd / RESOLUTION_PID_POS_KD;
 	MsgR01.message.pidAccAltOutput = pidVars.accAlt.output;
+
 	MsgR01.message.pidAccAltPresult = pidAccAlt.Get_P_Result();
 	MsgR01.message.pidAccAltIresult = pidAccAlt.Get_I_Result();
 	MsgR01.message.pidAccAltDresult = pidAccAlt.Get_D_Result();
@@ -1081,18 +1083,20 @@ void transformVelPIDoutputsToBody()
 {
 
 	//this code will be modified according to the behaviour of quadcopter during flight tests
-	double tempVar = cos(mpu.euler.phi)*cos(mpu.euler.theta);
-	if (abs(tempVar) > 0.5)
-	{
-		accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / tempVar) + 500;
-	}
-	else if (tempVar >= 0)
-	{
-		accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / 0.5) + 500;
-	}
-	else
-	{
-		accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / -0.5) -500;   //this condition should be discussed
-	}
+	//double tempVar = cos(mpu.euler.phi)*cos(mpu.euler.theta);
+	//if (abs(tempVar) > 0.5)
+	//{
+	//	accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / tempVar) + 500;
+	//}
+	//else if (tempVar >= 0)
+	//{
+	//	accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / 0.5) + 500;
+	//}
+	//else
+	//{
+	//	accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / -0.5) -500;   //this condition should be discussed
+	//}
+
+	accelCmd.z = (pidVars.velAlt.outputFiltered + 1000);
 
 }
