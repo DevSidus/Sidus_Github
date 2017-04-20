@@ -23,13 +23,18 @@
 #include "cRxFilter.h"
 #include "cBuzzerMelody.h"
 
-
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
 cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT01.message.startChar2, MsgT01.message.endChar);
-//HardwareSerial Serial2(2);
+
+#ifdef FCB_VERSION_2_1
+	HardwareSerial SerialCom(2);
+#else
+	HardwareSerial SerialCom(0);
+#endif // FCB_VERSION_2_1
+
 
 PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint);
 PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.d_bypass);
@@ -51,8 +56,7 @@ cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-	Serial.begin(SERIAL_COM_SPEED);
-	//Serial2.begin(SERIAL_COM_SPEED);
+	SerialCom.begin(SERIAL_COM_SPEED);
 	
 	
 	//Configure all PINs
@@ -383,7 +387,7 @@ void test_task()
 
 void serialCheck()
 {
-	int numberofbytes = Serial.available();
+	int numberofbytes = SerialCom.available();
 	if (numberofbytes > 0)
 	{
 
@@ -391,7 +395,7 @@ void serialCheck()
 		if (numberofbytes <= sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT)
 		{
 			unsigned char buffer[sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT];
-			Serial.readBytes(buffer, numberofbytes);
+			SerialCom.readBytes(buffer, numberofbytes);
 			serialParse.Push(buffer, numberofbytes);
 			if (serialParse.getParsedData(MsgT01.dataBytes, sizeof(MsgT01.message)))
 			{
@@ -405,7 +409,7 @@ void serialCheck()
 		{
 			//Just read it
 			unsigned char buffer[sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT];
-			Serial.readBytes(buffer, sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT);
+			SerialCom.readBytes(buffer, sizeof(MsgT01.message) * SERIAL_PARSE_OVF_MULT);
 		}
 
 	}
@@ -418,8 +422,8 @@ void serialTransmit()
 	MsgR01.message.statusRx = statusRx;
 	
 	MsgR01.message.rxThrottle = cmdRxThr;
-	MsgR01.message.rxPitch = cmdRxPitch;
-	MsgR01.message.rxRoll = cmdRxRoll;
+	MsgR01.message.rxPitch = cmdRxPitchCalibrated;
+	MsgR01.message.rxRoll = cmdRxRollCalibrated;
 	MsgR01.message.rxYaw = cmdRxYaw;
 
 	MsgR01.message.pidRatePitchKp = pidVars.ratePitch.Kp / RESOLUTION_PID_RATE_KP;
@@ -516,7 +520,7 @@ void serialTransmit()
 
 
 	MsgR01.getPacket();
-	Serial.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
+	SerialCom.write(MsgR01.dataBytes, sizeof(MsgR01.dataBytes));
 }
 
 void updateMessageVariables()
@@ -1010,17 +1014,17 @@ void postPIDprocesses()
 	}
 	else if (autoModeStatus == autoModeAltToOFF)
 	{
-		if (abs(cmdMotorThr - cmdRxThr) < 4)
+		if (abs(cmdMotorThr - cmdRxThr) < 8)
 		{
 			autoModeStatus = autoModeOFF;
 		}
 		else if (cmdMotorThr > cmdRxThr)
 		{
-			cmdMotorThr -= 0.2;
+			cmdMotorThr -= 0.3;
 		}
 		else
 		{
-			cmdMotorThr += 0.2;
+			cmdMotorThr += 0.3;
 		}
 	}
 	else
@@ -1072,10 +1076,13 @@ void getBodyToEulerAngularRates()
 
 void transformAnglePIDoutputsToBody()
 {
-	rateCmd.x = pidVars.angleRoll.outputFiltered - sin(mpu.euler.theta) * pidVars.angleYaw.outputFiltered;
-	rateCmd.y = cos(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + sin(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
-	rateCmd.z = -sin(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + cos(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
+	//rateCmd.x = pidVars.angleRoll.outputFiltered - sin(mpu.euler.theta) * pidVars.angleYaw.outputFiltered;
+	//rateCmd.y = cos(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + sin(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
+	//rateCmd.z = -sin(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + cos(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
 
+	rateCmd.x = pidVars.angleRoll.outputFiltered;
+	rateCmd.y = pidVars.anglePitch.outputFiltered;
+	rateCmd.z = pidVars.angleYaw.outputFiltered;
 
 }
 

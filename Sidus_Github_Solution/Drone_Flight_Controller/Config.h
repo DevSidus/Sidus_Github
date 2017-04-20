@@ -11,6 +11,11 @@ This header file define all the configurable variables including constants, pin 
 //Comment out below line if you have 6 CH RX_TX
 #define		MY_RX_TX_IS_6_CHANNEL
 
+//Comment out one of the below lines according to the board version number you have
+#define		FCB_VERSION_2_1
+//#define		FCB_VERSION_2_0
+
+
 //Wifi, UDP Definitions
 
 
