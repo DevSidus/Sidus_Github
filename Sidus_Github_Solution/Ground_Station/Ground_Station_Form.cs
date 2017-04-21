@@ -19,6 +19,9 @@ namespace Ground_Station
         cMsgUdpT01 MsgUdpT01 = new cMsgUdpT01();
         cMsgUdpR01 MsgUdpR01 = new cMsgUdpR01();
 
+        String textFileName = "";
+        
+
 
 
         cDataAnalysisClass DataAnalysisObj = new cDataAnalysisClass();
@@ -105,7 +108,21 @@ namespace Ground_Station
 
             ssMainLabel1.Text = "IP:" + qgsUdp.GetLocalIPv4();
             ssMainLabel2.Text = "Port#:" + qgsUdp.port.ToString();
-            
+
+            textFileName = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "_" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString() + ".txt";
+
+
+            String insertLine = " ";
+            foreach (var prop in DataAnalysisObj.data.GetType().GetProperties())
+            {
+                insertLine = insertLine + prop.Name + "  ";
+
+            }
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@textFileName, true))
+            {
+                file.WriteLine(insertLine);
+            }
+
         }
         
         
@@ -128,6 +145,28 @@ namespace Ground_Station
             updateMessagesForDataAnalysis();
             DataAnalysisObj.update(lvDataAnalysis, pnlDataAnalysis, tbGraphBackColor.BackColor);
             DataTxDisplayObj.update(lvDataTx, MsgUdpT01.message);
+
+            writeToTextFile();
+
+
+        }
+
+        private void writeToTextFile()
+        {
+            String insertLine = " ";
+            foreach (var prop in DataAnalysisObj.data.GetType().GetProperties())
+            {
+
+                insertLine = insertLine + string.Format("{0,8:0.00}", Convert.ToDouble(prop.GetValue(DataAnalysisObj.data, null).ToString())) + "  ";
+
+            }
+
+
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@textFileName, true))
+            {
+                file.WriteLine(insertLine);
+            }
+
         }
 
         private void updateMessagesForDataAnalysis()
@@ -816,6 +855,14 @@ namespace Ground_Station
             tb_pid_vel_alt_kp_Scroll(this, e);
             tb_pid_acc_alt_kp_Scroll(this, e);
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@textFileName, true))
+            {
+                file.WriteLine("hello");
+            }
         }
     }
 }
