@@ -229,11 +229,15 @@ void processMpuTask()
 			mpu.dmpGetQuaternion(&q, fifoBuffer);
 			mpu.dmpGetGravity(&gravity, &q);
 			mpu.dmpGetAccel(&aa, fifoBuffer);
-			mpu.dmpGetGyro(gg, fifoBuffer);
+			//mpu.dmpGetGyro(gg, fifoBuffer);
 			mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
 			mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 			mpu.dmpGetEuler(euler, &q);
 			mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+
+			gg[0] = mpu.getRotationX / 16.38;
+			gg[1] = mpu.getRotationY / 16.38;
+			gg[2] = mpu.getRotationZ / 16.38;
 
 			//Serial.println(millis() - mpuLastDataTime);
 			mpuLastDataTime = millis();

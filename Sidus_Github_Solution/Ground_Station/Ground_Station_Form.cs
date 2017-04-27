@@ -856,14 +856,7 @@ namespace Ground_Station
             tb_pid_acc_alt_kp_Scroll(this, e);
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@textFileName, true))
-            {
-                file.WriteLine("hello");
-            }
-        }
+        
     }
 }
 
