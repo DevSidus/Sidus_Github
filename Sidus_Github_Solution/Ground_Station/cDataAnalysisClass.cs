@@ -12,6 +12,7 @@ namespace Ground_Station
     struct structData
     {
         //MsgCoWorkerTx Members
+        public UInt32 R1_timeStamp { get; set; }
         public byte R1_statusGS { get; set; }
         public short R1_mpuGyroX { get; set; }
         public short R1_mpuGyroY { get; set; }

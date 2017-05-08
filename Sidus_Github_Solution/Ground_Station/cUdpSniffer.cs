@@ -79,11 +79,14 @@ namespace Ground_Station
         public void ReceivePacket()
         {
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, port);
-            receivedData = udpServer.Receive(ref remoteEP);
-            receivedDataFresh = true;
-            timeSpan = DateTime.Now - lastTime;
-            lastTime = DateTime.Now;
+            if(udpServer.Available > 0)
+            {
+                receivedData = udpServer.Receive(ref remoteEP);
+                receivedDataFresh = true;
+                timeSpan = DateTime.Now - lastTime;
+                lastTime = DateTime.Now;
 
+            }
             if (timeSpan.TotalMilliseconds < connectionThresholdTime)
                 connectionHanged = false;
             else

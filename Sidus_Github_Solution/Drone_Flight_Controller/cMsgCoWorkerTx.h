@@ -5,6 +5,7 @@ using namespace std;
 #pragma pack(push, 1)
 struct structMsgCoWorkerTx
 {
+	unsigned int timeStamp;
 	unsigned char statusMpu;
 	unsigned char statusBaro;
 	unsigned char statusCompass;

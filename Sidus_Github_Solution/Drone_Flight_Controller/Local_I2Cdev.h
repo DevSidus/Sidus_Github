@@ -72,7 +72,7 @@ THE SOFTWARE.
 // Arduino-style "Serial.print" debug constant (uncomment to enable)
 // -----------------------------------------------------------------------------
 //#define I2CDEV_SERIAL_DEBUG
-#define BUFFER_LENGTH		128
+#define BUFFER_LENGTH		32
 
 #ifdef ARDUINO
 #if ARDUINO < 100

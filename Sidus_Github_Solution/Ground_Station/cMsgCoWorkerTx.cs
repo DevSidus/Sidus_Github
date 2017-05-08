@@ -10,6 +10,7 @@ namespace Ground_Station
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     struct structcMsgCoWorkerTx
     {
+        public UInt32 timeStamp { get; set; }
         public byte statusMpu { get; set; }
         public byte statusBaro { get; set; }
         public byte statusCompass { get; set; }

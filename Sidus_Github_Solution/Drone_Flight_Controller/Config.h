@@ -86,7 +86,7 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
 
-#define		PID_RATE_PITCH_KP			0.85
+#define		PID_RATE_PITCH_KP			0.80
 #define		PID_RATE_PITCH_KI			0.0
 #define		PID_RATE_PITCH_KD			0.07
 #define		PID_RATE_PITCH_OUTMIN		-250
@@ -95,7 +95,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_PITCH_F2_DEFAULT	0.3
 #define		PID_RATE_PITCH_OUT_FILT_CONSTANT	0.0
 
-#define		PID_ANGLE_PITCH_KP			3.3
+#define		PID_ANGLE_PITCH_KP			3.0
 #define		PID_ANGLE_PITCH_KI			1.0
 #define		PID_ANGLE_PITCH_KD			0.08
 #define		PID_ANGLE_PITCH_OUTMIN		-250
@@ -104,7 +104,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_PITCH_F2_DEFAULT	0.9
 #define		PID_ANGLE_PITCH_OUT_FILT_CONSTANT	0.88
 
-#define		PID_RATE_ROLL_KP			0.9
+#define		PID_RATE_ROLL_KP			0.80
 #define		PID_RATE_ROLL_KI			0.0
 #define		PID_RATE_ROLL_KD			0.07
 #define		PID_RATE_ROLL_OUTMIN		-250
@@ -113,7 +113,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_RATE_ROLL_F2_DEFAULT	0.3
 #define		PID_RATE_ROLL_OUT_FILT_CONSTANT		0.0
 
-#define		PID_ANGLE_ROLL_KP			3.6
+#define		PID_ANGLE_ROLL_KP			3.0
 #define		PID_ANGLE_ROLL_KI			1.0
 #define		PID_ANGLE_ROLL_KD			0.08
 #define		PID_ANGLE_ROLL_OUTMIN		-250
@@ -148,14 +148,14 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_VEL_ALT_OUTMIN		-500
 #define		PID_VEL_ALT_OUTMAX		500
 #define		PID_VEL_ALT_F1_DEFAULT	0.0
-#define		PID_VEL_ALT_F2_DEFAULT	0.3
+#define		PID_VEL_ALT_F2_DEFAULT	0.0
 #define		PID_VEL_ALT_OUT_FILT_CONSTANT		0
 
 #define		PID_ACC_ALT_KP			0.2
 #define		PID_ACC_ALT_KI			0.0
 #define		PID_ACC_ALT_KD			0.0
 #define		PID_ACC_ALT_F1_DEFAULT	0.0
-#define		PID_ACC_ALT_F2_DEFAULT	0.8
+#define		PID_ACC_ALT_F2_DEFAULT	0.94
 #define		PID_ACC_ALT_OUT_FILT_CONSTANT	0.3
 
 

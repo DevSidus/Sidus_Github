@@ -18,7 +18,7 @@ namespace Ground_Station
         cUdpSniffer qgsUdp = new cUdpSniffer(cConfig.UDP_PORT_NUM);
         cMsgUdpT01 MsgUdpT01 = new cMsgUdpT01();
         cMsgUdpR01 MsgUdpR01 = new cMsgUdpR01();
-
+        long udp_rx_reset_counter = 0;
         String textFileName = "";
         
 
@@ -36,52 +36,10 @@ namespace Ground_Station
         {
             //Initialize Form
             InitializeComponent();
-            //Subscribe BackgroundWorker bwUdpSniffer
-            bwUdpSniffer.WorkerReportsProgress = true;
-            bwUdpSniffer.DoWork += new DoWorkEventHandler(bwUdpSniffer_DoWork);
-            //bwUdpSniffer.ProgressChanged += new ProgressChangedEventHandler(bwUdpSniffer_ProgressChanged);
 
             bwUdpTransmit.WorkerReportsProgress = true;
             bwUdpTransmit.DoWork += new DoWorkEventHandler(bwUdpTransmit_DoWork);
 
-
-
-        }
-        private void bwUdpSniffer_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            //prbMainProgress.Value = e.ProgressPercentage;
-        }
-        private void bwUdpSniffer_DoWork(object sender, DoWorkEventArgs e)
-        {
-            long counter = 0;
-            while (true)
-            {
-                qgsUdp.ReceivePacket();
-                if (qgsUdp.receivedDataFresh)
-                {
-                    byte[] buffer = qgsUdp.getReceivedData();
-                    if (buffer.Length >= Marshal.SizeOf(MsgUdpR01.message))
-                    {
-                        Buffer.BlockCopy(buffer, 0, MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.message));
-                        counter = 0;
-                    }
-                }
-
-                checkUdpClientStatus();
-                
-                if (counter < 100)
-                {
-                    pnlHeartBeat.BackColor = System.Drawing.Color.Green;
-                }
-                else
-                {
-                    pnlHeartBeat.BackColor = System.Drawing.Color.OrangeRed;
-                }
-                
-
-                counter++;
-                System.Threading.Thread.Sleep(8);
-            }
         }
 
         private void bwUdpTransmit_DoWork(object sender, DoWorkEventArgs e)
@@ -100,11 +58,11 @@ namespace Ground_Station
         {
             DataAnalysisObj.init(lvDataAnalysis, pnlDataAnalysis);
             DataTxDisplayObj.init(lvDataTx, MsgUdpT01.message);
-
-            bwUdpSniffer.RunWorkerAsync();
+            
             bwUdpTransmit.RunWorkerAsync();
 
             timerDisplayRefresh.Enabled = true;
+            timerUdpReceive.Enabled = true;
 
             ssMainLabel1.Text = "IP:" + qgsUdp.GetLocalIPv4();
             ssMainLabel2.Text = "Port#:" + qgsUdp.port.ToString();
@@ -176,6 +134,7 @@ namespace Ground_Station
             //DataAnalysisObj.data.R1_baroTemp = MsgUdpR01.message.coWorkerTxPacket.baroTemp;
             //DataAnalysisObj.data.R1_compassHdg = MsgUdpR01.message.coWorkerTxPacket.compassHdg;
 
+            DataAnalysisObj.data.R1_timeStamp = MsgUdpR01.message.coWorkerTxPacket.timeStamp;
             DataAnalysisObj.data.R1_statusGS = MsgUdpR01.message.coWorkerTxPacket.statusGS;
             DataAnalysisObj.data.R1_mpuGyroX = MsgUdpR01.message.coWorkerTxPacket.mpuGyroX;
             DataAnalysisObj.data.R1_mpuGyroY = MsgUdpR01.message.coWorkerTxPacket.mpuGyroY;
@@ -856,7 +815,41 @@ namespace Ground_Station
             tb_pid_acc_alt_kp_Scroll(this, e);
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
         }
-        
+
+        private void timerUdpReceive_Tick(object sender, EventArgs e)
+        {
+            qgsUdp.ReceivePacket();
+            if (qgsUdp.receivedDataFresh)
+            {
+                byte[] buffer = qgsUdp.getReceivedData();
+                try
+                {
+                    if (buffer.Length >= Marshal.SizeOf(MsgUdpR01.message))
+                    {
+                        Buffer.BlockCopy(buffer, 0, MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.message));
+                        udp_rx_reset_counter = 0;
+                    }
+
+                }
+                catch
+                {
+
+                }
+
+            }
+
+            //checkUdpClientStatus();
+
+            //if (udp_rx_reset_counter < 100)
+            //{
+            //    pnlHeartBeat.BackColor = System.Drawing.Color.Green;
+            //}
+            //else
+            //{
+            //    pnlHeartBeat.BackColor = System.Drawing.Color.OrangeRed;
+            //}
+            udp_rx_reset_counter++;
+        }
     }
 }
 
