@@ -81,6 +81,42 @@
     <ClInclude Include="PID_AccAlt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos\FreeRTOS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos\FreeRTOSConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos\task.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver\gpio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos\queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos\semphr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\esp32\esp_err.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\log\esp_log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver\periph_ctrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver\rmt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos\ringbuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\soc\soc\rmt_reg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Local_Agenda.cpp">

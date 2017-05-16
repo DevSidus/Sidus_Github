@@ -9,6 +9,20 @@
 //Use ledc functions for motor pwm usage
 #include "esp32-hal-ledc.h"
 
+//#include "FreeRTOS.h"
+//#include "FreeRTOSConfig.h"
+//#include "task.h"
+//
+//#include "queue.h"
+//#include "semphr.h"
+//#include "esp_err.h"
+//#include "esp_log.h"
+//#include "rmt.h"
+//#include "periph_ctrl.h"
+//#include "rmt_reg.h"
+//#include "ringbuf.h"
+
+
 //Local include class and files
 #include "Local_Agenda.h"
 #include "Config.h"
@@ -23,11 +37,19 @@
 #include "cRxFilter.h"
 #include "cBuzzerMelody.h"
 
+
+
+//#define RMT_RX_GPIO_NUM  19     /*!< GPIO number for receiver */
+//#define RMT_CLK_DIV      80    /*!< RMT counter clock divider */
+//#define RMT_TICK_10_US    (80000000/RMT_CLK_DIV/100000)   /*!< RMT counter value for 10 us.(Source clock is APB clock) */
+
 //Global Class Definitions
 Agenda scheduler;
 cMsgT01 MsgT01;
 cMsgR01 MsgR01;
 cSerialParse serialParse(sizeof(MsgT01.message), MsgT01.message.startChar1, MsgT01.message.startChar2, MsgT01.message.endChar);
+
+
 
 #ifdef FCB_VERSION_2_1
 	HardwareSerial SerialCom(2);
@@ -58,6 +80,29 @@ cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 void setup() {
 	SerialCom.begin(SERIAL_COM_SPEED);
 	
+	//xTaskCreatePinnedToCore(
+	//	taskOne,          /* Task function. */
+	//	"TaskOne",        /* String with name of task. */
+	//	10000,            /* Stack size in words. */
+	//	NULL,             /* Parameter passed as input of the task */
+	//	1,                /* Priority of the task. */
+	//	NULL, 0);            /* Task handle. */
+
+	//xTaskCreatePinnedToCore(
+	//	taskTwo,          /* Task function. */
+	//	"TaskTwo",        /* String with name of task. */
+	//	10000,            /* Stack size in words. */
+	//	NULL,             /* Parameter passed as input of the task */
+	//	1,                /* Priority of the task. */
+	//	NULL, 0);            /* Task handle. */
+
+	//xTaskCreatePinnedToCore(my_task, "my_task", 20000, NULL, 10, NULL, 1);
+	//periph_module_enable(PERIPH_RMT_MODULE);
+
+	//pinMode(19, INPUT);
+	//pinMode(23, OUTPUT);
+
+	//gpio_set_pull_mode(GPIO_NUM_19, GPIO_PULLDOWN_ONLY);
 	
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
@@ -79,6 +124,7 @@ void setup() {
 
 	attachInterrupt(PIN_RX_5TH_CHAN, isrRx5thCh, CHANGE);
 	attachInterrupt(PIN_RX_6TH_CHAN, isrRx6thCh, CHANGE);
+	
 
 
 
@@ -96,9 +142,118 @@ void setup() {
 
 	initVariables();
 	initPIDtuning();
-
-
 }
+
+
+
+//void my_task(void * parameter)
+//{
+//
+//	SerialCom.println("Hello from my_task");
+//
+//
+//	rmt_config_t rmt_rx;
+//	rmt_rx.channel = RMT_CHANNEL_1;
+//	rmt_rx.gpio_num = GPIO_NUM_19;
+//	rmt_rx.clk_div = RMT_CLK_DIV;
+//	rmt_rx.mem_block_num = 1;
+//	rmt_rx.rmt_mode = RMT_MODE_RX;
+//	rmt_rx.rx_config.filter_en = true;
+//	rmt_rx.rx_config.filter_ticks_thresh = 100;
+//	rmt_rx.rx_config.idle_threshold = 4000;
+//	rmt_config(&rmt_rx);
+//	rmt_driver_install(rmt_rx.channel, 1000, 0);
+//
+//
+//	SerialCom.println("ggg 1");
+//
+//	RingbufHandle_t rb = NULL;
+//	//get RMT RX ringbuffer
+//	rmt_get_ringbuf_handler(RMT_CHANNEL_1, &rb);
+//	SerialCom.println("ggg 2");
+//	rmt_rx_start(RMT_CHANNEL_1, true);
+//	SerialCom.println("ggg 3");
+//	while (true) {
+//		//SerialCom.println("deneme");
+//		size_t rx_size = 0;
+//		//try to receive data from ringbuffer.
+//		//RMT driver will push all the data it receives to its ringbuffer.
+//		//We just need to parse the value and return the spaces of ringbuffer.
+//		rmt_item32_t* item = (rmt_item32_t*)xRingbufferReceive(rb, &rx_size, 1000);
+//		SerialCom.print("rxSize1:");
+//		SerialCom.println(rx_size);
+//		
+//		if (item) {
+//			//uint16_t rmt_addr;
+//			//uint16_t rmt_cmd;
+//			//int offset = 0;
+//			//while (1) {
+//
+//			SerialCom.print("dur0:");
+//			SerialCom.print(item->duration0);
+//			SerialCom.print("   dur1:");
+//			SerialCom.println(item->duration1);
+//
+//				//if (item->val != 0) {
+//
+//				//}
+//				//else {
+//				//	break;
+//				//}
+//			//}
+//			//after parsing the data, return spaces to ringbuffer.
+//			vRingbufferReturnItem(rb, (void*)item);
+//		}
+//		else {
+//			//break;
+//		}
+//
+//		delay(6);
+//	}
+//	vTaskDelete(NULL);
+//}
+//
+//void taskOne(void * parameter)
+//{
+//	SerialCom.print("Task 1: Executing on core ");
+//	SerialCom.println(xPortGetCoreID());
+//	for (int i = 0; true; i++) {
+//
+//		//SerialCom.println("Hello from task 1");
+//		if (i % 2 == 0)
+//		{
+//			digitalWrite(23, LOW);
+//			delay(20);
+//		}
+//		else
+//		{
+//			digitalWrite(23, HIGH);
+//			delay(2);
+//		}
+//
+//
+//	}
+//
+//	SerialCom.println("Ending task 1");
+//	vTaskDelete(NULL);
+//
+//}
+//
+//void taskTwo(void * parameter)
+//{
+//	SerialCom.print("Task 2: Executing on core ");
+//	SerialCom.println(xPortGetCoreID());
+//	for (int i = 0; i<10; i++) {
+//
+//		SerialCom.println("Hello from task 2");
+//		delay(1000);
+//	}
+//	SerialCom.println("Ending task 2");
+//	vTaskDelete(NULL);
+//
+//}
+
+
 // the loop function runs over and over again until power down or reset
 void loop() {
 	//Just call scheduler update and let it do all the process
