@@ -19,6 +19,19 @@ This header file define all the configurable variables including constants, pin 
 //Wifi, UDP Definitions
 
 
+
+//MS5611 Barometer Definitions
+#define		BAROMETER_INIT_THRESHOLD	2000
+#define		BARO_TEMP_MIN				-20
+#define		BARO_TEMP_MAX				100
+#define		BARO_ALT_MIN				-100
+#define		BARO_ALT_MAX				4000
+
+//HMC5883L Compass Definitions
+#define		COMPASS_OFFSET_X_DEFAULT	304
+#define		COMPASS_OFFSET_Y_DEFAULT	-360
+
+
 //Pin Definitions
 #define		PIN_LED				5
 
@@ -220,8 +233,14 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
-int16_t raw_Acc[3];
-int16_t raw_Gyro[3];
+
+
+float barometerTemp = 0.0;
+double barometerAlt = 0.0;
+int32_t barometerPress;
+
+float compassHdg;
+
 
 unsigned long mpuProcessStartTime = 0;
 short mpuProcessTaskDuration = 0;
@@ -372,3 +391,10 @@ double cmdMotorPitch = 0, cmdMotorRoll = 0, cmdMotorThr = CMD_THR_MIN, cmdMotorY
 unsigned char modeQuad;
 unsigned char autoModeStatus;
 unsigned char statusRx;
+
+//StatusType Definitions
+unsigned char statusBaro;
+unsigned char statusMpu;
+unsigned char statusCompass;
+unsigned char statusUdp;
+unsigned char statusGS;

@@ -6,7 +6,6 @@
 
 bool MS5611::begin(ms5611_osr_t osr)
 {
-	Wire.begin();
 	reset();
 	setOversampling(osr);
 	delay(100);

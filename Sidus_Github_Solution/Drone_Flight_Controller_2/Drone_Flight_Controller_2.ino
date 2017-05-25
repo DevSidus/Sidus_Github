@@ -24,6 +24,9 @@ Description: This is the main code for Drone_Flight_Controller Project
 
 //Global Class Definitions
 MPU6050 mpu;
+MS5611 barometer;
+HMC5883L compass;
+
 PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint);
 PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.d_bypass);
 PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint);
@@ -33,6 +36,8 @@ PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, 
 
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.d_bypass);
 PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint);
+
+SemaphoreHandle_t xI2CSemaphore;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -48,11 +53,8 @@ void setup() {
 	pinMode(PIN_RX_YAW, INPUT);
 	pinMode(PIN_RX_5TH_CHAN, INPUT);
 	pinMode(PIN_RX_6TH_CHAN, INPUT);
-
 	pinMode(PIN_BUZZER, OUTPUT);
-
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
-
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
 	delay(100);
 
@@ -61,8 +63,18 @@ void setup() {
 	Wire.setClock(800000L);
 
 
+	if (xI2CSemaphore == NULL)  // Check to confirm that the Serial Semaphore has not already been created.
+	{
+		xI2CSemaphore = xSemaphoreCreateMutex();  // Create a mutex semaphore we will use to manage the Serial Port
+		if ((xI2CSemaphore) != NULL)
+			xSemaphoreGive((xI2CSemaphore));  // Make the Serial Port available for use, by "Giving" the Semaphore.
+	}
+
+
 	xTaskCreatePinnedToCore(task_test, "task_test", 1024, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_compass, "task_compass", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_0, "task_rx_0", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_1, "task_rx_1", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_2, "task_rx_2", 2048, NULL, 10, NULL, 0);
@@ -86,6 +98,7 @@ void task_test(void * parameter)
 	while (true)
 	{
 		processTest();
+		//Serial.println(portTICK_PERIOD_MS);
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 	}
 	vTaskDelete(NULL);
@@ -93,14 +106,65 @@ void task_test(void * parameter)
 
 void task_mpu(void * parameter)
 {
-	initMPU();
+
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
+	{
+		initMPU();
+		xSemaphoreGive(xI2CSemaphore);
+	}
 	while (true)
 	{
 		//mpuProcessStartTime = micros();
-		processMpu();
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)2) == pdTRUE)
+		{
+			processMpu();
+			xSemaphoreGive(xI2CSemaphore);
+		}
 		//mpuProcessTaskDuration = micros() - mpuProcessStartTime;
-		//Serial.println(mpuProcessTaskDuration);
-		delay(4);
+		Serial.println(millis());
+		delay(3);
+	}
+	vTaskDelete(NULL);
+	return;
+}
+
+void task_baro(void * parameter)
+{
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
+	{
+		initBarometer();
+		xSemaphoreGive(xI2CSemaphore);
+	}
+	while (true)
+	{
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)2) == pdTRUE)
+		{
+			processBarometer();
+			xSemaphoreGive(xI2CSemaphore);
+		}
+
+		delay(15);
+	}
+	vTaskDelete(NULL);
+	return;
+}
+
+void task_compass(void * parameter)
+{
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
+	{
+		initCompass();
+		xSemaphoreGive(xI2CSemaphore);
+	}
+
+	while (true)
+	{
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)0) == pdTRUE)
+		{
+			processCompass();
+			xSemaphoreGive(xI2CSemaphore);
+		}
+		delay(35);
 	}
 	vTaskDelete(NULL);
 	return;
@@ -434,6 +498,8 @@ void task_PID(void * parameter)
 
 void task_Motor(void * parameter)
 {
+	setupMotorPins();
+
 	while (true)
 	{
 		processRunMotors();
@@ -549,10 +615,14 @@ void processMpu()
 	}
 	else if ((mpuIntStatus & 0x02))
 	{
-		//Serial.println(fifoCount);
+		Serial.print("F:");
+		Serial.println(fifoCount);
 		if (fifoCount >= packetSize)
 		{
 
+			//Serial.print(fifoCount);
+			//Serial.print("  ");
+			//Serial.println(millis());
 			// wait for correct available data length, should be a VERY short wait
 			//while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
 
@@ -564,6 +634,7 @@ void processMpu()
 				// (this lets us immediately read more without waiting for an interrupt)
 				fifoCount -= packetSize;
 			}
+
 
 
 			mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -1125,7 +1196,91 @@ void calculate_pid_thr_batt_scale_factor() //this function will be modified to i
 	}
 }
 
+void setupMotorPins()
+{
+	ledcSetup(M_FL_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcSetup(M_FR_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcSetup(M_BR_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcSetup(M_BL_CHANNEL, PWM_FREQ, PWM_DEPTH);
+	ledcAttachPin(PIN_M_FL, M_FL_CHANNEL);
+	ledcAttachPin(PIN_M_FR, M_FR_CHANNEL);
+	ledcAttachPin(PIN_M_BR, M_BR_CHANNEL);
+	ledcAttachPin(PIN_M_BL, M_BL_CHANNEL);
+}
+
 void pwmMicroSeconds(int _pwm_channel, int _microseconds)
 {
 	ledcWrite(_pwm_channel, _microseconds*PWM_MICROSECONDS_TO_BITS);
+}
+
+bool initBarometer()
+{
+	uint32_t initTime = millis();
+	// Initialize MS5611 sensor
+	// Ultra high resolution: MS5611_ULTRA_HIGH_RES
+	// (default) High resolution: MS5611_HIGH_RES
+	// Standard: MS5611_STANDARD
+	// Low power: MS5611_LOW_POWER
+	// Ultra low power: MS5611_ULTRA_LOW_POWER
+	while (!barometer.begin(MS5611_ULTRA_HIGH_RES))
+	{
+		if (millis() - initTime > BAROMETER_INIT_THRESHOLD)
+		{
+			statusBaro = statusType_InitFail;
+			Serial.println("Baro init failed");
+			return false;
+		}
+		delay(200);
+	}
+	statusBaro = statusType_Normal;
+
+	Serial.println("Baro init success");
+
+	delay(100);
+	return true;
+}
+
+void processBarometer()
+{
+	//Barometer Data Processing
+	barometer.runProcess();
+	barometerTemp = barometer.readTemperature(true);
+	barometerPress = barometer.readPressure(true);
+	barometerAlt = barometer.getAltitude(barometerPress);
+}
+
+bool initCompass()
+{
+
+	if (compass.begin())
+	{
+		// Set measurement range
+		compass.setRange(HMC5883L_RANGE_1_3GA);
+		// Set measurement mode
+		compass.setMeasurementMode(HMC5883L_CONTINOUS);
+		// Set data rate
+		compass.setDataRate(HMC5883L_DATARATE_15HZ);
+		// Set number of samples averaged
+		compass.setSamples(HMC5883L_SAMPLES_1);
+		// Check settings
+		compass.setOffset(COMPASS_OFFSET_X_DEFAULT, COMPASS_OFFSET_Y_DEFAULT);
+		statusCompass = statusType_Normal;
+		Serial.println("Compass Init Success!");
+		return true;
+	}
+	else
+	{
+		Serial.println("Compass Init Failed!");
+		statusCompass = statusType_InitFail;
+		return false;
+	}
+
+
+}
+
+void processCompass()
+{
+	Vector compassNorm = compass.readNormalize();
+	// To calculate heading in degrees. 0 degree indicates North
+	compassHdg = atan2(compassNorm.YAxis, compassNorm.XAxis);
 }

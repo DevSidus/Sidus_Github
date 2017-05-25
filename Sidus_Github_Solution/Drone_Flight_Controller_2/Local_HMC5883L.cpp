@@ -30,8 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 bool HMC5883L::begin()
 {
-	Wire.begin();
-
 	if ((fastRegister8(HMC5883L_REG_IDENT_A) != 0x48)
 		|| (fastRegister8(HMC5883L_REG_IDENT_B) != 0x34)
 		|| (fastRegister8(HMC5883L_REG_IDENT_C) != 0x33))
