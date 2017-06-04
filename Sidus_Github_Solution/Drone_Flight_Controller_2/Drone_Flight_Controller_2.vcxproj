@@ -47,10 +47,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\WiFi\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\Wire\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\ArduinoOTA\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\Update\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\ESPmDNS\src;$(ProjectDir)..\..\..\..\Arduino\libraries;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\cores\esp32;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\cores\esp32\libb64;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\variants\esp32;$(ProjectDir)..\Drone_Flight_Controller_2;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2\xtensa-lx106-elf;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\lib\gcc\xtensa-lx106-elf\4.8.2\include;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Drone_Flight_Controller_2.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <PreprocessorDefinitions>__ESP32_ESp32__;__ESP32_ESP32__;ESP_PLATFORM;HAVE_CONFIG_H;F_CPU=240000000L;ARDUINO=10802;ARDUINO_ESP32_DEV;ARDUINO_ARCH_ESP32;ESP32;CORE_DEBUG_LEVEL=0;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -63,10 +63,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\Arduino\hardware\espressif\esp32\libraries\Wire\src;D:\Arduino\hardware\espressif\esp32\libraries\Wire\src\utility;D:\Arduino\libraries;D:\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;D:\Arduino\hardware\espressif\esp32\cores\esp32;D:\Arduino\hardware\espressif\esp32\cores\esp32\libb64;D:\Arduino\hardware\espressif\esp32\variants\esp32;D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller_2;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\xtensa-esp32-elf\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\5.2.0\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\5.2.0\include\;D:\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller_2\__vm\.Drone_Flight_Controller_2.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\WiFi\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\Wire\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\ArduinoOTA\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\Update\src;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\ESPmDNS\src;$(ProjectDir)..\..\..\..\Arduino\libraries;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\cores\esp32;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\cores\esp32\libb64;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\variants\esp32;$(ProjectDir)..\Drone_Flight_Controller_2;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2\xtensa-lx106-elf;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\lib\gcc\xtensa-lx106-elf\4.8.2\include;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Drone_Flight_Controller_2.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>__ESP32_ESp32__;__ESP32_ESP32__;ESP_PLATFORM;HAVE_CONFIG_H;F_CPU=240000000L;ARDUINO=10801;ARDUINO_ESP32_DEV;ARDUINO_ARCH_ESP32;ESP32;CORE_DEBUG_LEVEL=0;__cplusplus=201103L;GCC_VERSION=50200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__ESP32_ESp32__;__ESP32_ESP32__;ESP_PLATFORM;HAVE_CONFIG_H;F_CPU=240000000L;ARDUINO=10802;ARDUINO_ESP32_DEV;ARDUINO_ARCH_ESP32;ESP32;CORE_DEBUG_LEVEL=0;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -88,6 +88,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver\rmt.h" />
     <ClInclude Include="cBuzzerMelody.h" />
+    <ClInclude Include="cMsgUdpR01.h" />
+    <ClInclude Include="cMsgUdpT01.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Local_helper_3dmath.h" />
     <ClInclude Include="Local_HMC5883L.h" />
@@ -102,6 +104,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp" />
+    <ClCompile Include="cMsgUdpR01.cpp" />
+    <ClCompile Include="cMsgUdpT01.cpp" />
     <ClCompile Include="Local_HMC5883L.cpp" />
     <ClCompile Include="Local_I2Cdev.cpp" />
     <ClCompile Include="Local_MPU6050.cpp" />

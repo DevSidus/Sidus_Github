@@ -153,6 +153,7 @@
             this.label39 = new System.Windows.Forms.Label();
             this.label40 = new System.Windows.Forms.Label();
             this.button_setallcmd = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
             this.lvDataTx = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -160,7 +161,7 @@
             this.numericUpDownDataTx = new System.Windows.Forms.NumericUpDown();
             this.bwUdpTransmit = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.timerUdpReceive = new System.Windows.Forms.Timer(this.components);
+            this.bwUdpReceive = new System.ComponentModel.BackgroundWorker();
             this.pnlTopPanel.SuspendLayout();
             this.pnlBottomPanel.SuspendLayout();
             this.ssMain.SuspendLayout();
@@ -295,7 +296,7 @@
             // 
             // timerDisplayRefresh
             // 
-            this.timerDisplayRefresh.Interval = 20;
+            this.timerDisplayRefresh.Interval = 40;
             this.timerDisplayRefresh.Tick += new System.EventHandler(this.timerDisplayRefresh_Tick);
             // 
             // pnlContentPanel
@@ -477,7 +478,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20.18072F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 79.81927F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 494F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 149F));
             this.tableLayoutPanel3.Controls.Add(this.btnDataAnalysisDeselectAll, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel5, 5, 0);
             this.tableLayoutPanel3.Controls.Add(this.button_GraphSelectBackColor, 1, 0);
@@ -513,15 +514,15 @@
             this.tableLayoutPanel5.ColumnCount = 3;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 48.91304F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 51.08696F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 136F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 176F));
             this.tableLayoutPanel5.Controls.Add(this.button_GraphSetDefault, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.button_RemoveGraph, 2, 0);
             this.tableLayoutPanel5.Controls.Add(this.button_InsertGraph, 1, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(343, 3);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(413, 3);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(206, 27);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(481, 27);
             this.tableLayoutPanel5.TabIndex = 25;
             // 
             // button_GraphSetDefault
@@ -531,7 +532,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.button_GraphSetDefault.Location = new System.Drawing.Point(3, 3);
             this.button_GraphSetDefault.Name = "button_GraphSetDefault";
-            this.button_GraphSetDefault.Size = new System.Drawing.Size(28, 21);
+            this.button_GraphSetDefault.Size = new System.Drawing.Size(143, 21);
             this.button_GraphSetDefault.TabIndex = 11;
             this.button_GraphSetDefault.Text = "Set Default";
             this.button_GraphSetDefault.UseVisualStyleBackColor = true;
@@ -542,9 +543,9 @@
             this.button_RemoveGraph.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_RemoveGraph.Location = new System.Drawing.Point(72, 3);
+            this.button_RemoveGraph.Location = new System.Drawing.Point(307, 3);
             this.button_RemoveGraph.Name = "button_RemoveGraph";
-            this.button_RemoveGraph.Size = new System.Drawing.Size(131, 21);
+            this.button_RemoveGraph.Size = new System.Drawing.Size(171, 21);
             this.button_RemoveGraph.TabIndex = 13;
             this.button_RemoveGraph.Text = "Remove";
             this.button_RemoveGraph.UseVisualStyleBackColor = true;
@@ -555,9 +556,9 @@
             this.button_InsertGraph.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_InsertGraph.Location = new System.Drawing.Point(37, 3);
+            this.button_InsertGraph.Location = new System.Drawing.Point(152, 3);
             this.button_InsertGraph.Name = "button_InsertGraph";
-            this.button_InsertGraph.Size = new System.Drawing.Size(29, 21);
+            this.button_InsertGraph.Size = new System.Drawing.Size(149, 21);
             this.button_InsertGraph.TabIndex = 12;
             this.button_InsertGraph.Text = "Insert";
             this.button_InsertGraph.UseVisualStyleBackColor = true;
@@ -620,7 +621,7 @@
             0,
             -2147483648});
             this.numericUpDown_vScale.Name = "numericUpDown_vScale";
-            this.numericUpDown_vScale.Size = new System.Drawing.Size(47, 26);
+            this.numericUpDown_vScale.Size = new System.Drawing.Size(46, 26);
             this.numericUpDown_vScale.TabIndex = 24;
             this.numericUpDown_vScale.Value = new decimal(new int[] {
             1,
@@ -698,7 +699,7 @@
             0,
             65536});
             this.numericUpDown_hScale.Name = "numericUpDown_hScale";
-            this.numericUpDown_hScale.Size = new System.Drawing.Size(47, 26);
+            this.numericUpDown_hScale.Size = new System.Drawing.Size(46, 26);
             this.numericUpDown_hScale.TabIndex = 21;
             this.numericUpDown_hScale.Value = new decimal(new int[] {
             1,
@@ -710,7 +711,7 @@
             // cb_AltitudeHold
             // 
             this.cb_AltitudeHold.AutoSize = true;
-            this.cb_AltitudeHold.Location = new System.Drawing.Point(555, 3);
+            this.cb_AltitudeHold.Location = new System.Drawing.Point(900, 3);
             this.cb_AltitudeHold.Name = "cb_AltitudeHold";
             this.cb_AltitudeHold.Size = new System.Drawing.Size(112, 17);
             this.cb_AltitudeHold.TabIndex = 28;
@@ -752,7 +753,7 @@
             this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.9061F));
             this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 179F));
             this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 286F));
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 119F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 159F));
             this.tableLayoutPanel7.Controls.Add(this.tableLayoutPanel9, 0, 1);
             this.tableLayoutPanel7.Controls.Add(this.tableLayoutPanel8, 0, 0);
             this.tableLayoutPanel7.Controls.Add(this.tableLayoutPanel11, 1, 1);
@@ -761,6 +762,7 @@
             this.tableLayoutPanel7.Controls.Add(this.tableLayoutPanel14, 3, 1);
             this.tableLayoutPanel7.Controls.Add(this.tableLayoutPanel15, 3, 0);
             this.tableLayoutPanel7.Controls.Add(this.button_setallcmd, 4, 0);
+            this.tableLayoutPanel7.Controls.Add(this.textBox1, 2, 1);
             this.tableLayoutPanel7.Location = new System.Drawing.Point(19, 3);
             this.tableLayoutPanel7.Name = "tableLayoutPanel7";
             this.tableLayoutPanel7.RowCount = 2;
@@ -796,16 +798,16 @@
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18F));
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 17F));
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel9.Size = new System.Drawing.Size(232, 157);
+            this.tableLayoutPanel9.Size = new System.Drawing.Size(212, 157);
             this.tableLayoutPanel9.TabIndex = 0;
             // 
             // tb_pid_rate_pitch_roll_kp
             // 
             this.tb_pid_rate_pitch_roll_kp.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_pitch_roll_kp.Location = new System.Drawing.Point(26, 20);
+            this.tb_pid_rate_pitch_roll_kp.Location = new System.Drawing.Point(24, 20);
             this.tb_pid_rate_pitch_roll_kp.Maximum = 255;
             this.tb_pid_rate_pitch_roll_kp.Name = "tb_pid_rate_pitch_roll_kp";
-            this.tb_pid_rate_pitch_roll_kp.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_rate_pitch_roll_kp.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_rate_pitch_roll_kp.TabIndex = 0;
             this.tb_pid_rate_pitch_roll_kp.TickFrequency = 5;
             this.tb_pid_rate_pitch_roll_kp.Value = 85;
@@ -814,10 +816,10 @@
             // tb_pid_rate_pitch_roll_ki
             // 
             this.tb_pid_rate_pitch_roll_ki.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_pitch_roll_ki.Location = new System.Drawing.Point(26, 48);
+            this.tb_pid_rate_pitch_roll_ki.Location = new System.Drawing.Point(24, 48);
             this.tb_pid_rate_pitch_roll_ki.Maximum = 255;
             this.tb_pid_rate_pitch_roll_ki.Name = "tb_pid_rate_pitch_roll_ki";
-            this.tb_pid_rate_pitch_roll_ki.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_rate_pitch_roll_ki.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_rate_pitch_roll_ki.TabIndex = 0;
             this.tb_pid_rate_pitch_roll_ki.TickFrequency = 5;
             this.tb_pid_rate_pitch_roll_ki.Scroll += new System.EventHandler(this.tb_pid_rate_pitch_roll_ki_Scroll);
@@ -826,9 +828,9 @@
             // 
             this.label8.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 52);
+            this.label8.Location = new System.Drawing.Point(3, 46);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(16, 13);
+            this.label8.Size = new System.Drawing.Size(14, 26);
             this.label8.TabIndex = 1;
             this.label8.Text = "Ki";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -836,10 +838,10 @@
             // tb_pid_rate_pitch_roll_kd
             // 
             this.tb_pid_rate_pitch_roll_kd.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_pitch_roll_kd.Location = new System.Drawing.Point(26, 76);
+            this.tb_pid_rate_pitch_roll_kd.Location = new System.Drawing.Point(24, 76);
             this.tb_pid_rate_pitch_roll_kd.Maximum = 255;
             this.tb_pid_rate_pitch_roll_kd.Name = "tb_pid_rate_pitch_roll_kd";
-            this.tb_pid_rate_pitch_roll_kd.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_rate_pitch_roll_kd.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_rate_pitch_roll_kd.TabIndex = 0;
             this.tb_pid_rate_pitch_roll_kd.TickFrequency = 5;
             this.tb_pid_rate_pitch_roll_kd.Value = 70;
@@ -849,7 +851,7 @@
             // 
             this.label9.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(4, 74);
+            this.label9.Location = new System.Drawing.Point(3, 74);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(14, 26);
             this.label9.TabIndex = 1;
@@ -860,7 +862,7 @@
             // 
             this.label10.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(77, 2);
+            this.label10.Location = new System.Drawing.Point(66, 2);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(101, 13);
             this.label10.TabIndex = 1;
@@ -871,7 +873,7 @@
             // 
             this.label7.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(4, 18);
+            this.label7.Location = new System.Drawing.Point(3, 18);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(14, 26);
             this.label7.TabIndex = 1;
@@ -881,10 +883,10 @@
             // tb_pid_rate_pitch_roll_f1
             // 
             this.tb_pid_rate_pitch_roll_f1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_pitch_roll_f1.Location = new System.Drawing.Point(26, 104);
+            this.tb_pid_rate_pitch_roll_f1.Location = new System.Drawing.Point(24, 104);
             this.tb_pid_rate_pitch_roll_f1.Maximum = 255;
             this.tb_pid_rate_pitch_roll_f1.Name = "tb_pid_rate_pitch_roll_f1";
-            this.tb_pid_rate_pitch_roll_f1.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_rate_pitch_roll_f1.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_rate_pitch_roll_f1.TabIndex = 0;
             this.tb_pid_rate_pitch_roll_f1.TickFrequency = 5;
             this.tb_pid_rate_pitch_roll_f1.Scroll += new System.EventHandler(this.tb_pid_rate_pitch_roll_f1_Scroll);
@@ -892,10 +894,10 @@
             // tb_pid_rate_pitch_roll_f2
             // 
             this.tb_pid_rate_pitch_roll_f2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_pitch_roll_f2.Location = new System.Drawing.Point(26, 132);
+            this.tb_pid_rate_pitch_roll_f2.Location = new System.Drawing.Point(24, 132);
             this.tb_pid_rate_pitch_roll_f2.Maximum = 255;
             this.tb_pid_rate_pitch_roll_f2.Name = "tb_pid_rate_pitch_roll_f2";
-            this.tb_pid_rate_pitch_roll_f2.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_rate_pitch_roll_f2.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_rate_pitch_roll_f2.TabIndex = 0;
             this.tb_pid_rate_pitch_roll_f2.TickFrequency = 5;
             this.tb_pid_rate_pitch_roll_f2.Value = 30;
@@ -905,9 +907,9 @@
             // 
             this.label11.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(3, 108);
+            this.label11.Location = new System.Drawing.Point(4, 102);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(16, 13);
+            this.label11.Size = new System.Drawing.Size(13, 26);
             this.label11.TabIndex = 1;
             this.label11.Text = "f1";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -916,9 +918,9 @@
             // 
             this.label12.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(3, 136);
+            this.label12.Location = new System.Drawing.Point(4, 130);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(16, 13);
+            this.label12.Size = new System.Drawing.Size(13, 26);
             this.label12.TabIndex = 1;
             this.label12.Text = "f2";
             this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -949,16 +951,16 @@
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 17F));
-            this.tableLayoutPanel8.Size = new System.Drawing.Size(232, 156);
+            this.tableLayoutPanel8.Size = new System.Drawing.Size(212, 156);
             this.tableLayoutPanel8.TabIndex = 0;
             // 
             // tb_pid_angle_pitch_roll_kp
             // 
             this.tb_pid_angle_pitch_roll_kp.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_pitch_roll_kp.Location = new System.Drawing.Point(26, 20);
+            this.tb_pid_angle_pitch_roll_kp.Location = new System.Drawing.Point(24, 20);
             this.tb_pid_angle_pitch_roll_kp.Maximum = 255;
             this.tb_pid_angle_pitch_roll_kp.Name = "tb_pid_angle_pitch_roll_kp";
-            this.tb_pid_angle_pitch_roll_kp.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_angle_pitch_roll_kp.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_angle_pitch_roll_kp.TabIndex = 0;
             this.tb_pid_angle_pitch_roll_kp.TickFrequency = 5;
             this.tb_pid_angle_pitch_roll_kp.Value = 33;
@@ -968,7 +970,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 18);
+            this.label3.Location = new System.Drawing.Point(3, 18);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(14, 26);
             this.label3.TabIndex = 1;
@@ -978,10 +980,10 @@
             // tb_pid_angle_pitch_roll_ki
             // 
             this.tb_pid_angle_pitch_roll_ki.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_pitch_roll_ki.Location = new System.Drawing.Point(26, 48);
+            this.tb_pid_angle_pitch_roll_ki.Location = new System.Drawing.Point(24, 48);
             this.tb_pid_angle_pitch_roll_ki.Maximum = 255;
             this.tb_pid_angle_pitch_roll_ki.Name = "tb_pid_angle_pitch_roll_ki";
-            this.tb_pid_angle_pitch_roll_ki.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_angle_pitch_roll_ki.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_angle_pitch_roll_ki.TabIndex = 0;
             this.tb_pid_angle_pitch_roll_ki.TickFrequency = 5;
             this.tb_pid_angle_pitch_roll_ki.Value = 100;
@@ -991,9 +993,9 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 52);
+            this.label4.Location = new System.Drawing.Point(3, 46);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(16, 13);
+            this.label4.Size = new System.Drawing.Size(14, 26);
             this.label4.TabIndex = 1;
             this.label4.Text = "Ki";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1001,10 +1003,10 @@
             // tb_pid_angle_pitch_roll_kd
             // 
             this.tb_pid_angle_pitch_roll_kd.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_pitch_roll_kd.Location = new System.Drawing.Point(26, 76);
+            this.tb_pid_angle_pitch_roll_kd.Location = new System.Drawing.Point(24, 76);
             this.tb_pid_angle_pitch_roll_kd.Maximum = 255;
             this.tb_pid_angle_pitch_roll_kd.Name = "tb_pid_angle_pitch_roll_kd";
-            this.tb_pid_angle_pitch_roll_kd.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_angle_pitch_roll_kd.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_angle_pitch_roll_kd.TabIndex = 0;
             this.tb_pid_angle_pitch_roll_kd.TickFrequency = 5;
             this.tb_pid_angle_pitch_roll_kd.Value = 80;
@@ -1014,7 +1016,7 @@
             // 
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(4, 74);
+            this.label5.Location = new System.Drawing.Point(3, 74);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(14, 26);
             this.label5.TabIndex = 1;
@@ -1025,7 +1027,7 @@
             // 
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(75, 2);
+            this.label6.Location = new System.Drawing.Point(64, 2);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(105, 13);
             this.label6.TabIndex = 1;
@@ -1035,10 +1037,10 @@
             // tb_pid_angle_pitch_roll_f1
             // 
             this.tb_pid_angle_pitch_roll_f1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_pitch_roll_f1.Location = new System.Drawing.Point(26, 104);
+            this.tb_pid_angle_pitch_roll_f1.Location = new System.Drawing.Point(24, 104);
             this.tb_pid_angle_pitch_roll_f1.Maximum = 255;
             this.tb_pid_angle_pitch_roll_f1.Name = "tb_pid_angle_pitch_roll_f1";
-            this.tb_pid_angle_pitch_roll_f1.Size = new System.Drawing.Size(203, 22);
+            this.tb_pid_angle_pitch_roll_f1.Size = new System.Drawing.Size(185, 22);
             this.tb_pid_angle_pitch_roll_f1.TabIndex = 0;
             this.tb_pid_angle_pitch_roll_f1.TickFrequency = 5;
             this.tb_pid_angle_pitch_roll_f1.Scroll += new System.EventHandler(this.tb_pid_angle_pitch_roll_f1_Scroll);
@@ -1047,9 +1049,9 @@
             // 
             this.label13.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(3, 108);
+            this.label13.Location = new System.Drawing.Point(4, 102);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(16, 13);
+            this.label13.Size = new System.Drawing.Size(13, 26);
             this.label13.TabIndex = 1;
             this.label13.Text = "f1";
             this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1058,9 +1060,9 @@
             // 
             this.label14.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(3, 136);
+            this.label14.Location = new System.Drawing.Point(4, 129);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(16, 13);
+            this.label14.Size = new System.Drawing.Size(13, 26);
             this.label14.TabIndex = 1;
             this.label14.Text = "f2";
             this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1068,10 +1070,10 @@
             // tb_pid_angle_pitch_roll_f2
             // 
             this.tb_pid_angle_pitch_roll_f2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_pitch_roll_f2.Location = new System.Drawing.Point(26, 132);
+            this.tb_pid_angle_pitch_roll_f2.Location = new System.Drawing.Point(24, 132);
             this.tb_pid_angle_pitch_roll_f2.Maximum = 255;
             this.tb_pid_angle_pitch_roll_f2.Name = "tb_pid_angle_pitch_roll_f2";
-            this.tb_pid_angle_pitch_roll_f2.Size = new System.Drawing.Size(203, 21);
+            this.tb_pid_angle_pitch_roll_f2.Size = new System.Drawing.Size(185, 21);
             this.tb_pid_angle_pitch_roll_f2.TabIndex = 0;
             this.tb_pid_angle_pitch_roll_f2.TickFrequency = 5;
             this.tb_pid_angle_pitch_roll_f2.Value = 90;
@@ -1093,7 +1095,7 @@
             this.tableLayoutPanel11.Controls.Add(this.tb_pid_rate_yaw_f2, 1, 5);
             this.tableLayoutPanel11.Controls.Add(this.label19, 0, 4);
             this.tableLayoutPanel11.Controls.Add(this.label20, 0, 5);
-            this.tableLayoutPanel11.Location = new System.Drawing.Point(241, 165);
+            this.tableLayoutPanel11.Location = new System.Drawing.Point(221, 165);
             this.tableLayoutPanel11.Name = "tableLayoutPanel11";
             this.tableLayoutPanel11.RowCount = 6;
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11F));
@@ -1103,16 +1105,16 @@
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18F));
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 17F));
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel11.Size = new System.Drawing.Size(241, 157);
+            this.tableLayoutPanel11.Size = new System.Drawing.Size(221, 157);
             this.tableLayoutPanel11.TabIndex = 0;
             // 
             // tb_pid_rate_yaw_kp
             // 
             this.tb_pid_rate_yaw_kp.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_yaw_kp.Location = new System.Drawing.Point(27, 20);
+            this.tb_pid_rate_yaw_kp.Location = new System.Drawing.Point(25, 20);
             this.tb_pid_rate_yaw_kp.Maximum = 255;
             this.tb_pid_rate_yaw_kp.Name = "tb_pid_rate_yaw_kp";
-            this.tb_pid_rate_yaw_kp.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_rate_yaw_kp.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_rate_yaw_kp.TabIndex = 0;
             this.tb_pid_rate_yaw_kp.TickFrequency = 5;
             this.tb_pid_rate_yaw_kp.Value = 140;
@@ -1121,10 +1123,10 @@
             // tb_pid_rate_yaw_ki
             // 
             this.tb_pid_rate_yaw_ki.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_yaw_ki.Location = new System.Drawing.Point(27, 48);
+            this.tb_pid_rate_yaw_ki.Location = new System.Drawing.Point(25, 48);
             this.tb_pid_rate_yaw_ki.Maximum = 255;
             this.tb_pid_rate_yaw_ki.Name = "tb_pid_rate_yaw_ki";
-            this.tb_pid_rate_yaw_ki.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_rate_yaw_ki.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_rate_yaw_ki.TabIndex = 0;
             this.tb_pid_rate_yaw_ki.TickFrequency = 5;
             this.tb_pid_rate_yaw_ki.Scroll += new System.EventHandler(this.tb_pid_rate_yaw_ki_Scroll);
@@ -1133,7 +1135,7 @@
             // 
             this.label15.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(4, 52);
+            this.label15.Location = new System.Drawing.Point(3, 52);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(16, 13);
             this.label15.TabIndex = 1;
@@ -1143,10 +1145,10 @@
             // tb_pid_rate_yaw_kd
             // 
             this.tb_pid_rate_yaw_kd.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_yaw_kd.Location = new System.Drawing.Point(27, 76);
+            this.tb_pid_rate_yaw_kd.Location = new System.Drawing.Point(25, 76);
             this.tb_pid_rate_yaw_kd.Maximum = 255;
             this.tb_pid_rate_yaw_kd.Name = "tb_pid_rate_yaw_kd";
-            this.tb_pid_rate_yaw_kd.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_rate_yaw_kd.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_rate_yaw_kd.TabIndex = 0;
             this.tb_pid_rate_yaw_kd.TickFrequency = 5;
             this.tb_pid_rate_yaw_kd.Value = 120;
@@ -1156,7 +1158,7 @@
             // 
             this.label16.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(5, 74);
+            this.label16.Location = new System.Drawing.Point(4, 74);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(14, 26);
             this.label16.TabIndex = 1;
@@ -1167,7 +1169,7 @@
             // 
             this.label17.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(95, 2);
+            this.label17.Location = new System.Drawing.Point(84, 2);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(75, 13);
             this.label17.TabIndex = 1;
@@ -1178,7 +1180,7 @@
             // 
             this.label18.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(5, 18);
+            this.label18.Location = new System.Drawing.Point(4, 18);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(14, 26);
             this.label18.TabIndex = 1;
@@ -1188,10 +1190,10 @@
             // tb_pid_rate_yaw_f1
             // 
             this.tb_pid_rate_yaw_f1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_yaw_f1.Location = new System.Drawing.Point(27, 104);
+            this.tb_pid_rate_yaw_f1.Location = new System.Drawing.Point(25, 104);
             this.tb_pid_rate_yaw_f1.Maximum = 255;
             this.tb_pid_rate_yaw_f1.Name = "tb_pid_rate_yaw_f1";
-            this.tb_pid_rate_yaw_f1.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_rate_yaw_f1.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_rate_yaw_f1.TabIndex = 0;
             this.tb_pid_rate_yaw_f1.TickFrequency = 5;
             this.tb_pid_rate_yaw_f1.Scroll += new System.EventHandler(this.tb_pid_rate_yaw_f1_Scroll);
@@ -1199,10 +1201,10 @@
             // tb_pid_rate_yaw_f2
             // 
             this.tb_pid_rate_yaw_f2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_rate_yaw_f2.Location = new System.Drawing.Point(27, 132);
+            this.tb_pid_rate_yaw_f2.Location = new System.Drawing.Point(25, 132);
             this.tb_pid_rate_yaw_f2.Maximum = 255;
             this.tb_pid_rate_yaw_f2.Name = "tb_pid_rate_yaw_f2";
-            this.tb_pid_rate_yaw_f2.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_rate_yaw_f2.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_rate_yaw_f2.TabIndex = 0;
             this.tb_pid_rate_yaw_f2.TickFrequency = 5;
             this.tb_pid_rate_yaw_f2.Value = 30;
@@ -1212,7 +1214,7 @@
             // 
             this.label19.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(4, 108);
+            this.label19.Location = new System.Drawing.Point(3, 108);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(16, 13);
             this.label19.TabIndex = 1;
@@ -1223,7 +1225,7 @@
             // 
             this.label20.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(4, 136);
+            this.label20.Location = new System.Drawing.Point(3, 136);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(16, 13);
             this.label20.TabIndex = 1;
@@ -1246,7 +1248,7 @@
             this.tableLayoutPanel12.Controls.Add(this.tb_pid_angle_yaw_f2, 1, 5);
             this.tableLayoutPanel12.Controls.Add(this.label25, 0, 4);
             this.tableLayoutPanel12.Controls.Add(this.label26, 0, 5);
-            this.tableLayoutPanel12.Location = new System.Drawing.Point(241, 3);
+            this.tableLayoutPanel12.Location = new System.Drawing.Point(221, 3);
             this.tableLayoutPanel12.Name = "tableLayoutPanel12";
             this.tableLayoutPanel12.RowCount = 6;
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11F));
@@ -1256,15 +1258,15 @@
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18F));
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 17F));
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel12.Size = new System.Drawing.Size(241, 156);
+            this.tableLayoutPanel12.Size = new System.Drawing.Size(221, 156);
             this.tableLayoutPanel12.TabIndex = 0;
             // 
             // tb_pid_angle_yaw_kp
             // 
-            this.tb_pid_angle_yaw_kp.Location = new System.Drawing.Point(27, 20);
+            this.tb_pid_angle_yaw_kp.Location = new System.Drawing.Point(25, 20);
             this.tb_pid_angle_yaw_kp.Maximum = 255;
             this.tb_pid_angle_yaw_kp.Name = "tb_pid_angle_yaw_kp";
-            this.tb_pid_angle_yaw_kp.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_angle_yaw_kp.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_angle_yaw_kp.TabIndex = 0;
             this.tb_pid_angle_yaw_kp.TickFrequency = 5;
             this.tb_pid_angle_yaw_kp.Value = 30;
@@ -1273,10 +1275,10 @@
             // tb_pid_angle_yaw_ki
             // 
             this.tb_pid_angle_yaw_ki.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_yaw_ki.Location = new System.Drawing.Point(27, 48);
+            this.tb_pid_angle_yaw_ki.Location = new System.Drawing.Point(25, 48);
             this.tb_pid_angle_yaw_ki.Maximum = 255;
             this.tb_pid_angle_yaw_ki.Name = "tb_pid_angle_yaw_ki";
-            this.tb_pid_angle_yaw_ki.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_angle_yaw_ki.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_angle_yaw_ki.TabIndex = 0;
             this.tb_pid_angle_yaw_ki.TickFrequency = 5;
             this.tb_pid_angle_yaw_ki.Scroll += new System.EventHandler(this.tb_pid_angle_yaw_ki_Scroll);
@@ -1285,7 +1287,7 @@
             // 
             this.label21.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(4, 52);
+            this.label21.Location = new System.Drawing.Point(3, 52);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(16, 13);
             this.label21.TabIndex = 1;
@@ -1295,10 +1297,10 @@
             // tb_pid_angle_yaw_kd
             // 
             this.tb_pid_angle_yaw_kd.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_yaw_kd.Location = new System.Drawing.Point(27, 76);
+            this.tb_pid_angle_yaw_kd.Location = new System.Drawing.Point(25, 76);
             this.tb_pid_angle_yaw_kd.Maximum = 255;
             this.tb_pid_angle_yaw_kd.Name = "tb_pid_angle_yaw_kd";
-            this.tb_pid_angle_yaw_kd.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_angle_yaw_kd.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_angle_yaw_kd.TabIndex = 0;
             this.tb_pid_angle_yaw_kd.TickFrequency = 5;
             this.tb_pid_angle_yaw_kd.Value = 25;
@@ -1308,7 +1310,7 @@
             // 
             this.label22.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(5, 74);
+            this.label22.Location = new System.Drawing.Point(4, 74);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(14, 26);
             this.label22.TabIndex = 1;
@@ -1319,7 +1321,7 @@
             // 
             this.label23.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(93, 2);
+            this.label23.Location = new System.Drawing.Point(82, 2);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(79, 13);
             this.label23.TabIndex = 1;
@@ -1330,7 +1332,7 @@
             // 
             this.label24.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(5, 18);
+            this.label24.Location = new System.Drawing.Point(4, 18);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(14, 26);
             this.label24.TabIndex = 1;
@@ -1340,10 +1342,10 @@
             // tb_pid_angle_yaw_f1
             // 
             this.tb_pid_angle_yaw_f1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_yaw_f1.Location = new System.Drawing.Point(27, 104);
+            this.tb_pid_angle_yaw_f1.Location = new System.Drawing.Point(25, 104);
             this.tb_pid_angle_yaw_f1.Maximum = 255;
             this.tb_pid_angle_yaw_f1.Name = "tb_pid_angle_yaw_f1";
-            this.tb_pid_angle_yaw_f1.Size = new System.Drawing.Size(211, 22);
+            this.tb_pid_angle_yaw_f1.Size = new System.Drawing.Size(193, 22);
             this.tb_pid_angle_yaw_f1.TabIndex = 0;
             this.tb_pid_angle_yaw_f1.TickFrequency = 5;
             this.tb_pid_angle_yaw_f1.Scroll += new System.EventHandler(this.tb_pid_angle_yaw_f1_Scroll);
@@ -1351,10 +1353,10 @@
             // tb_pid_angle_yaw_f2
             // 
             this.tb_pid_angle_yaw_f2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_pid_angle_yaw_f2.Location = new System.Drawing.Point(27, 132);
+            this.tb_pid_angle_yaw_f2.Location = new System.Drawing.Point(25, 132);
             this.tb_pid_angle_yaw_f2.Maximum = 255;
             this.tb_pid_angle_yaw_f2.Name = "tb_pid_angle_yaw_f2";
-            this.tb_pid_angle_yaw_f2.Size = new System.Drawing.Size(211, 21);
+            this.tb_pid_angle_yaw_f2.Size = new System.Drawing.Size(193, 21);
             this.tb_pid_angle_yaw_f2.TabIndex = 0;
             this.tb_pid_angle_yaw_f2.TickFrequency = 5;
             this.tb_pid_angle_yaw_f2.Value = 90;
@@ -1364,7 +1366,7 @@
             // 
             this.label25.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(4, 108);
+            this.label25.Location = new System.Drawing.Point(3, 108);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(16, 13);
             this.label25.TabIndex = 1;
@@ -1375,7 +1377,7 @@
             // 
             this.label26.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(4, 136);
+            this.label26.Location = new System.Drawing.Point(3, 136);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(16, 13);
             this.label26.TabIndex = 1;
@@ -1393,7 +1395,7 @@
             this.tableLayoutPanel13.Controls.Add(this.label41, 0, 6);
             this.tableLayoutPanel13.Controls.Add(this.tb_pid_vel_alt_out_filter, 0, 7);
             this.tableLayoutPanel13.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel13.Location = new System.Drawing.Point(488, 3);
+            this.tableLayoutPanel13.Location = new System.Drawing.Point(448, 3);
             this.tableLayoutPanel13.Name = "tableLayoutPanel13";
             this.tableLayoutPanel13.RowCount = 8;
             this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52.27273F));
@@ -1492,7 +1494,7 @@
             this.tableLayoutPanel14.Controls.Add(this.tb_pid_acc_alt_f2, 1, 5);
             this.tableLayoutPanel14.Controls.Add(this.label33, 0, 4);
             this.tableLayoutPanel14.Controls.Add(this.label34, 0, 5);
-            this.tableLayoutPanel14.Location = new System.Drawing.Point(667, 165);
+            this.tableLayoutPanel14.Location = new System.Drawing.Point(627, 165);
             this.tableLayoutPanel14.Name = "tableLayoutPanel14";
             this.tableLayoutPanel14.RowCount = 6;
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11F));
@@ -1643,7 +1645,7 @@
             this.tableLayoutPanel15.Controls.Add(this.tb_pid_vel_alt_f2, 1, 5);
             this.tableLayoutPanel15.Controls.Add(this.label39, 0, 4);
             this.tableLayoutPanel15.Controls.Add(this.label40, 0, 5);
-            this.tableLayoutPanel15.Location = new System.Drawing.Point(667, 3);
+            this.tableLayoutPanel15.Location = new System.Drawing.Point(627, 3);
             this.tableLayoutPanel15.Name = "tableLayoutPanel15";
             this.tableLayoutPanel15.RowCount = 6;
             this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11F));
@@ -1779,13 +1781,20 @@
             // 
             // button_setallcmd
             // 
-            this.button_setallcmd.Location = new System.Drawing.Point(953, 3);
+            this.button_setallcmd.Location = new System.Drawing.Point(913, 3);
             this.button_setallcmd.Name = "button_setallcmd";
             this.button_setallcmd.Size = new System.Drawing.Size(87, 23);
             this.button_setallcmd.TabIndex = 2;
             this.button_setallcmd.Text = "Set All Cmd";
             this.button_setallcmd.UseVisualStyleBackColor = true;
             this.button_setallcmd.Click += new System.EventHandler(this.button_setallcmd_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(448, 165);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(100, 20);
+            this.textBox1.TabIndex = 3;
             // 
             // tableLayoutPanel10
             // 
@@ -1853,10 +1862,9 @@
             // 
             this.bwUdpTransmit.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bwUdpTransmit_DoWork);
             // 
-            // timerUdpReceive
+            // bwUdpReceive
             // 
-            this.timerUdpReceive.Interval = 30;
-            this.timerUdpReceive.Tick += new System.EventHandler(this.timerUdpReceive_Tick);
+            this.bwUdpReceive.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bwUdpReceive_DoWork);
             // 
             // Ground_Station
             // 
@@ -1892,6 +1900,7 @@
             this.tableLayoutPanelDataTx.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel7.ResumeLayout(false);
+            this.tableLayoutPanel7.PerformLayout();
             this.tableLayoutPanel9.ResumeLayout(false);
             this.tableLayoutPanel9.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tb_pid_rate_pitch_roll_kp)).EndInit();
@@ -2077,7 +2086,8 @@
         private System.Windows.Forms.TrackBar tb_pid_vel_alt_out_filter;
         private System.Windows.Forms.CheckBox cb_AltitudeHold;
         private System.Windows.Forms.Button button_setallcmd;
-        private System.Windows.Forms.Timer timerUdpReceive;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.ComponentModel.BackgroundWorker bwUdpReceive;
     }
 }
 

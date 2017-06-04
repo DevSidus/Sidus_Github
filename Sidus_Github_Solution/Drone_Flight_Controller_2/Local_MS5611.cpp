@@ -8,7 +8,7 @@ bool MS5611::begin(ms5611_osr_t osr)
 {
 	reset();
 	setOversampling(osr);
-	delay(100);
+	delay(200);
 	readPROM();
 
 	lastProcess = INITIAL_PROCESS;
@@ -199,6 +199,8 @@ uint16_t MS5611::readRegister16(uint8_t reg)
 	uint8_t vla = Wire.read();
 	value = vha << 8 | vla;
 
+	//Serial.print("Wire16:");
+	//Serial.println(value);
 	return value;
 }
 
@@ -211,12 +213,13 @@ uint32_t MS5611::readRegister24(uint8_t reg)
 	Wire.endTransmission(MS5611_ADDRESS);
 
 	Wire.beginTransmission(MS5611_ADDRESS);
-	Wire.requestFrom(MS5611_ADDRESS, 3);
+	Wire.requestFrom(MS5611_ADDRESS, 2);
 	while (!Wire.available()) {};
 	uint8_t vxa = Wire.read();
 	uint8_t vha = Wire.read();
 	uint8_t vla = Wire.read();
 
 	value = ((int32_t)vxa << 16) | ((int32_t)vha << 8) | vla;
+
 	return value;
 }

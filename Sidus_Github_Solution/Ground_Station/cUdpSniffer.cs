@@ -65,9 +65,21 @@ namespace Ground_Station
         //Class Methods
         public bool SendPacket(byte[] data, int sizeInBytes)
         {
+            int val = 0;
+
             //if (!clientConnected) { return false; }
             //Even  if the client was not connected, send to the default EP
-            if (sizeInBytes == udpServer.Send(data, sizeInBytes, remoteIpEndPoint))
+
+            try
+            {
+                val = udpServer.Send(data, sizeInBytes, remoteIpEndPoint);
+            }
+            catch
+            {
+
+            }
+
+            if (sizeInBytes == val)
             {
                 return true;
             }

@@ -6,9 +6,11 @@ Description: This is the main code for Drone_Flight_Controller Project
 */
 
 //Global Include Files
+#include <WiFi.h>
 #include <esp32-hal-ledc.h>
 #include <Wire.h>
 #include "rmt.h"
+#include <ArduinoOTA.h>
 
 //Local Include Files
 #include "cBuzzerMelody.h"
@@ -20,12 +22,20 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include "PID_YawAngle.h"
 #include "PID_AccAlt.h"
 #include "Config.h"
+#include "cMsgUdpR01.h"
+#include "cMsgUdpT01.h"
 
 
 //Global Class Definitions
 MPU6050 mpu;
 MS5611 barometer;
 HMC5883L compass;
+
+//The udp library class
+WiFiUDP udp;
+
+cMsgUdpR01 MsgUdpR01;
+cMsgUdpT01 MsgUdpT01;
 
 PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint);
 PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.d_bypass);
@@ -37,16 +47,18 @@ PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, 
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.d_bypass);
 PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint);
 
+cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
+
 SemaphoreHandle_t xI2CSemaphore;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(SERIAL_COM_SPEED);
-
 	Serial.println("Serial started");
-
+	analogRead(4);
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
+	//pinMode(PIN_BATTERY, INPUT);
 	pinMode(PIN_RX_ROLL, INPUT);
 	pinMode(PIN_RX_PITCH, INPUT);
 	pinMode(PIN_RX_THR, INPUT);
@@ -57,7 +69,7 @@ void setup() {
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
 	delay(100);
-
+	
 
 	Wire.begin(PIN_MCU_SDA, PIN_MCU_SCL);
 	Wire.setClock(800000L);
@@ -70,11 +82,8 @@ void setup() {
 			xSemaphoreGive((xI2CSemaphore));  // Make the Serial Port available for use, by "Giving" the Semaphore.
 	}
 
-
+	//Processor 0 Tasks
 	xTaskCreatePinnedToCore(task_test, "task_test", 1024, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 0);
-	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
-	xTaskCreatePinnedToCore(task_compass, "task_compass", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_0, "task_rx_0", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_1, "task_rx_1", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_2, "task_rx_2", 2048, NULL, 10, NULL, 0);
@@ -83,8 +92,19 @@ void setup() {
 	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_PID, "task_PID", 8192, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 4096, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 4096, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 4096, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_melody, "task_melody", 2048, NULL, 1, NULL, 0);
+	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
+
+	//Processor 1 Tasks
+	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 1);
+	xTaskCreatePinnedToCore(task_compass, "task_compass", 2048, NULL, 10, NULL, 1);
+	xTaskCreatePinnedToCore(task_PID, "task_PID", 8192, NULL, 20, NULL, 1);
+	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 20, NULL, 1);
 
 }
 
@@ -106,8 +126,8 @@ void task_test(void * parameter)
 
 void task_mpu(void * parameter)
 {
-
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
+	statusMpu = statusType_NotInitiated;
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
 	{
 		initMPU();
 		xSemaphoreGive(xI2CSemaphore);
@@ -121,7 +141,7 @@ void task_mpu(void * parameter)
 			xSemaphoreGive(xI2CSemaphore);
 		}
 		//mpuProcessTaskDuration = micros() - mpuProcessStartTime;
-		Serial.println(millis());
+		//Serial.println(millis());
 		delay(3);
 	}
 	vTaskDelete(NULL);
@@ -130,7 +150,7 @@ void task_mpu(void * parameter)
 
 void task_baro(void * parameter)
 {
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
 	{
 		initBarometer();
 		xSemaphoreGive(xI2CSemaphore);
@@ -151,7 +171,7 @@ void task_baro(void * parameter)
 
 void task_compass(void * parameter)
 {
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
 	{
 		initCompass();
 		xSemaphoreGive(xI2CSemaphore);
@@ -509,13 +529,126 @@ void task_Motor(void * parameter)
 	vTaskDelete(NULL);
 }
 
+void task_UDP(void * parameter)
+{
+	initUDP();
+
+	while (true)
+	{
+		if (wifi_connected)
+		{
+			prepareUDPmessages();
+			udp.beginPacket(DEFAULT_GROUND_STATION_IP, UDP_PORT);
+			udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+			udp.endPacket();
+		}
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		delay(10);
+	}
+	vTaskDelete(NULL);
+}
+
+void task_UDPrx(void * parameter)
+{
+	initUDP();
+
+	while (true)
+	{
+		if (wifi_connected)
+		{
+
+
+			if (udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
+			{
+				udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
+				MsgUdpT01.setPacket();
+
+				updateUdpMsgVars();
+
+				//Serial.println("udp message received");
+				//udpLastMessageTime = millis();
+			}
+			//processUDPrx();
+		}
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		delay(150);
+	}
+	vTaskDelete(NULL);
+}
+
+void task_OTA(void * parameter)
+{
+	initOTA();
+
+	while (true)
+	{
+		if (wifi_connected)
+		{
+			ArduinoOTA.handle();
+		}
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		delay(200);
+	}
+	vTaskDelete(NULL);
+}
+
+void task_ADC(void * parameter)
+{
+	//adcAttachPin(PIN_BATTERY);
+	//adcStart(PIN_BATTERY);
+
+	while (true)
+	{
+		//adcEnd(PIN_BATTERY);
+		batteryVoltageInBits=analogRead(PIN_BATTERY);
+		batteryVoltageInVolts = float(batteryVoltageInBits) * ((BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2) * 3.3 / 4095;
+		//adcStart(PIN_BATTERY);
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		delay(100);
+	}
+	vTaskDelete(NULL);
+}
+
+void task_melody(void * parameter)
+{
+	while (true)
+	{
+		if ((modeQuad == modeQuadARMED || modeQuad == modeQuadDirCmd) && cmdMotorThr <= CMD_THR_ARM_START)
+			buzzer.play(buzzerMelodyArmWarning);
+		else
+			buzzer.play(buzzerMelodyNoTone);
+		delay(100);
+	}
+	vTaskDelete(NULL);
+}
+
+void task_2Hz(void * parameter)
+{
+	statusMpu = statusType_NotInitiated;
+	mpuLastDataTime = millis();
+	while (true)
+	{
+		checkMpuGSHealth();
+		delay(500);
+	}
+	vTaskDelete(NULL);
+}
+
 void processTest() {
 
-
+	//Serial.print("ADC Ch:");
+	//Serial.print(digitalPinToAnalogChannel(PIN_BATTERY));
+	//Serial.print("  Bat:");
+	//Serial.println(batteryVoltageInBits);
+	//Serial.print("DC_Roll:");
+	//Serial.println(dutyCycle_Roll);
 	digitalWrite(PIN_LED, HIGH);
-	delay(500);
+	delay(750);
 	digitalWrite(PIN_LED, LOW);
-	delay(500);
+	delay(750);
+/*
+	Serial.print("Temp");
+	Serial.println(barometerTemp);*/
 
 }
 
@@ -570,10 +703,11 @@ bool initMPU()
 
 		mpuLastDataTime = millis();
 
-
 		// reset so we can continue cleanly
 		mpu.resetFIFO();
 
+		statusMpu = statusType_Normal;
+		
 	}
 	else
 	{
@@ -584,6 +718,8 @@ bool initMPU()
 		Serial.print(F("DMP Initialization failed (code "));
 		Serial.print(devStatus);
 		Serial.println(F(")"));
+
+		statusMpu = statusType_Fail;
 	}
 }
 
@@ -615,8 +751,8 @@ void processMpu()
 	}
 	else if ((mpuIntStatus & 0x02))
 	{
-		Serial.print("F:");
-		Serial.println(fifoCount);
+		//Serial.print("F:");
+		//Serial.println(fifoCount);
 		if (fifoCount >= packetSize)
 		{
 
@@ -635,6 +771,8 @@ void processMpu()
 				fifoCount -= packetSize;
 			}
 
+			mpuLastDataTime = millis();
+
 
 
 			mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -645,6 +783,52 @@ void processMpu()
 			mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 			mpu.dmpGetEuler(euler, &q);
 
+#ifdef INVERSE_IMU
+			qc.gyro.x = gg[0];
+			qc.gyro.y = gg[1]; 
+			qc.gyro.z = gg[2];
+
+			qc.accel.mpuAccX = aa.x;
+			qc.accel.mpuAccY = -aa.y;
+			qc.accel.mpuAccZ = -aa.z;
+
+			qc.accelBody.x = aaReal.x;
+			qc.accelBody.y = -aaReal.y;
+			qc.accelBody.z = -aaReal.z;
+
+			qc.accelWorld.x = aaWorld.x;
+			qc.accelWorld.y = -aaWorld.y;
+			qc.accelWorld.z = -aaWorld.z;
+
+			qc.euler.psi = -euler[0];
+			qc.euler.theta = -euler[1];
+			float tempRoll = euler[2] + M_PI;
+			if (tempRoll > M_PI)
+				tempRoll -= M_PI * 2;
+			else if (tempRoll <= -M_PI)
+				tempRoll += M_PI * 2;
+			qc.euler.phi = tempRoll;
+#else
+			qc.gyro.x = gg[0];
+			qc.gyro.y = -gg[1];
+			qc.gyro.z = -gg[2];
+
+			qc.accel.x = aa.x;
+			qc.accel.y = aa.y;
+			qc.accel.z = aa.z;
+
+			qc.accelBody.x = aaReal.x;
+			qc.accelBody.y = aaReal.y;
+			qc.accelBody.z = aaReal.z;
+
+			qc.accelWorld.x = aaWorld.x;
+			qc.accelWorld.y = aaWorld.y;
+			qc.accelWorld.z = aaWorld.z;
+
+			qc.euler.psi = -euler[0];  
+			qc.euler.theta = -euler[1]; 
+			qc.euler.phi = euler[2];   
+#endif
 
 		}
 
@@ -671,7 +855,7 @@ void processMapRxDCtoCmd()
 		if (abs(cmdRxRoll) > 1)
 		{
 			cmdRxPitchRollAngle = atan(abs(cmdRxPitch / cmdRxRoll));
-			cmdRxPitchRollSF = cos(min(cmdRxPitchRollAngle, M_PI_2 - cmdRxPitchRollAngle));
+			cmdRxPitchRollSF = cos(_min(cmdRxPitchRollAngle, M_PI_2 - cmdRxPitchRollAngle));
 
 
 			cmdRxPitchRollXfactor = sin(CMD_MAX_ATTITUDE_IN_RADIANS);
@@ -1122,7 +1306,7 @@ void handleAutoModeCommands()
 #else	
 	if (modeQuad == modeQuadARMED && MsgT01.message.coWorkerTxPacket.statusGS == statusType_Normal)
 	{
-		autoModeStatus = MsgT01.message.udpT01RelayPacket.autoModeCommand;
+		autoModeStatus = MsgUdpT01.message.autoModeCommand;
 	}
 	else
 	{
@@ -1244,9 +1428,10 @@ void processBarometer()
 {
 	//Barometer Data Processing
 	barometer.runProcess();
-	barometerTemp = barometer.readTemperature(true);
-	barometerPress = barometer.readPressure(true);
+	barometerTemp = barometer.readTemperature(false);
+	barometerPress = barometer.readPressure(false);
 	barometerAlt = barometer.getAltitude(barometerPress);
+
 }
 
 bool initCompass()
@@ -1283,4 +1468,379 @@ void processCompass()
 	Vector compassNorm = compass.readNormalize();
 	// To calculate heading in degrees. 0 degree indicates North
 	compassHdg = atan2(compassNorm.YAxis, compassNorm.XAxis);
+}
+
+void initUDP()
+{
+	Serial.println("Connecting to WiFi network: " + String(WIFI_SSID));
+
+	WiFi.mode(WIFI_STA);
+	// delete old config
+	WiFi.disconnect(true);
+	//register event handler
+	WiFi.onEvent(WiFiEvent);
+
+	//Initiate connection
+	WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+	Serial.println("Waiting for WIFI connection...");
+}
+
+void WiFiEvent(WiFiEvent_t event) {
+	switch (event) {
+	case SYSTEM_EVENT_STA_GOT_IP:
+		//When connected set 
+		Serial.print("WiFi connected! IP address: ");
+		Serial.println(WiFi.localIP());
+		//initializes the UDP state
+		//This initializes the transfer buffer
+		udp.begin(WiFi.localIP(), UDP_PORT);
+		wifi_connected = true;
+		break;
+	case SYSTEM_EVENT_STA_DISCONNECTED:
+		Serial.println("WiFi lost connection");
+		wifi_connected = false;
+		if (wifi_connection_attempt < WIFI_CONNECTION_ATTEMPT_LIMIT)
+		{
+			initUDP();
+		}
+
+		wifi_connection_attempt++;
+		break;
+	}
+}
+
+void initOTA()
+{
+	while (!wifi_connected)
+	{
+		delay(100);
+		if (wifi_connection_attempt >= WIFI_CONNECTION_ATTEMPT_LIMIT)
+		{
+			//Serial.println("Unable to connect wifi, Suspending OTA Task!");
+			//vTaskSuspend(NULL);
+		}
+	}
+	// Port defaults to 3232
+	// ArduinoOTA.setPort(3232);
+
+	// Hostname defaults to esp3232-[MAC]
+	// ArduinoOTA.setHostname("myesp32");
+
+	// No authentication by default
+	// ArduinoOTA.setPassword("admin");
+
+	// Password can be set with it's md5 value as well
+	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+	ArduinoOTA.onStart([]() {
+		String type;
+		if (ArduinoOTA.getCommand() == U_FLASH)
+			type = "sketch";
+		else // U_SPIFFS
+			type = "filesystem";
+
+		// NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+		//SPIFFS.end();
+		Serial.println("Start updating " + type);
+	});
+	ArduinoOTA.onEnd([]() {
+		Serial.println("\nEnd");
+	});
+	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+		Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+	});
+	ArduinoOTA.onError([](ota_error_t error) {
+		Serial.printf("Error[%u]: ", error);
+		if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+		else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+		else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+		else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+		else if (error == OTA_END_ERROR) Serial.println("End Failed");
+	});
+	ArduinoOTA.begin();
+	Serial.print("OTA Ready,");
+	Serial.print("  IP address: ");
+	Serial.println(WiFi.localIP());
+}
+
+void updateUdpMsgVars()
+{
+	/// !!! Do not forget to add multiplication to following identities with correct resolution values
+	switch (MsgUdpT01.message.pidCommandState)
+	{
+	case pidCommandApplyRatePitchRoll:
+		applyPidCommandRatePitchRoll();
+		break;
+
+	case pidCommandApplyAnglePitchRoll:
+		applyPidCommandAnglePitchRoll();
+		break;
+
+	case pidCommandApplyRateYaw:
+		applyPidCommandRateYaw();
+		break;
+
+	case pidCommandApplyAngleYaw:
+		applyPidCommandAngleYaw();
+		break;
+
+	case pidCommandApplyAll:
+		applyPidCommandRatePitchRoll();
+		applyPidCommandAnglePitchRoll();
+		applyPidCommandRateYaw();
+		applyPidCommandAngleYaw();
+		applyPidCommandVelAlt();
+		applyPidCommandAccAlt();
+		break;
+
+	case pidCommandApplyVelAlt:
+		applyPidCommandVelAlt();
+		break;
+
+	case pidCommandApplyAccAlt:
+		applyPidCommandAccAlt();
+		break;
+	default:break;
+	}
+}
+
+void applyPidCommandRatePitchRoll()
+{
+	//Set Pitch Rate PID parameters
+	pidVars.ratePitch.Kp = MsgUdpT01.message.pidRatePitchRollKp * RESOLUTION_PID_RATE_KP;
+	pidVars.ratePitch.Ki = MsgUdpT01.message.pidRatePitchRollKi * RESOLUTION_PID_RATE_KI;
+	pidVars.ratePitch.Kd = MsgUdpT01.message.pidRatePitchRollKd * RESOLUTION_PID_RATE_KD;
+	pidVars.ratePitch.f1 = MsgUdpT01.message.pidRatePitchRollF1 * RESOLUTION_PID_F;
+	pidVars.ratePitch.f2 = MsgUdpT01.message.pidRatePitchRollF2 * RESOLUTION_PID_F;
+	pidRatePitch.SetTunings(pidVars.ratePitch.Kp, pidVars.ratePitch.Ki, pidVars.ratePitch.Kd);
+	pidRatePitch.SetF1(pidVars.ratePitch.f1);
+	pidRatePitch.SetF2(pidVars.ratePitch.f2);
+	//Set Roll Rate PID parameters
+	pidVars.rateRoll.Kp = pidVars.ratePitch.Kp;
+	pidVars.rateRoll.Ki = pidVars.ratePitch.Ki;
+	pidVars.rateRoll.Kd = pidVars.ratePitch.Kd;
+	pidVars.rateRoll.f1 = pidVars.ratePitch.f1;
+	pidVars.rateRoll.f2 = pidVars.ratePitch.f2;
+	pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
+	pidRateRoll.SetF1(pidVars.rateRoll.f1);
+	pidRateRoll.SetF2(pidVars.rateRoll.f2);
+}
+
+void applyPidCommandAnglePitchRoll()
+{
+	//Set Pitch Angle PID parameters
+	pidVars.anglePitch.Kp = MsgUdpT01.message.pidAnglePitchRollKp * RESOLUTION_PID_ANGLE_KP;
+	pidVars.anglePitch.Ki = MsgUdpT01.message.pidAnglePitchRollKi * RESOLUTION_PID_ANGLE_KI;
+	pidVars.anglePitch.Kd = MsgUdpT01.message.pidAnglePitchRollKd * RESOLUTION_PID_ANGLE_KD;
+	pidVars.anglePitch.f1 = MsgUdpT01.message.pidAnglePitchRollF1 * RESOLUTION_PID_F;
+	pidVars.anglePitch.f2 = MsgUdpT01.message.pidAnglePitchRollF2 * RESOLUTION_PID_F;
+	pidVars.anglePitch.outputFilterConstant = MsgUdpT01.message.pidAnglePitchRollOutFilter * RESOLUTION_PID_F;
+	pidVars.angleRoll.outputFilterConstant = pidVars.anglePitch.outputFilterConstant;
+	pidAnglePitch.SetTunings(pidVars.anglePitch.Kp, pidVars.anglePitch.Ki, pidVars.anglePitch.Kd);
+	pidAnglePitch.SetF1(pidVars.anglePitch.f1);
+	pidAnglePitch.SetF2(pidVars.anglePitch.f2);
+	//Set Roll Angle PID parameters
+	pidVars.angleRoll.Kp = pidVars.anglePitch.Kp;
+	pidVars.angleRoll.Ki = pidVars.anglePitch.Ki;
+	pidVars.angleRoll.Kd = pidVars.anglePitch.Kd;
+	pidVars.angleRoll.f1 = pidVars.anglePitch.f1;
+	pidVars.angleRoll.f2 = pidVars.anglePitch.f2;
+	pidAngleRoll.SetTunings(pidVars.angleRoll.Kp, pidVars.angleRoll.Ki, pidVars.angleRoll.Kd);
+	pidAngleRoll.SetF1(pidVars.angleRoll.f1);
+	pidAngleRoll.SetF2(pidVars.angleRoll.f2);
+}
+
+void applyPidCommandRateYaw()
+{
+	//Set Yaw Rate PID parameters
+	pidVars.rateYaw.Kp = MsgUdpT01.message.pidRateYawKp * RESOLUTION_PID_RATE_KP;
+	pidVars.rateYaw.Ki = MsgUdpT01.message.pidRateYawKi * RESOLUTION_PID_RATE_KI;
+	pidVars.rateYaw.Kd = MsgUdpT01.message.pidRateYawKd * RESOLUTION_PID_RATE_KD;
+	pidVars.rateYaw.f1 = MsgUdpT01.message.pidRateYawF1 * RESOLUTION_PID_F;
+	pidVars.rateYaw.f2 = MsgUdpT01.message.pidRateYawF2 * RESOLUTION_PID_F;
+	pidRateYaw.SetTunings(pidVars.rateYaw.Kp, pidVars.rateYaw.Ki, pidVars.rateYaw.Kd);
+	pidRateYaw.SetF1(pidVars.rateYaw.f1);
+	pidRateYaw.SetF2(pidVars.rateYaw.f2);
+}
+
+void applyPidCommandAngleYaw()
+{
+	//Set Yaw Angle PID parameters
+	pidVars.angleYaw.Kp = MsgUdpT01.message.pidAngleYawKp * RESOLUTION_PID_ANGLE_KP;
+	pidVars.angleYaw.Ki = MsgUdpT01.message.pidAngleYawKi * RESOLUTION_PID_ANGLE_KI;
+	pidVars.angleYaw.Kd = MsgUdpT01.message.pidAngleYawKd * RESOLUTION_PID_ANGLE_YAW_KD;
+	pidVars.angleYaw.f1 = MsgUdpT01.message.pidAngleYawF1 * RESOLUTION_PID_F;
+	pidVars.angleYaw.f2 = MsgUdpT01.message.pidAngleYawF2 * RESOLUTION_PID_F;
+	pidVars.angleYaw.outputFilterConstant = MsgUdpT01.message.pidAngleYawOutFilter * RESOLUTION_PID_F;
+	pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
+	pidAngleYaw.SetF1(pidVars.angleYaw.f1);
+	pidAngleYaw.SetF2(pidVars.angleYaw.f2);
+}
+
+void applyPidCommandVelAlt()
+{
+	//Set Altitude Velocity PID parameters
+	pidVars.velAlt.Kp = MsgUdpT01.message.pidVelAltKp * RESOLUTION_PID_VEL_KP;
+	pidVars.velAlt.Ki = MsgUdpT01.message.pidVelAltKi * RESOLUTION_PID_VEL_KI;
+	pidVars.velAlt.Kd = MsgUdpT01.message.pidVelAltKd * RESOLUTION_PID_VEL_KD;
+	pidVars.velAlt.f1 = MsgUdpT01.message.pidVelAltF1 * RESOLUTION_PID_F;
+	pidVars.velAlt.f2 = MsgUdpT01.message.pidVelAltF2 * RESOLUTION_PID_F;
+	pidVars.velAlt.outputFilterConstant = MsgUdpT01.message.pidVelAltOutFilter * RESOLUTION_PID_F;
+	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
+	pidVelAlt.SetF1(pidVars.velAlt.f1);
+	pidVelAlt.SetF2(pidVars.velAlt.f2);
+}
+
+void applyPidCommandAccAlt()
+{
+	//Set Altitude Position PID parameters
+	pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_POS_KP;
+	pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_POS_KI;
+	pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_POS_KD;
+	pidVars.accAlt.f1 = MsgUdpT01.message.pidAccAltF1 * RESOLUTION_PID_F;
+	pidVars.accAlt.f2 = MsgUdpT01.message.pidAccAltF2 * RESOLUTION_PID_F;
+	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
+	pidAccAlt.SetF1(pidVars.accAlt.f1);
+	pidAccAlt.SetF2(pidVars.accAlt.f2);
+}
+
+void prepareUDPmessages()
+{
+	MsgUdpR01.message.timeStamp				= millis();
+	MsgUdpR01.message.statusMpu				= statusMpu;
+	MsgUdpR01.message.statusBaro			= statusBaro;
+	MsgUdpR01.message.statusCompass			= statusCompass;
+	MsgUdpR01.message.statusUdp				= statusUdp;
+	MsgUdpR01.message.statusGS				= statusGS;
+	MsgUdpR01.message.mpuGyroX				= qc.gyro.x;
+	MsgUdpR01.message.mpuGyroY				= qc.gyro.y;
+	MsgUdpR01.message.mpuGyroZ				= qc.gyro.z;
+	MsgUdpR01.message.mpuAccX				= qc.accel.x;
+	MsgUdpR01.message.mpuAccY				= qc.accel.y;
+	MsgUdpR01.message.mpuAccZ				= qc.accel.z;
+	MsgUdpR01.message.mpuAccWorldX			= qc.accelWorld.x;
+	MsgUdpR01.message.mpuAccWorldY			= qc.accelWorld.y;
+	MsgUdpR01.message.mpuAccWorldZ			= qc.accelWorld.z;
+	MsgUdpR01.message.mpuYaw				= qc.euler.psi;
+	MsgUdpR01.message.mpuPitch				= qc.euler.theta;
+	MsgUdpR01.message.mpuRoll				= qc.euler.phi;
+	MsgUdpR01.message.baroTemp				= barometerTemp;
+	MsgUdpR01.message.baroAlt				= barometerAlt;
+	MsgUdpR01.message.compassHdg			= compassHdg;
+	MsgUdpR01.message.batteryVoltageInBits	= batteryVoltageInBits;
+	MsgUdpR01.message.quadVelocityWorldZ	= 0;
+	MsgUdpR01.message.quadPositionWorldZ	= 0;
+	MsgUdpR01.message.modeQuad				= modeQuad;
+	MsgUdpR01.message.autoModeStatus		= autoModeStatus;
+	MsgUdpR01.message.statusRx				= statusRx;
+	MsgUdpR01.message.rxThrottle			= cmdRxThr;
+	MsgUdpR01.message.rxPitch				= cmdRxPitchCalibrated;
+	MsgUdpR01.message.rxRoll				= cmdRxRollCalibrated;
+	MsgUdpR01.message.rxYaw					= cmdRxYaw;
+	MsgUdpR01.message.pidRatePitchKp		= pidVars.ratePitch.Kp / RESOLUTION_PID_RATE_KP;
+	MsgUdpR01.message.pidRatePitchKi		= pidVars.ratePitch.Ki / RESOLUTION_PID_RATE_KI;
+	MsgUdpR01.message.pidRatePitchKd		= pidVars.ratePitch.Kd / RESOLUTION_PID_RATE_KD;
+	MsgUdpR01.message.pidRatePitchOutput	= pidVars.ratePitch.output;
+	MsgUdpR01.message.pidRatePitchPresult	= pidRatePitch.Get_P_Result();
+	MsgUdpR01.message.pidRatePitchIresult	= pidRatePitch.Get_I_Result();
+	MsgUdpR01.message.pidRatePitchDresult	= pidRatePitch.Get_D_Result();
+	MsgUdpR01.message.pidRatePitchF1		= pidVars.ratePitch.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidRatePitchF2		= pidVars.ratePitch.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAnglePitchKp		= pidVars.anglePitch.Kp / RESOLUTION_PID_ANGLE_KP;
+	MsgUdpR01.message.pidAnglePitchKi		= pidVars.anglePitch.Ki / RESOLUTION_PID_ANGLE_KI;
+	MsgUdpR01.message.pidAnglePitchKd		= pidVars.anglePitch.Kd / RESOLUTION_PID_ANGLE_KD;
+	MsgUdpR01.message.pidAnglePitchOutput	= pidVars.anglePitch.output;
+	MsgUdpR01.message.pidAnglePitchPresult	= pidAnglePitch.Get_P_Result();
+	MsgUdpR01.message.pidAnglePitchIresult	= pidAnglePitch.Get_I_Result();
+	MsgUdpR01.message.pidAnglePitchDresult	= pidAnglePitch.Get_D_Result();
+	MsgUdpR01.message.pidAnglePitchF1		= pidVars.anglePitch.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAnglePitchF2		= pidVars.anglePitch.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAnglePitchOutFilter = pidVars.anglePitch.outputFilterConstant / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidRateRollKp			= pidVars.rateRoll.Kp / RESOLUTION_PID_RATE_KP;
+	MsgUdpR01.message.pidRateRollKi			= pidVars.rateRoll.Ki / RESOLUTION_PID_RATE_KI;
+	MsgUdpR01.message.pidRateRollKd			= pidVars.rateRoll.Kd / RESOLUTION_PID_RATE_KD;
+	MsgUdpR01.message.pidRateRollOutput		= pidVars.rateRoll.output;
+	MsgUdpR01.message.pidRateRollPresult	= pidRateRoll.Get_P_Result();
+	MsgUdpR01.message.pidRateRollIresult	= pidRateRoll.Get_I_Result();
+	MsgUdpR01.message.pidRateRollDresult	= pidRateRoll.Get_D_Result();
+	MsgUdpR01.message.pidRateRollF1			= pidVars.rateRoll.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidRateRollF2			= pidVars.rateRoll.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAngleRollKp		= pidVars.angleRoll.Kp / RESOLUTION_PID_ANGLE_KP;
+	MsgUdpR01.message.pidAngleRollKi		= pidVars.angleRoll.Ki / RESOLUTION_PID_ANGLE_KI;
+	MsgUdpR01.message.pidAngleRollKd		= pidVars.angleRoll.Kd / RESOLUTION_PID_ANGLE_KD;
+	MsgUdpR01.message.pidAngleRollOutput	= pidVars.angleRoll.output;
+	MsgUdpR01.message.pidAngleRollPresult	= pidAngleRoll.Get_P_Result();
+	MsgUdpR01.message.pidAngleRollIresult	= pidAngleRoll.Get_I_Result();
+	MsgUdpR01.message.pidAngleRollDresult	= pidAngleRoll.Get_D_Result();
+	MsgUdpR01.message.pidAngleRollF1		= pidVars.angleRoll.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAngleRollF2		= pidVars.angleRoll.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAngleRollOutFilter = pidVars.angleRoll.outputFilterConstant / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidRateYawKp			= pidVars.rateYaw.Kp / RESOLUTION_PID_RATE_KP;
+	MsgUdpR01.message.pidRateYawKi			= pidVars.rateYaw.Ki / RESOLUTION_PID_RATE_KI;
+	MsgUdpR01.message.pidRateYawKd			= pidVars.rateYaw.Kd / RESOLUTION_PID_RATE_KD;
+	MsgUdpR01.message.pidRateYawOutput		= pidVars.rateYaw.output;
+	MsgUdpR01.message.pidRateYawPresult		= pidRateYaw.Get_P_Result();
+	MsgUdpR01.message.pidRateYawIresult		= pidRateYaw.Get_I_Result();
+	MsgUdpR01.message.pidRateYawDresult		= pidRateYaw.Get_D_Result();
+	MsgUdpR01.message.pidRateYawF1			= pidVars.rateYaw.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidRateYawF2			= pidVars.rateYaw.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAngleYawKp			= pidVars.angleYaw.Kp / RESOLUTION_PID_ANGLE_KP;
+	MsgUdpR01.message.pidAngleYawKi			= pidVars.angleYaw.Ki / RESOLUTION_PID_ANGLE_KI;
+	MsgUdpR01.message.pidAngleYawKd			= pidVars.angleYaw.Kd / RESOLUTION_PID_ANGLE_YAW_KD;
+	MsgUdpR01.message.pidAngleYawOutput		= pidVars.angleYaw.output;
+	MsgUdpR01.message.pidAngleYawPresult	= pidAngleYaw.Get_P_Result();
+	MsgUdpR01.message.pidAngleYawIresult	= pidAngleYaw.Get_I_Result();
+	MsgUdpR01.message.pidAngleYawDresult	= pidAngleYaw.Get_D_Result();
+	MsgUdpR01.message.pidAngleYawF1			= pidVars.angleYaw.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAngleYawF2			= pidVars.angleYaw.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAngleYawOutFilter	= pidVars.angleYaw.outputFilterConstant / RESOLUTION_PID_F;
+	MsgUdpR01.message.commandedYawAngle		= cmdMotorYaw;
+	MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
+	MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
+	MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
+	MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
+	MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
+	MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
+	MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
+	MsgUdpR01.message.pidVelAltF1			= pidVars.velAlt.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidVelAltF2			= pidVars.velAlt.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_POS_KP;
+	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_POS_KI;
+	MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_POS_KD;
+	MsgUdpR01.message.pidAccAltOutput		= pidVars.accAlt.output;
+	MsgUdpR01.message.pidAccAltPresult		= pidAccAlt.Get_P_Result();
+	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
+	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
+	MsgUdpR01.message.pidAccAltF1			= pidVars.accAlt.f1 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAccAltF2			= pidVars.accAlt.f2 / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidAccAltOutFilter	= pidVars.accAlt.outputFilterConstant / RESOLUTION_PID_F;
+
+
+	MsgUdpR01.getPacket();
+}
+
+void checkMpuGSHealth()
+{
+	if ((millis() - mpuLastDataTime> MPU_DATATIME_THRESHOLD) && statusMpu != statusType_NotInitiated)
+	{
+		statusMpu = statusType_Fail;
+		//try to restart MPU and check mpu status there again
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
+		{
+			initMPU();
+			xSemaphoreGive(xI2CSemaphore);
+		}
+	}
+
+
+	if (millis() - udpLastMessageTime > GS_CON_LOST_THRESHOLD)
+	{
+		statusGS = statusType_Fail;
+	}
+	else
+	{
+		statusGS = statusType_Normal;
+	}
 }

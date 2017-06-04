@@ -59,7 +59,6 @@ void cAltitudeFusion::update(double pos, double acc)
 	temp_nom[1][0] = P[1][0] * H[0][0] + P[1][1] * H[0][1];
 
 
-
 	temp_denom[0][0] = H[0][0] * temp_nom[0][0] + H[0][1] * temp_nom[1][0];
 
 

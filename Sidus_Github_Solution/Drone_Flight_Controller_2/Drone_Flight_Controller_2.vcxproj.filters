@@ -57,6 +57,12 @@
     <ClInclude Include="PID_YawAngle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cMsgUdpR01.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cMsgUdpT01.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp">
@@ -81,6 +87,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PID_YawAngle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cMsgUdpR01.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cMsgUdpT01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

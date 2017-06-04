@@ -3,6 +3,14 @@
 This header file define all the configurable variables including constants, pin mapping, etc.
 */
 
+//Wifi, UDP Definitions
+#define		WIFI_SSID						"khorfo_net"
+#define		WIFI_PASS						"ahmet_ipek_12082004"
+
+#define		UDP_PORT						8080
+#define		DEFAULT_GROUND_STATION_IP		"192.168.1.7"
+
+#define		WIFI_CONNECTION_ATTEMPT_LIMIT	8
 
 //Comment out below line if you do not want command calibration
 #define		COMMAND_CALIBRATION
@@ -15,8 +23,6 @@ This header file define all the configurable variables including constants, pin 
 #define		FCB_VERSION_2_1
 //#define		FCB_VERSION_2_0
 
-
-//Wifi, UDP Definitions
 
 
 
@@ -34,8 +40,9 @@ This header file define all the configurable variables including constants, pin 
 
 //Pin Definitions
 #define		PIN_LED				5
+#define		PIN_BATTERY			36
 
-#define		PIN_RX_ROLL			36
+#define		PIN_RX_ROLL			4
 #define		PIN_RX_PITCH		39	
 #define		PIN_RX_THR			34
 #define		PIN_RX_YAW			35
@@ -53,9 +60,11 @@ This header file define all the configurable variables including constants, pin 
 #define		PIN_MCU_SDA			21
 #define		PIN_MCU_SCL			22
 
-
 #define		PWM_FREQ		50
 #define		PWM_DEPTH		16
+
+#define		MPU_DATATIME_THRESHOLD		500
+#define		GS_CON_LOST_THRESHOLD      500
 
 #define		PWM_MICROSECONDS_TO_BITS	3.277 //pow(2, PWM_DEPTH)*PWM_FREQ/pow(10,6);
 
@@ -236,10 +245,13 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 
 
 float barometerTemp = 0.0;
-double barometerAlt = 0.0;
+float barometerAlt = 0.0;
 int32_t barometerPress;
 
 float compassHdg;
+
+short batteryVoltageInBits;
+uint32_t udpLastMessageTime;
 
 
 unsigned long mpuProcessStartTime = 0;
@@ -247,6 +259,9 @@ short mpuProcessTaskDuration = 0;
 double mpuPitchAngle, mpuRollAngle, mpuYawAngle;
 uint32_t mpuLastDataTime, mpuFirstDataTime;
 bool mpuFirstDataCheck;
+
+bool wifi_connected = false;
+int wifi_connection_attempt = 0;
 
 
 struct structPID

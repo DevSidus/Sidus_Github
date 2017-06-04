@@ -65,10 +65,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\Arduino\hardware\espressif\esp32\libraries\Wire\src;D:\Arduino\libraries;D:\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;D:\Arduino\hardware\espressif\esp32\cores\esp32;D:\Arduino\hardware\espressif\esp32\cores\esp32\libb64;D:\Arduino\hardware\espressif\esp32\variants\nano32;D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\xtensa-esp32-elf\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\5.2.0\include;D:\Arduino\hardware\espressif\esp32\tools\xtensa-esp32-elf\lib\gcc\xtensa-esp32-elf\5.2.0\include\;D:\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver;D:\Arduino\hardware\espressif\esp32\tools\sdk\include\esp32;D:\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos;D:\Arduino\hardware\espressif\esp32\tools\sdk\include\log;D:\Arduino\hardware\espressif\esp32\tools\sdk\include\soc\soc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>D:\DevSidus\Sidus_Github\Sidus_Github_Solution\Drone_Flight_Controller\__vm\.Drone_Flight_Controller.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries\Wire\src;$(ProjectDir)..\..\..\..\Arduino\libraries;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\libraries;E:\Arduino Sketches\libraries;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\cores\esp32;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\cores\esp32\libb64;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\variants\nano32;$(ProjectDir)..\Drone_Flight_Controller;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\esp32;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\freertos\freertos;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\log;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\soc\soc;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include\c++\4.8.2\xtensa-lx106-elf;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\xtensa-lx106-elf\include;C:\Users\ahmet\AppData\Local\arduino15\packages\esp8266\tools\xtensa-lx106-elf-gcc\1.20.0-26-gb404fb9-2\lib\gcc\xtensa-lx106-elf\4.8.2\include;$(ProjectDir)..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Drone_Flight_Controller.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>__ESP32_ESp32__;__ESP32_ESP32__;ESP_PLATFORM;HAVE_CONFIG_H;F_CPU=240000000L;ARDUINO=10801;ARDUINO_NANO32;ARDUINO_ARCH_ESP32;ESP32;CORE_DEBUG_LEVEL=0;__cplusplus=201103L;GCC_VERSION=50200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__ESP32_ESp32__;__ESP32_ESP32__;ESP_PLATFORM;HAVE_CONFIG_H;F_CPU=240000000L;ARDUINO=10802;ARDUINO_NANO32;ARDUINO_ARCH_ESP32;ESP32;CORE_DEBUG_LEVEL=0;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -102,6 +102,7 @@
     <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\soc\soc\rmt_reg.h" />
     <ClInclude Include="cAltitudeFusion.h" />
     <ClInclude Include="cBuzzerMelody.h" />
+    <ClInclude Include="cMsgCoWorkerTx.h" />
     <ClInclude Include="cMsgR01.h" />
     <ClInclude Include="cMsgT01.h" />
     <ClInclude Include="cMsgUdpR01.h" />
@@ -119,7 +120,6 @@
     <ClInclude Include="Local_PID_v1.h" />
     <ClInclude Include="PID_AccAlt.h" />
     <ClInclude Include="PID_YawAngle.h" />
-    <ClInclude Include="structMsgCoWorkerTx.h" />
     <ClInclude Include="__vm\.Drone_Flight_Controller.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>

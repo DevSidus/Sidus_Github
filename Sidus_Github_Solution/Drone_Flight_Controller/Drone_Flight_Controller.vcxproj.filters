@@ -60,9 +60,6 @@
     <ClInclude Include="cMsgUdpT01.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="structMsgCoWorkerTx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Local_PID_v1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,6 +112,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\soc\soc\rmt_reg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cMsgCoWorkerTx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -651,12 +651,9 @@ void serialTransmit()
 	MsgR01.message.pidVelAltKi = pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
 	MsgR01.message.pidVelAltKd = pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
 	MsgR01.message.pidVelAltOutput = pidVars.velAlt.output;
-
 	MsgR01.message.pidVelAltPresult = pidVelAlt.Get_P_Result();
 	MsgR01.message.pidVelAltIresult = pidVelAlt.Get_I_Result();
 	MsgR01.message.pidVelAltDresult = pidVelAlt.Get_D_Result();
-
-
 	MsgR01.message.pidVelAltF1 = pidVars.velAlt.f1 / RESOLUTION_PID_F;
 	MsgR01.message.pidVelAltF2 = pidVars.velAlt.f2 / RESOLUTION_PID_F;
 
@@ -664,11 +661,9 @@ void serialTransmit()
 	MsgR01.message.pidAccAltKi = pidVars.accAlt.Ki / RESOLUTION_PID_POS_KI;
 	MsgR01.message.pidAccAltKd = pidVars.accAlt.Kd / RESOLUTION_PID_POS_KD;
 	MsgR01.message.pidAccAltOutput = pidVars.accAlt.output;
-
 	MsgR01.message.pidAccAltPresult = pidAccAlt.Get_P_Result();
 	MsgR01.message.pidAccAltIresult = pidAccAlt.Get_I_Result();
 	MsgR01.message.pidAccAltDresult = pidAccAlt.Get_D_Result();
-
 	MsgR01.message.pidAccAltF1 = pidVars.accAlt.f1 / RESOLUTION_PID_F;
 	MsgR01.message.pidAccAltF2 = pidVars.accAlt.f2 / RESOLUTION_PID_F;
 	MsgR01.message.pidAccAltOutFilter = pidVars.accAlt.outputFilterConstant / RESOLUTION_PID_F;
@@ -684,23 +679,18 @@ void updateMessageVariables()
 	mpu.euler.psi = MsgT01.message.coWorkerTxPacket.mpuYaw;  //in radians
 	mpu.euler.theta = MsgT01.message.coWorkerTxPacket.mpuPitch;  //in radians
 	mpu.euler.phi = MsgT01.message.coWorkerTxPacket.mpuRoll;  //in radians
-
 	mpu.gyro.x = MsgT01.message.coWorkerTxPacket.mpuGyroX;  // in deg/sec
 	mpu.gyro.y = MsgT01.message.coWorkerTxPacket.mpuGyroY; // in deg/sec
 	mpu.gyro.z = MsgT01.message.coWorkerTxPacket.mpuGyroZ; // in deg/sec
-
 	mpu.accel.x = MsgT01.message.coWorkerTxPacket.mpuAccX;
 	mpu.accel.y = MsgT01.message.coWorkerTxPacket.mpuAccY;
 	mpu.accel.z = MsgT01.message.coWorkerTxPacket.mpuAccZ;
-
 	mpu.accelBody.x = MsgT01.message.coWorkerTxPacket.mpuAccX;
 	mpu.accelBody.y = MsgT01.message.coWorkerTxPacket.mpuAccY;
 	mpu.accelBody.z = MsgT01.message.coWorkerTxPacket.mpuAccZ;
-
 	mpu.accelWorld.x = MsgT01.message.coWorkerTxPacket.mpuAccWorldX;
 	mpu.accelWorld.y = MsgT01.message.coWorkerTxPacket.mpuAccWorldY;
 	mpu.accelWorld.z = MsgT01.message.coWorkerTxPacket.mpuAccWorldZ;
-
 	mpu.velWorld.z = MsgT01.message.coWorkerTxPacket.quadVelocityWorldZ;
 	mpu.posWorld.z = MsgT01.message.coWorkerTxPacket.quadPositionWorldZ;
 
