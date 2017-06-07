@@ -63,27 +63,6 @@
     <ClInclude Include="cMsgUdpT01.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kalmanFilter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="kalmanFilter_initialize.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="kalmanFilter_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rt_nonfinite.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rtGetInf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rtGetNaN.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rtwtypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp">
@@ -114,21 +93,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cMsgUdpT01.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="kalmanFilter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="kalmanFilter_initialize.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rt_nonfinite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rtGetInf.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rtGetNaN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
