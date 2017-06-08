@@ -60,7 +60,7 @@ This header file define all the configurable variables including constants, pin 
 #define		PIN_MCU_SDA			21
 #define		PIN_MCU_SCL			22
 
-#define		PWM_FREQ		50
+#define		PWM_FREQ		100
 #define		PWM_DEPTH		16
 
 #define		MPU_DATATIME_THRESHOLD		500
