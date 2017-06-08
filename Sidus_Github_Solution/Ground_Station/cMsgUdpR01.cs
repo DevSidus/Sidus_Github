@@ -42,7 +42,7 @@ namespace Ground_Station
 
         public float compassHdg { get; set; }
 
-        public short batteryVoltageInBits { get; set; }
+        public float batteryVoltage { get; set; }
 
         public float quadVelocityWorldZ { get; set; }
         public float quadPositionWorldZ { get; set; }

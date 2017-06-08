@@ -646,6 +646,10 @@ void processTest() {
 	delay(750);
 	digitalWrite(PIN_LED, LOW);
 	delay(750);
+
+	kalmanFilter(m_n1, P_n1, y_n, F_n, Q_n, H_n, R_n, m_n, P_n);
+
+	
 /*
 	Serial.print("Temp");
 	Serial.println(barometerTemp);*/
@@ -1727,13 +1731,13 @@ void prepareUDPmessages()
 	MsgUdpR01.message.mpuAccWorldX			= qc.accelWorld.x;
 	MsgUdpR01.message.mpuAccWorldY			= qc.accelWorld.y;
 	MsgUdpR01.message.mpuAccWorldZ			= qc.accelWorld.z;
-	MsgUdpR01.message.mpuYaw				= qc.euler.psi;
-	MsgUdpR01.message.mpuPitch				= qc.euler.theta;
-	MsgUdpR01.message.mpuRoll				= qc.euler.phi;
+	MsgUdpR01.message.mpuYaw				= qc.euler.psi * 180 / M_PI;
+	MsgUdpR01.message.mpuPitch				= qc.euler.theta * 180 / M_PI;
+	MsgUdpR01.message.mpuRoll				= qc.euler.phi * 180 / M_PI;
 	MsgUdpR01.message.baroTemp				= barometerTemp;
 	MsgUdpR01.message.baroAlt				= barometerAlt;
 	MsgUdpR01.message.compassHdg			= compassHdg;
-	MsgUdpR01.message.batteryVoltageInBits	= batteryVoltageInBits;
+	MsgUdpR01.message.batteryVoltage    	= batteryVoltageInVolts;
 	MsgUdpR01.message.quadVelocityWorldZ	= 0;
 	MsgUdpR01.message.quadPositionWorldZ	= 0;
 	MsgUdpR01.message.modeQuad				= modeQuad;

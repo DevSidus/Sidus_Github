@@ -138,6 +138,13 @@ namespace Ground_Station
             //DataAnalysisObj.data.baroTemp = MsgUdpR01.message.baroTemp;
             //DataAnalysisObj.data.compassHdg = MsgUdpR01.message.compassHdg;
 
+
+            DataAnalysisObj.data = MsgUdpR01.message;
+
+
+
+            /*
+
             DataAnalysisObj.data.timeStamp = MsgUdpR01.message.timeStamp;
             DataAnalysisObj.data.statusGS = MsgUdpR01.message.statusGS;
             DataAnalysisObj.data.mpuGyroX = MsgUdpR01.message.mpuGyroX;
@@ -152,7 +159,7 @@ namespace Ground_Station
             DataAnalysisObj.data.mpuRoll = (float)(MsgUdpR01.message.mpuRoll * 180.0 / Math.PI);
             DataAnalysisObj.data.mpuYaw = (float)(MsgUdpR01.message.mpuYaw * 180.0 / Math.PI);
             DataAnalysisObj.data.baroAlt = MsgUdpR01.message.baroAlt-800;
-            DataAnalysisObj.data.batteryVoltageInBits = MsgUdpR01.message.batteryVoltageInBits; //(BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2; ;
+            DataAnalysisObj.data.batteryVoltage = MsgUdpR01.message.batteryVoltage; //(BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2; ;
             DataAnalysisObj.data.mpuAccWorldX = MsgUdpR01.message.mpuAccWorldX;
             DataAnalysisObj.data.mpuAccWorldY = MsgUdpR01.message.mpuAccWorldY;
             DataAnalysisObj.data.mpuAccWorldZ = MsgUdpR01.message.mpuAccWorldZ;
@@ -244,7 +251,7 @@ namespace Ground_Station
             DataAnalysisObj.data.pidAccAltF1 = MsgUdpR01.message.pidAccAltF1;
             DataAnalysisObj.data.pidAccAltF2 = MsgUdpR01.message.pidAccAltF2;
             DataAnalysisObj.data.pidAccAltOutFilter = MsgUdpR01.message.pidAccAltOutFilter;
-
+            */
 
         }
 

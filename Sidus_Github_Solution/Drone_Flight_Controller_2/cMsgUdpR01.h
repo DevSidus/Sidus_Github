@@ -38,7 +38,7 @@ struct structMsgUdpR01
 
 	float compassHdg;
 
-	short batteryVoltageInBits;
+	float batteryVoltage;
 
 	float quadVelocityWorldZ;   //kalman filtered output
 	float quadPositionWorldZ;   //kalman filtered output
