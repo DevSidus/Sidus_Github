@@ -1,3 +1,4 @@
+/*
  * File: rt_nonfinite.h
  *
  * MATLAB Coder version            : 3.3
