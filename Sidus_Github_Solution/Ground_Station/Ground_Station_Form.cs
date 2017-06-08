@@ -77,10 +77,10 @@ namespace Ground_Station
             textFileName = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "_" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString() + ".txt";
 
 
-            String insertLine = "";
+            String insertLine = " ";
             foreach (var prop in DataAnalysisObj.data.GetType().GetProperties())
             {
-                insertLine = insertLine + prop.Name + " ";
+                insertLine = insertLine + prop.Name + "  ";
 
             }
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(@textFileName, true))
@@ -120,9 +120,10 @@ namespace Ground_Station
             foreach (var prop in DataAnalysisObj.data.GetType().GetProperties())
             {
 
-                insertLine = insertLine + string.Format("{0,0:0.00}", Convert.ToDouble(prop.GetValue(DataAnalysisObj.data, null).ToString())) + "  ";
+                insertLine = insertLine + string.Format("{0,8:0.00}", Convert.ToDouble(prop.GetValue(DataAnalysisObj.data, null).ToString())) + "  ";
 
             }
+
 
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(@textFileName, true))
             {
@@ -160,8 +161,6 @@ namespace Ground_Station
             DataAnalysisObj.data.quadPositionWorldZ = (float)MsgUdpR01.message.quadPositionWorldZ-800;
             DataAnalysisObj.data.modeQuad = MsgUdpR01.message.modeQuad;
             DataAnalysisObj.data.autoModeStatus = MsgUdpR01.message.autoModeStatus;
-            DataAnalysisObj.data.statusRx = MsgUdpR01.message.statusRx;
-
             DataAnalysisObj.data.rxThrottle = MsgUdpR01.message.rxThrottle;
             DataAnalysisObj.data.rxPitch = MsgUdpR01.message.rxPitch;
             DataAnalysisObj.data.rxRoll = MsgUdpR01.message.rxRoll;
@@ -829,7 +828,8 @@ namespace Ground_Station
                 if (qgsUdp.receivedDataFresh)
                 {
                     byte[] buffer = qgsUdp.getReceivedData();
-
+                    try
+                    {
                         if (buffer.Length >= Marshal.SizeOf(MsgUdpR01.message))
                         {
                             Buffer.BlockCopy(buffer, 0, MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.message));
@@ -837,7 +837,10 @@ namespace Ground_Station
                             updateMessagesForDataAnalysis();
                             writeToTextFile();
                         }
-
+                    }
+                    catch
+                    {
+                    }
 
 
                 }

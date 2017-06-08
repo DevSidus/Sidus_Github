@@ -324,6 +324,7 @@ void task_rx_2(void * parameter)
 			dutyCycle_Thr = item_ch2->duration0;
 			rxLastDataTime = millis();  //we need to define this for each isr in order to fully get status of rx
 			statusRx = statusType_Normal;
+
 			vRingbufferReturnItem(rb_ch2, (void*)item_ch2);
 		}
 		else
@@ -676,12 +677,12 @@ bool initMPU()
 
 	// supply your own gyro offsets here, scaled for min sensitivity
 	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
-	mpu.setXAccelOffset(-2553);
-	mpu.setYAccelOffset(-989);
-	mpu.setZAccelOffset(1689);
-	mpu.setXGyroOffset(88);
-	mpu.setYGyroOffset(-26);
-	mpu.setZGyroOffset(-5);
+	//mpu.setXGyroOffset(171);
+	//mpu.setYGyroOffset(55);
+	//mpu.setZGyroOffset(13);
+	//mpu.setXAccelOffset(-2068);
+	//mpu.setYAccelOffset(-250);
+	//mpu.setZAccelOffset(1067);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
@@ -837,7 +838,6 @@ void processMpu()
 
 void processMapRxDCtoCmd()
 {
-	//Serial.println(cmdRxPitchCalibrated);
 	if (statusRx == statusType_Normal)
 	{
 		cmdRxPitch = mapping(dutyCycle_Pitch, DC_PITCH_MIN, DC_PITCH_MAX, -CMD_RX_PITCH_ROLL_MAX, CMD_RX_PITCH_ROLL_MAX);  
@@ -852,7 +852,7 @@ void processMapRxDCtoCmd()
 
 		//This below code segment is written to have smoother and much feasible commands for quadcopter
 #ifdef COMMAND_CALIBRATION
-		if (abs(cmdRxRoll) > 2)
+		if (abs(cmdRxRoll) > 1)
 		{
 			cmdRxPitchRollAngle = atan(abs(cmdRxPitch / cmdRxRoll));
 			cmdRxPitchRollSF = cos(_min(cmdRxPitchRollAngle, M_PI_2 - cmdRxPitchRollAngle));
@@ -900,9 +900,6 @@ void processMapRxDCtoCmd()
 		cmdRxThr = CMD_THR_MIN;
 		cmdRx5thCh = 0;
 		cmdRx6thCh = 0;
-
-		cmdRxPitchCalibrated = 0;
-		cmdRxRollCalibrated = 0;
 	}
 
 }

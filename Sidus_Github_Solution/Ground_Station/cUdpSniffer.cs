@@ -98,17 +98,17 @@ namespace Ground_Station
                 timeSpan = DateTime.Now - lastTime;
                 lastTime = DateTime.Now;
 
-                if (!clientConnected)
-                {
-                    remoteIpEndPoint = remoteEP;
-                    clientConnected = true;
-                }
             }
             if (timeSpan.TotalMilliseconds < connectionThresholdTime)
                 connectionHanged = false;
             else
                 connectionHanged = true;
 
+            if (!clientConnected)
+            {
+                remoteIpEndPoint = remoteEP;
+                clientConnected = true;
+            }
         }
         public byte[] getReceivedData()
         {
