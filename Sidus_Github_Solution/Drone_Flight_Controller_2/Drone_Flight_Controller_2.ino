@@ -25,7 +25,6 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include "cMsgUdpR01.h"
 #include "cMsgUdpT01.h"
 
-#include "kalmanFilter.h"
 
 //Global Class Definitions
 MPU6050 mpu;
@@ -74,7 +73,7 @@ void setup() {
 
 	Wire.begin(PIN_MCU_SDA, PIN_MCU_SCL);
 	Wire.setClock(800000L);
-	
+
 
 	if (xI2CSemaphore == NULL)  // Check to confirm that the Serial Semaphore has not already been created.
 	{
