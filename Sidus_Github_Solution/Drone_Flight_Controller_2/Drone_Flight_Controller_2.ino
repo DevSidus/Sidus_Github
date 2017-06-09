@@ -100,6 +100,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_melody, "task_melody", 2048, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_kalman, "task_kalman", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
 	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 1);
@@ -120,7 +121,7 @@ void task_test(void * parameter)
 	{
 		processTest();
 		//Serial.println(portTICK_PERIOD_MS);
-		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));	   
 	}
 	vTaskDelete(NULL);
 }
@@ -634,6 +635,48 @@ void task_2Hz(void * parameter)
 	vTaskDelete(NULL);
 }
 
+
+void task_kalman(void * parameter)
+{
+	double F_n[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+	double H_n[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+
+	double Q_n[9] = { 0.0000018, 0, 0, 0, 0.0000018, 0, 0, 0, 0.0000018 };
+	double R_n[9] = { 0.000324, 0, 0, 0, 0.000324, 0, 0, 0, 0.000324 };
+
+
+	double P_n1[9] = { 0.018, 0, 0, 0, 0.018, 0, 0, 0, 0.018 };
+	double m_n1[3] = { 0, 0, 0 };
+
+	double m_n[3] = { 0, 0, 0 };
+	double P_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	double y_n[3] = { 0, 0, 0 };
+	
+	//unsigned long strtTime;
+	
+	while (true)
+	{
+		//strtTime = micros();
+		y_n[0] = qc.gyro.x;
+		y_n[1] = qc.gyro.y;
+		y_n[2] = qc.gyro.z;
+
+		kalmanFilter(m_n1, P_n1, y_n, F_n, Q_n, H_n, R_n, m_n, P_n);
+		
+		qc.gyroKalman.x = m_n[0];
+		qc.gyroKalman.y = m_n[1];
+		qc.gyroKalman.z = m_n[2];
+
+		memcpy(m_n1, m_n, sizeof(m_n));
+		memcpy(P_n1, P_n, sizeof(P_n));
+
+		//Serial.println(micros() - strtTime);
+
+		delay(9);
+	}
+	vTaskDelete(NULL);
+}
+
 void processTest() {
 
 	//Serial.print("ADC Ch:");
@@ -646,9 +689,6 @@ void processTest() {
 	delay(750);
 	digitalWrite(PIN_LED, LOW);
 	delay(750);
-
-	kalmanFilter(m_n1, P_n1, y_n, F_n, Q_n, H_n, R_n, m_n, P_n);
-
 	
 /*
 	Serial.print("Temp");
@@ -1725,6 +1765,9 @@ void prepareUDPmessages()
 	MsgUdpR01.message.mpuGyroX				= qc.gyro.x;
 	MsgUdpR01.message.mpuGyroY				= qc.gyro.y;
 	MsgUdpR01.message.mpuGyroZ				= qc.gyro.z;
+	MsgUdpR01.message.mpuGyroXkalman		= qc.gyroKalman.x;
+	MsgUdpR01.message.mpuGyroYkalman		= qc.gyroKalman.y;
+	MsgUdpR01.message.mpuGyroZkalman		= qc.gyroKalman.z;
 	MsgUdpR01.message.mpuAccX				= qc.accel.x;
 	MsgUdpR01.message.mpuAccY				= qc.accel.y;
 	MsgUdpR01.message.mpuAccZ				= qc.accel.z;

@@ -316,6 +316,7 @@ struct structIMU
 	struct3Daxis accelBody;
 	struct3Daxis velWorld;
 	struct3Daxis posWorld;
+	struct3Daxis gyroKalman;
 
 }qc;
 
@@ -413,6 +414,3 @@ unsigned char statusMpu;
 unsigned char statusCompass;
 unsigned char statusUdp;
 unsigned char statusGS;
-
-//kalmanFilter Declarations
-double m_n1[3], m_n[3], P_n1[9], P_n[9], y_n[3], F_n[9], Q_n[9], H_n[9], R_n[9];
