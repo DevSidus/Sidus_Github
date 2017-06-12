@@ -215,12 +215,13 @@ void task_rx_0(void * parameter)
 	//--------RMT CONFIG RADIO ROLL CHANNEL-----------------//
 
 	size_t rx_size = 0;
-
+	rmt_item32_t* item_ch0 = NULL;
 	while (true) 
 	{
 		//------------RMT GET RADIO ROLL PULSE DURATION-----------//
 		rx_size = 0;
-		rmt_item32_t* item_ch0 = (rmt_item32_t*)xRingbufferReceive(rb_ch0, &rx_size, RMT_RX_WAIT_TICKS);
+		
+		item_ch0 = (rmt_item32_t*)xRingbufferReceive(rb_ch0, &rx_size, RMT_RX_WAIT_TICKS);
 		if (item_ch0)
 		{
 			//Get the duration values from item..
@@ -262,13 +263,13 @@ void task_rx_1(void * parameter)
 	rmt_rx_start(rmt_rx_ch1.channel, true);
 	//--------RMT CONFIG RADIO PITCH CHANNEL-----------------//
 	size_t rx_size = 0;
-
+	rmt_item32_t* item_ch1 = NULL;
 	while (true)
 	{
 
 		//------------RMT GET RADIO PITCH PULSE DURATION-----------//
 		rx_size = 0;
-		rmt_item32_t* item_ch1 = (rmt_item32_t*)xRingbufferReceive(rb_ch1, &rx_size, RMT_RX_WAIT_TICKS);
+		item_ch1 = (rmt_item32_t*)xRingbufferReceive(rb_ch1, &rx_size, RMT_RX_WAIT_TICKS);
 		if (item_ch1)
 		{
 			//Get the duration values from item..
@@ -310,12 +311,12 @@ void task_rx_2(void * parameter)
 	//--------RMT CONFIG RADIO THR CHANNEL-----------------//
 
 	size_t rx_size = 0;
-
+	rmt_item32_t* item_ch2 = NULL;
 	while (true)
 	{
 		//------------RMT GET RADIO THR PULSE DURATION-----------//
 		rx_size = 0;
-		rmt_item32_t* item_ch2 = (rmt_item32_t*)xRingbufferReceive(rb_ch2, &rx_size, RMT_RX_WAIT_TICKS);
+		item_ch2 = (rmt_item32_t*)xRingbufferReceive(rb_ch2, &rx_size, RMT_RX_WAIT_TICKS);
 		if (item_ch2)
 		{
 			//Get the duration values from item..
@@ -365,13 +366,13 @@ void task_rx_3(void * parameter)
 	//--------RMT CONFIG RADIO YAW CHANNEL-----------------//
 
 	size_t rx_size = 0;
-
+	rmt_item32_t* item_ch3 = NULL;
 	while (true)
 	{
 
 		//------------RMT GET RADIO YAW PULSE DURATION-----------//
 		rx_size = 0;
-		rmt_item32_t* item_ch3 = (rmt_item32_t*)xRingbufferReceive(rb_ch3, &rx_size, RMT_RX_WAIT_TICKS);
+		item_ch3 = (rmt_item32_t*)xRingbufferReceive(rb_ch3, &rx_size, RMT_RX_WAIT_TICKS);
 		if (item_ch3)
 		{
 			//Get the duration values from item..
@@ -410,13 +411,13 @@ void task_rx_4(void * parameter)
 	//--------RMT CONFIG RADIO 5TH_CHAN CHANNEL-----------------//
 
 	size_t rx_size = 0;
-
+	rmt_item32_t* item_ch4 = NULL;
 	while (true)
 	{
 
 		//------------RMT GET RADIO 5TH CHAN PULSE DURATION-----------//
 		rx_size = 0;
-		rmt_item32_t* item_ch4 = (rmt_item32_t*)xRingbufferReceive(rb_ch4, &rx_size, RMT_RX_WAIT_TICKS);
+		item_ch4 = (rmt_item32_t*)xRingbufferReceive(rb_ch4, &rx_size, RMT_RX_WAIT_TICKS);
 		if (item_ch4)
 		{
 			//Get the duration values from item..
@@ -455,12 +456,13 @@ void task_rx_5(void * parameter)
 	//--------RMT CONFIG RADIO 6TH_CHAN CHANNEL-----------------//
 
 	size_t rx_size = 0;
+	rmt_item32_t* item_ch5 = NULL;
 
 	while (true)
 	{
 		//------------RMT GET RADIO 6TH CHAN PULSE DURATION-----------//
 		rx_size = 0;
-		rmt_item32_t* item_ch5 = (rmt_item32_t*)xRingbufferReceive(rb_ch5, &rx_size, RMT_RX_WAIT_TICKS);
+		item_ch5 = (rmt_item32_t*)xRingbufferReceive(rb_ch5, &rx_size, RMT_RX_WAIT_TICKS);
 		if (item_ch5)
 		{
 			//Get the duration values from item..

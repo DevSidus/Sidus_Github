@@ -4,6 +4,9 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,13 +18,15 @@ namespace Ground_Station
     public partial class Ground_Station : Form
     {
         //Initial Declaration of Objects
-        cUdpSniffer qgsUdp = new cUdpSniffer(cConfig.UDP_PORT_NUM);
         cMsgUdpT01 MsgUdpT01 = new cMsgUdpT01();
         cMsgUdpR01 MsgUdpR01 = new cMsgUdpR01();
-        long udp_rx_reset_counter = 0;
         String textFileName = "";
         DateTime startTime=DateTime.Now;
-        TimeSpan deltaTime;
+
+        UdpClient myUdpServer = new UdpClient(cConfig.UDP_PORT_NUM);
+        IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, cConfig.UDP_PORT_NUM);
+        bool clientConnected = false;
+
 
 
         double myVal = 0;
@@ -54,8 +59,16 @@ namespace Ground_Station
             while (true)
             {
                 MsgUdpT01.getPacket();
-                qgsUdp.SendPacket(MsgUdpT01.dataBytes, Marshal.SizeOf(MsgUdpT01.message));
-                MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandNoAction);
+
+                try
+                {
+                    myUdpServer.Send(MsgUdpT01.dataBytes, Marshal.SizeOf(MsgUdpT01.message), remoteEP);
+                    MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandNoAction);
+                }
+                catch
+                {
+
+                }                
                 System.Threading.Thread.Sleep(200);
             }
 
@@ -63,6 +76,10 @@ namespace Ground_Station
 
         private void Ground_Station_Load(object sender, EventArgs e)
         {
+
+            ssMainLabel1.Text = "IP:" + GetLocalIPv4();
+            ssMainLabel2.Text = "Port#:" + cConfig.UDP_PORT_NUM.ToString();
+
             DataAnalysisObj.init(lvDataAnalysis, pnlDataAnalysis);
             DataTxDisplayObj.init(lvDataTx, MsgUdpT01.message);
             
@@ -71,8 +88,6 @@ namespace Ground_Station
 
             timerDisplayRefresh.Enabled = true;
 
-            ssMainLabel1.Text = "IP:" + qgsUdp.GetLocalIPv4();
-            ssMainLabel2.Text = "Port#:" + qgsUdp.port.ToString();
 
             textFileName = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "_" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString() + ".txt";
 
@@ -93,10 +108,10 @@ namespace Ground_Station
         
         private void checkUdpClientStatus()
         {
-            if (qgsUdp.clientConnected)
+            if (clientConnected)
             {
                 ssMainLabel3.Text = "Connected";
-                ssMainLabel4.Text = "Client IP:" + qgsUdp.GetRemoteIP();
+                ssMainLabel4.Text = "Client IP:" + remoteEP.Address.ToString();
             }
             else
             {
@@ -832,30 +847,49 @@ namespace Ground_Station
         {
             while (true)
             {
-                qgsUdp.ReceivePacket();
-                if (qgsUdp.receivedDataFresh)
+                if (myUdpServer.Available > 0)
                 {
-                    byte[] buffer = qgsUdp.getReceivedData();
+                    try
+                    {
+                        MsgUdpR01.dataBytes = myUdpServer.Receive(ref remoteEP);
+                        updateMessagesForDataAnalysis();
+                        writeToTextFile();
+                        clientConnected = true;
+                    }
+                    catch
+                    {
 
-                        if (buffer.Length >= Marshal.SizeOf(MsgUdpR01.message))
-                        {
-                            Buffer.BlockCopy(buffer, 0, MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.message));
-                            udp_rx_reset_counter = 0;
-                            updateMessagesForDataAnalysis();
-                            writeToTextFile();
-                        }
-
-
-
+                    }
                 }
-                udp_rx_reset_counter++;
 
-                deltaTime = DateTime.Now - startTime;
-                myVal = deltaTime.TotalMilliseconds;
-                startTime = DateTime.Now;
-                //System.Threading.Thread.Sleep(1);
             }
         }
+
+        public string GetLocalIPv4()
+        {
+            NetworkInterfaceType _type = NetworkInterfaceType.Wireless80211;
+            string output = "";
+            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (item.NetworkInterfaceType == _type && item.OperationalStatus == OperationalStatus.Up)
+                {
+                    IPInterfaceProperties adapterProperties = item.GetIPProperties();
+
+                    if (adapterProperties.GatewayAddresses.FirstOrDefault() != null)
+                    {
+                        foreach (UnicastIPAddressInformation ip in adapterProperties.UnicastAddresses)
+                        {
+                            if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            {
+                                output = ip.Address.ToString();
+                            }
+                        }
+                    }
+                }
+            }
+            return output;
+        }
+
     }
 }
 
@@ -867,3 +901,5 @@ public static class ControlExtensions
         doubleBufferPropertyInfo.SetValue(control, enable, null);
     }
 }
+
+

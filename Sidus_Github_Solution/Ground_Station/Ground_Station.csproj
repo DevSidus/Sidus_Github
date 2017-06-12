@@ -89,7 +89,6 @@
     <Compile Include="cMsgR01.cs" />
     <Compile Include="cMsgUdpR01.cs" />
     <Compile Include="cMsgUdpT01.cs" />
-    <Compile Include="cUdpSniffer.cs" />
     <Compile Include="Ground_Station_Form.cs">
       <SubType>Form</SubType>
     </Compile>
