@@ -48,10 +48,9 @@ namespace Ground_Station
             bwUdpTransmit.WorkerReportsProgress = true;
             bwUdpTransmit.DoWork += new DoWorkEventHandler(bwUdpTransmit_DoWork);
 
-
             bwUdpReceive.WorkerReportsProgress = true;
             bwUdpReceive.DoWork += new DoWorkEventHandler(bwUdpReceive_DoWork);
-
+            
         }
 
         private void bwUdpTransmit_DoWork(object sender, DoWorkEventArgs e)
@@ -122,11 +121,11 @@ namespace Ground_Station
         
         private void timerDisplayRefresh_Tick(object sender, EventArgs e)
         {
-            checkUdpClientStatus();
+
             DataAnalysisObj.update(lvDataAnalysis, pnlDataAnalysis, tbGraphBackColor.BackColor);
             DataTxDisplayObj.update(lvDataTx, MsgUdpT01.message);
-
-            textBox1.Text = myVal.ToString("0000");
+            
+            checkUdpClientStatus();
         }
 
         private void writeToTextFile()
@@ -847,7 +846,7 @@ namespace Ground_Station
         {
             while (true)
             {
-                if (myUdpServer.Available > 0)
+                while (myUdpServer.Available >= Marshal.SizeOf(MsgUdpR01.message))
                 {
                     try
                     {
