@@ -51,6 +51,7 @@ namespace Ground_Station
             bwUdpReceive.WorkerReportsProgress = true;
             bwUdpReceive.DoWork += new DoWorkEventHandler(bwUdpReceive_DoWork);
             
+
         }
 
         private void bwUdpTransmit_DoWork(object sender, DoWorkEventArgs e)
@@ -124,7 +125,7 @@ namespace Ground_Station
 
             DataAnalysisObj.update(lvDataAnalysis, pnlDataAnalysis, tbGraphBackColor.BackColor);
             DataTxDisplayObj.update(lvDataTx, MsgUdpT01.message);
-            
+
             checkUdpClientStatus();
         }
 
@@ -134,7 +135,7 @@ namespace Ground_Station
             foreach (var prop in DataAnalysisObj.data.GetType().GetProperties())
             {
 
-                insertLine = insertLine + string.Format("{0,0:0.00}", Convert.ToDouble(prop.GetValue(DataAnalysisObj.data, null).ToString())) + "  ";
+                insertLine = insertLine + string.Format("{0,8:0.00}", Convert.ToDouble(prop.GetValue(DataAnalysisObj.data, null).ToString())) + "  ";
 
             }
 
@@ -888,7 +889,7 @@ namespace Ground_Station
             }
             return output;
         }
-
+        
     }
 }
 
