@@ -26,12 +26,7 @@ namespace Ground_Station
         UdpClient myUdpServer = new UdpClient(cConfig.UDP_PORT_NUM);
         IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, cConfig.UDP_PORT_NUM);
         bool clientConnected = false;
-
-
-
-        double myVal = 0;
-
-
+        
         cDataAnalysisClass DataAnalysisObj = new cDataAnalysisClass();
         cDataTxDisplayClass DataTxDisplayObj = new cDataTxDisplayClass();
 
@@ -47,10 +42,7 @@ namespace Ground_Station
 
             bwUdpTransmit.WorkerReportsProgress = true;
             bwUdpTransmit.DoWork += new DoWorkEventHandler(bwUdpTransmit_DoWork);
-
-            bwUdpReceive.WorkerReportsProgress = true;
-            bwUdpReceive.DoWork += new DoWorkEventHandler(bwUdpReceive_DoWork);
-            
+                      
 
         }
 
@@ -68,7 +60,7 @@ namespace Ground_Station
                 catch
                 {
 
-                }                
+                }
                 System.Threading.Thread.Sleep(200);
             }
 
@@ -84,7 +76,7 @@ namespace Ground_Station
             DataTxDisplayObj.init(lvDataTx, MsgUdpT01.message);
             
             bwUdpTransmit.RunWorkerAsync();
-            bwUdpReceive.RunWorkerAsync();
+            UDPListener();
 
             timerDisplayRefresh.Enabled = true;
 
@@ -134,9 +126,7 @@ namespace Ground_Station
             String insertLine = " ";
             foreach (var prop in DataAnalysisObj.data.GetType().GetProperties())
             {
-
-                insertLine = insertLine + string.Format("{0,8:0.00}", Convert.ToDouble(prop.GetValue(DataAnalysisObj.data, null).ToString())) + "  ";
-
+                insertLine = insertLine + string.Format("{0,4:0.00}", Convert.ToDouble(prop.GetValue(DataAnalysisObj.data, null).ToString())) + "  ";
             }
 
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(@textFileName, true))
@@ -840,29 +830,25 @@ namespace Ground_Station
             tb_pid_vel_alt_kp_Scroll(this, e);
             tb_pid_acc_alt_kp_Scroll(this, e);
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
-        }
-        
+        }        
 
-        private void bwUdpReceive_DoWork(object sender, DoWorkEventArgs e)
+        private void UDPListener()
         {
-            while (true)
+            Task.Run(async () =>
             {
-                while (myUdpServer.Available >= Marshal.SizeOf(MsgUdpR01.message))
+                using (myUdpServer)
                 {
-                    try
+                    while (true)
                     {
-                        MsgUdpR01.dataBytes = myUdpServer.Receive(ref remoteEP);
+                        var receivedResults = await myUdpServer.ReceiveAsync();
+                        MsgUdpR01.dataBytes = receivedResults.Buffer;
+                        remoteEP = receivedResults.RemoteEndPoint;
                         updateMessagesForDataAnalysis();
                         writeToTextFile();
                         clientConnected = true;
                     }
-                    catch
-                    {
-
-                    }
                 }
-
-            }
+            });
         }
 
         public string GetLocalIPv4()
