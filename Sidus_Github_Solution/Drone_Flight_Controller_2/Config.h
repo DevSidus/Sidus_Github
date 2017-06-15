@@ -4,11 +4,11 @@ This header file define all the configurable variables including constants, pin 
 */
 
 //Wifi, UDP Definitions
-#define		WIFI_SSID						"YANIKS HOUSE"
-#define		WIFI_PASS						"YanikTurkiye06"
+#define		WIFI_SSID						"khorfo_net"
+#define		WIFI_PASS						"ahmet_ipek_12082004"
 
 #define		UDP_PORT						8080
-#define		DEFAULT_GROUND_STATION_IP		"192.168.0.19"
+#define		DEFAULT_GROUND_STATION_IP		"192.168.1.7"
 
 #define		WIFI_CONNECTION_ATTEMPT_LIMIT	8
 

@@ -762,12 +762,12 @@ bool initMPU()
 
 	// supply your own gyro offsets here, scaled for min sensitivity
 	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
-	mpu.setXAccelOffset(-1705);
-	mpu.setYAccelOffset(-1217);
-	mpu.setZAccelOffset(1441);
-	mpu.setXGyroOffset(144);
-	mpu.setYGyroOffset(51);
-	mpu.setZGyroOffset(3);
+	mpu.setXAccelOffset(-2553);
+	mpu.setYAccelOffset(-989);
+	mpu.setZAccelOffset(1689);
+	mpu.setXGyroOffset(88);
+	mpu.setYGyroOffset(-26);
+	mpu.setZGyroOffset(-5);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
