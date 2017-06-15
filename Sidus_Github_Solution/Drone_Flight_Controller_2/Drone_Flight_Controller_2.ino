@@ -101,6 +101,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_kalman, "task_kalman", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
 	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 1);
@@ -679,6 +680,44 @@ void task_kalman(void * parameter)
 	vTaskDelete(NULL);
 }
 
+void task_IoT(void * parameter)
+{
+	WiFiClient clientIoT;
+
+	// ThingSpeak Settings
+	const int channelID = 287860;
+	String writeAPIKey = "AF8MQWKYWKF7Z393"; // write API key for your ThingSpeak Channel
+	const char* serverIoT = "api.thingspeak.com";
+
+	while (true)
+	{
+		if (clientIoT.connect(serverIoT, 80)) {
+
+			// Measure Signal Strength (RSSI) of Wi-Fi connection
+			long rssi = WiFi.RSSI();
+
+			// Construct API request body
+			String body = "field1=";
+			body += String(rssi);
+
+			clientIoT.print("POST /update HTTP/1.1\n");
+			clientIoT.print("Host: api.thingspeak.com\n");
+			clientIoT.print("Connection: close\n");
+			clientIoT.print("X-THINGSPEAKAPIKEY: " + writeAPIKey + "\n");
+			clientIoT.print("Content-Type: application/x-www-form-urlencoded\n");
+			clientIoT.print("Content-Length: ");
+			clientIoT.print(body.length());
+			clientIoT.print("\n\n");
+			clientIoT.print(body);
+			clientIoT.print("\n\n");
+		}
+		clientIoT.stop();
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		delay(10*1000);
+	}
+	vTaskDelete(NULL);
+}
+
 void processTest() {
 
 	//Serial.print("ADC Ch:");
@@ -723,12 +762,12 @@ bool initMPU()
 
 	// supply your own gyro offsets here, scaled for min sensitivity
 	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
-	mpu.setXAccelOffset(-2553);
-	mpu.setYAccelOffset(-989);
-	mpu.setZAccelOffset(1689);
-	mpu.setXGyroOffset(88);
-	mpu.setYGyroOffset(-26);
-	mpu.setZGyroOffset(-5);
+	mpu.setXAccelOffset(-1705);
+	mpu.setYAccelOffset(-1217);
+	mpu.setZAccelOffset(1441);
+	mpu.setXGyroOffset(144);
+	mpu.setYGyroOffset(51);
+	mpu.setZGyroOffset(3);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
