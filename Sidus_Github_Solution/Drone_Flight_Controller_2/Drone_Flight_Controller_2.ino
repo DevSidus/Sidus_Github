@@ -548,8 +548,7 @@ void task_UDP(void * parameter)
 
 	delay(2000);
 	initUDP();
-
-	while (true)
+		while (true)
 	{
 		if (wifi_connected)
 		{
