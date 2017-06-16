@@ -63,10 +63,11 @@ This header file define all the configurable variables including constants, pin 
 #define		PWM_FREQ		100
 #define		PWM_DEPTH		16
 
+#define		PWM_MICROSECONDS_TO_BITS	pow(2, PWM_DEPTH)*PWM_FREQ/pow(10,6)
+
 #define		MPU_DATATIME_THRESHOLD		500
 #define		GS_CON_LOST_THRESHOLD      500
 
-#define		PWM_MICROSECONDS_TO_BITS	3.277 //pow(2, PWM_DEPTH)*PWM_FREQ/pow(10,6);
 
 #define		M_FL_CHANNEL		1
 #define		M_FR_CHANNEL		2
@@ -86,7 +87,7 @@ This header file define all the configurable variables including constants, pin 
 #define		DC_ROLL_MIN		1100.0
 #define		DC_ROLL_MAX		1900.0
 
-#define		CMD_THR_MIN		1000.0
+#define		CMD_THR_MIN		1050.0
 #define		CMD_THR_MAX		1900.0
 #define		DC_THR_MIN		1100.0
 #define		DC_THR_MAX		1900.0
@@ -213,6 +214,7 @@ This header file define all the configurable variables including constants, pin 
 
 #define     BAT_VOLT_DIV_R1				51.0
 #define		BAT_VOLT_DIV_R2				10.0
+#define     ADC_ERROR_FACTOR			1.098
 
 
 #define		RMT_CLK_DIV						80    /*!< RMT counter clock divider */

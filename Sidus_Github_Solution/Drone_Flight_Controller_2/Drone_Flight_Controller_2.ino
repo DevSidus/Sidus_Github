@@ -83,6 +83,8 @@ void setup() {
 			xSemaphoreGive((xI2CSemaphore));  // Make the Serial Port available for use, by "Giving" the Semaphore.
 	}
 
+	TaskHandle_t task_UDPhandle;
+
 	//Processor 0 Tasks
 	xTaskCreatePinnedToCore(task_test, "task_test", 1024, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_0, "task_rx_0", 2048, NULL, 10, NULL, 0);
@@ -93,7 +95,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 4096, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 4096, NULL, 10, &task_UDPhandle, 0);
 	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 4096, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 4096, NULL, 10, NULL, 0);
@@ -109,8 +111,10 @@ void setup() {
 	xTaskCreatePinnedToCore(task_PID, "task_PID", 8192, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 20, NULL, 1);
 
-}
 
+
+	//esp_event_loop_init((system_event_cb_t*)&task_UDPhandle, NULL);
+}
 // the loop function runs over and over again until power down or reset
 void loop() {
 	vTaskSuspend(NULL);
@@ -197,6 +201,7 @@ void task_rx_0(void * parameter)
 {
 	gpio_set_pull_mode(gpio_num_t(PIN_RX_ROLL), GPIO_PULLDOWN_ONLY);
 
+	delay(200);
 	//--------RMT CONFIG RADIO ROLL CHANNEL-----------------//
 	rmt_config_t rmt_rx_ch0;
 	rmt_rx_ch0.channel = RMT_CHANNEL_0;
@@ -246,6 +251,7 @@ void task_rx_1(void * parameter)
 	gpio_set_pull_mode(gpio_num_t(PIN_RX_PITCH), GPIO_PULLDOWN_ONLY);
 
 
+	delay(300);
 	//--------RMT CONFIG RADIO PITCH CHANNEL-----------------//
 	rmt_config_t rmt_rx_ch1;
 	rmt_rx_ch1.channel = RMT_CHANNEL_1;
@@ -293,6 +299,7 @@ void task_rx_2(void * parameter)
 
 	gpio_set_pull_mode(gpio_num_t(PIN_RX_THR), GPIO_PULLDOWN_ONLY);
 
+	delay(400);
 	//--------RMT CONFIG RADIO THR CHANNEL-----------------//
 	rmt_config_t rmt_rx_ch2;
 	rmt_rx_ch2.channel = RMT_CHANNEL_2;
@@ -348,6 +355,7 @@ void task_rx_3(void * parameter)
 {
 	gpio_set_pull_mode(gpio_num_t(PIN_RX_YAW), GPIO_PULLDOWN_ONLY);
 
+	delay(500);
 	//--------RMT CONFIG RADIO YAW CHANNEL-----------------//
 	rmt_config_t rmt_rx_ch3;
 	rmt_rx_ch3.channel = RMT_CHANNEL_3;
@@ -393,6 +401,7 @@ void task_rx_4(void * parameter)
 {
 	gpio_set_pull_mode(gpio_num_t(PIN_RX_5TH_CHAN), GPIO_PULLDOWN_ONLY);
 
+	delay(600);
 	//--------RMT CONFIG RADIO 5TH_CHAN CHANNEL-----------------//
 	rmt_config_t rmt_rx_ch4;
 	rmt_rx_ch4.channel = RMT_CHANNEL_4;
@@ -438,6 +447,7 @@ void task_rx_5(void * parameter)
 {
 	gpio_set_pull_mode(gpio_num_t(PIN_RX_6TH_CHAN), GPIO_PULLDOWN_ONLY);
 
+	delay(700);
 	//--------RMT CONFIG RADIO 6TH_CHAN CHANNEL-----------------//
 	rmt_config_t rmt_rx_ch5;
 	rmt_rx_ch5.channel = RMT_CHANNEL_5;
@@ -535,6 +545,8 @@ void task_Motor(void * parameter)
 
 void task_UDP(void * parameter)
 {
+
+	delay(2000);
 	initUDP();
 
 	while (true)
@@ -554,8 +566,6 @@ void task_UDP(void * parameter)
 
 void task_UDPrx(void * parameter)
 {
-	initUDP();
-
 	while (true)
 	{
 		if (wifi_connected)
@@ -605,7 +615,7 @@ void task_ADC(void * parameter)
 	{
 		//adcEnd(PIN_BATTERY);
 		batteryVoltageInBits=analogRead(PIN_BATTERY);
-		batteryVoltageInVolts = float(batteryVoltageInBits) * ((BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2) * 3.3 / 4095;
+		batteryVoltageInVolts = float(batteryVoltageInBits) * ((BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2) * 3.3 / 4095 * ADC_ERROR_FACTOR;
 		//adcStart(PIN_BATTERY);
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 		delay(100);
@@ -637,7 +647,6 @@ void task_2Hz(void * parameter)
 	}
 	vTaskDelete(NULL);
 }
-
 
 void task_kalman(void * parameter)
 {
@@ -1425,7 +1434,6 @@ void processRunMotors()
 			pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
 			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
 
-
 		}
 		else
 		{
@@ -1571,7 +1579,7 @@ void initUDP()
 
 	//Initiate connection
 	WiFi.begin(WIFI_SSID, WIFI_PASS);
-
+	delay(200);
 	Serial.println("Waiting for WIFI connection...");
 }
 
