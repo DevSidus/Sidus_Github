@@ -70,7 +70,7 @@ void setup() {
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
 	delay(100);
-	
+
 
 	Wire.begin(PIN_MCU_SDA, PIN_MCU_SCL);
 	Wire.setClock(800000L);
@@ -100,14 +100,14 @@ void setup() {
 	xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 4096, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_melody, "task_melody", 2048, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
+	//xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_kalman, "task_kalman", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
+	//xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
 	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_compass, "task_compass", 2048, NULL, 10, NULL, 1);
+	//xTaskCreatePinnedToCore(task_compass, "task_compass", 2048, NULL, 10, NULL, 1);
 	xTaskCreatePinnedToCore(task_PID, "task_PID", 8192, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 20, NULL, 1);
 
@@ -126,7 +126,15 @@ void task_test(void * parameter)
 	{
 		processTest();
 		//Serial.println(portTICK_PERIOD_MS);
-		//Serial.println(uxTaskGetStackHighWaterMark(NULL));	   
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));	
+
+		Serial.print("theta:"); Serial.print(euler[1]);
+		Serial.print("theta2:"); Serial.print(qc.euler.theta);
+		Serial.print(" aP:"); Serial.print(pidVars.anglePitch.outputFiltered);
+		Serial.print(" aPsp:"); Serial.print(pidVars.anglePitch.setpoint);
+		Serial.print(" aPsV:"); Serial.print(pidVars.anglePitch.sensedVal);
+
+		Serial.print(" aP2:"); Serial.println(pidVars.anglePitch.output);
 	}
 	vTaskDelete(NULL);
 }
@@ -876,32 +884,7 @@ void processMpu()
 			mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 			mpu.dmpGetEuler(euler, &q);
 
-#ifdef INVERSE_IMU
-			qc.gyro.x = gg[0];
-			qc.gyro.y = gg[1]; 
-			qc.gyro.z = gg[2];
 
-			qc.accel.mpuAccX = aa.x;
-			qc.accel.mpuAccY = -aa.y;
-			qc.accel.mpuAccZ = -aa.z;
-
-			qc.accelBody.x = aaReal.x;
-			qc.accelBody.y = -aaReal.y;
-			qc.accelBody.z = -aaReal.z;
-
-			qc.accelWorld.x = aaWorld.x;
-			qc.accelWorld.y = -aaWorld.y;
-			qc.accelWorld.z = -aaWorld.z;
-
-			qc.euler.psi = -euler[0];
-			qc.euler.theta = -euler[1];
-			float tempRoll = euler[2] + M_PI;
-			if (tempRoll > M_PI)
-				tempRoll -= M_PI * 2;
-			else if (tempRoll <= -M_PI)
-				tempRoll += M_PI * 2;
-			qc.euler.phi = tempRoll;
-#else
 			qc.gyro.x = gg[0];
 			qc.gyro.y = -gg[1];
 			qc.gyro.z = -gg[2];
@@ -918,10 +901,9 @@ void processMpu()
 			qc.accelWorld.y = aaWorld.y;
 			qc.accelWorld.z = aaWorld.z;
 
-			qc.euler.psi = -euler[0];  
-			qc.euler.theta = -euler[1]; 
+			qc.euler.psi = -euler[0];
+			qc.euler.theta = -euler[1];
 			qc.euler.phi = euler[2];   
-#endif
 
 		}
 
@@ -1091,6 +1073,7 @@ void processPID()
 	pidAngleRoll.Compute();
 	pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
 
+	if (isnan(qc.euler.theta))	qc.euler.theta = 0;
 
 	pidVars.anglePitch.setpoint = cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = qc.euler.theta * 180 / M_PI;
@@ -1141,6 +1124,7 @@ void processPID()
 
 void initPIDvariables()
 {
+
 	//PID related variable initializations
 	pidVars.ratePitch.Kp = PID_RATE_PITCH_KP;
 	pidVars.ratePitch.Ki = PID_RATE_PITCH_KI;
@@ -1338,6 +1322,13 @@ void getBodyToEulerAngularRates()
 		qc.eulerRate.theta = cos(qc.euler.phi)*qc.gyro.y - sin(qc.euler.phi)*qc.gyro.z;
 		qc.eulerRate.psi = sin(qc.euler.phi) / cos(qc.euler.theta) * qc.gyro.y + cos(qc.euler.phi) / cos(qc.euler.theta)*qc.gyro.z;
 	}
+	else
+	{
+		qc.eulerRate.phi = qc.gyro.x;
+		qc.eulerRate.theta = qc.gyro.y;
+		qc.eulerRate.psi = qc.gyro.z;
+	}
+
 
 
 }
@@ -1417,9 +1408,9 @@ void handleAutoModeCommands()
 void processRunMotors()
 {
 
-	if (modeQuad == modeQuadARMED)//modeQuad == modeQuadARMED
+	if (true)//modeQuad == modeQuadARMED
 	{
-		if (cmdMotorThr > CMD_THR_ARM_START)
+		if (true)
 		{
 			calculate_pid_thr_batt_scale_factor();
 
@@ -1432,6 +1423,8 @@ void processRunMotors()
 			pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
 			pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
 			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
+
+
 
 		}
 		else
