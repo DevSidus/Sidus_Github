@@ -224,7 +224,7 @@ This header file define all the configurable variables including constants, pin 
 #define		RMT_RX_WAIT_TICKS				1000  
 
 double		PID_THR_BATT_SCALE_FACTOR = 1.0;
-float		batteryVoltageInVolts = 0;
+float		batteryVoltageInVolts;
 double		commandedAltitude = 0;
 
 // MPU control/status vars

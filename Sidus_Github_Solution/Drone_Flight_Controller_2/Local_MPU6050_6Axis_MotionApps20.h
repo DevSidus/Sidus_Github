@@ -698,9 +698,6 @@ uint8_t MPU6050::dmpGetEuler(float *data, Quaternion *q) {
 	data[0] = atan2(2*(q->w*q->z + q->x*q->y), 1-2*(q->y*q->y + q->z*q->z));   // psi
 	data[1] = asin(2*(q->w*q->y - q->z*q->x));    // theta
 	data[2] = atan2(2*(q->w*q->x + q->y*q->z),1-2*(q->x*q->x+q->y*q->y));   // phi
-
-	if (isnan(data[1]))		data[1] = 0;
-
 	return 0;
 }
 uint8_t MPU6050::dmpGetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity) {
