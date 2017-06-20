@@ -9,7 +9,9 @@ class cBuzzerMelody
 {
 
 private:
+	bool toneSafe[20] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	bool toneArmed[20] = { 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	bool toneDirCmd[20] = { 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	bool toneBatteryLow[20] = { 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 };
 	unsigned short toneIndex;
 	unsigned short buzzer_pin;

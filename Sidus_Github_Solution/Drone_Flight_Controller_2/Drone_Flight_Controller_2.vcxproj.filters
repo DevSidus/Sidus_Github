@@ -45,9 +45,6 @@
     <ClInclude Include="Local_MS5611.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Arduino\hardware\espressif\esp32\tools\sdk\include\driver\driver\rmt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Local_PID_v1.h">
       <Filter>Header Files</Filter>
     </ClInclude>

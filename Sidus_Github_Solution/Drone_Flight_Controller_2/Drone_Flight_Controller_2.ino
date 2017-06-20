@@ -9,8 +9,8 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include <WiFi.h>
 #include <esp32-hal-ledc.h>
 #include <Wire.h>
-#include "rmt.h"
 #include <ArduinoOTA.h>
+#include <../../tools/sdk/include/driver/driver/rmt.h>
 
 //Local Include Files
 #include "cBuzzerMelody.h"
@@ -626,10 +626,14 @@ void task_melody(void * parameter)
 {
 	while (true)
 	{
-		if ((modeQuad == modeQuadARMED || modeQuad == modeQuadDirCmd) && cmdMotorThr <= CMD_THR_ARM_START)
-			buzzer.play(buzzerMelodyArmWarning);
+		if (batteryVoltageInVolts >= BATT_LEVEL_EXIST && batteryVoltageInVolts <= BATT_LEVEL_CRITICAL)
+			buzzer.play(buzzerMelodyBatLow);
+		else if (modeQuad == modeQuadARMED && cmdMotorThr <= CMD_THR_ARM_START)
+			buzzer.play(buzzerMelodyArmed);
+		else if (modeQuad == modeQuadDirCmd && cmdMotorThr <= CMD_THR_ARM_START)
+			buzzer.play(buzzerMelodyDirCmd);
 		else
-			buzzer.play(buzzerMelodyNoTone);
+			buzzer.play(buzzerMelodySafe);
 		delay(100);
 	}
 	vTaskDelete(NULL);
@@ -866,8 +870,6 @@ void processMpu()
 
 			mpuLastDataTime = millis();
 
-
-
 			mpu.dmpGetQuaternion(&q, fifoBuffer);
 			mpu.dmpGetGravity(&gravity, &q);
 			mpu.dmpGetAccel(&aa, fifoBuffer);
@@ -876,32 +878,6 @@ void processMpu()
 			mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 			mpu.dmpGetEuler(euler, &q);
 
-#ifdef INVERSE_IMU
-			qc.gyro.x = gg[0];
-			qc.gyro.y = gg[1]; 
-			qc.gyro.z = gg[2];
-
-			qc.accel.mpuAccX = aa.x;
-			qc.accel.mpuAccY = -aa.y;
-			qc.accel.mpuAccZ = -aa.z;
-
-			qc.accelBody.x = aaReal.x;
-			qc.accelBody.y = -aaReal.y;
-			qc.accelBody.z = -aaReal.z;
-
-			qc.accelWorld.x = aaWorld.x;
-			qc.accelWorld.y = -aaWorld.y;
-			qc.accelWorld.z = -aaWorld.z;
-
-			qc.euler.psi = -euler[0];
-			qc.euler.theta = -euler[1];
-			float tempRoll = euler[2] + M_PI;
-			if (tempRoll > M_PI)
-				tempRoll -= M_PI * 2;
-			else if (tempRoll <= -M_PI)
-				tempRoll += M_PI * 2;
-			qc.euler.phi = tempRoll;
-#else
 			qc.gyro.x = gg[0];
 			qc.gyro.y = -gg[1];
 			qc.gyro.z = -gg[2];
@@ -921,7 +897,6 @@ void processMpu()
 			qc.euler.psi = -euler[0];  
 			qc.euler.theta = -euler[1]; 
 			qc.euler.phi = euler[2];   
-#endif
 
 		}
 

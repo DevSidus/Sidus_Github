@@ -19,12 +19,6 @@ This header file define all the configurable variables including constants, pin 
 //Comment out below line if you have 6 CH RX_TX
 #define		MY_RX_TX_IS_6_CHANNEL
 
-//Comment out one of the below lines according to the board version number you have
-#define		FCB_VERSION_2_1
-//#define		FCB_VERSION_2_0
-
-
-
 
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
@@ -223,6 +217,9 @@ This header file define all the configurable variables including constants, pin 
 #define		RMT_RX_BUFFER_SIZE				1000  
 #define		RMT_RX_WAIT_TICKS				1000  
 
+#define		BATT_LEVEL_CRITICAL			10.5
+#define		BATT_LEVEL_EXIST			2.5
+
 double		PID_THR_BATT_SCALE_FACTOR = 1.0;
 float		batteryVoltageInVolts;
 double		commandedAltitude = 0;
@@ -365,8 +362,10 @@ typedef enum
 
 typedef enum
 {
-	buzzerMelodyNoTone = 0,
-	buzzerMelodyArmWarning = 1,
+	buzzerMelodySafe = 0,
+	buzzerMelodyArmed = 1,
+	buzzerMelodyDirCmd = 2,
+	buzzerMelodyBatLow = 3,
 }buzzerMelodyType;
 
 
