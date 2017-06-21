@@ -1,7 +1,9 @@
 /*
- Filter Coefficients Header File
- Generated after MATLAB(R) Analysis
- */
+Data Filtering Header File with Filter Coefficients
+*/
+
+#include <vector>
+using namespace std;
 
 // Low Pass Filter with Following Parameters
 // FilterOrder: 4
@@ -22,5 +24,8 @@ const double lpfCoefficient[5] = {
 
 const int diffFilterLength = 5;
 const double diffFilterCoefficient[5] = {
-	0.187871016156492, 0.0942057253992984, 0, -0.0942057253992984, -0.187871016156492
+	-0.187871016156492, -0.0942057253992984, 0, 0.0942057253992984, 0.187871016156492
 };
+
+
+double dataFilter(vector<double> input, const double filterCoefficient[]);

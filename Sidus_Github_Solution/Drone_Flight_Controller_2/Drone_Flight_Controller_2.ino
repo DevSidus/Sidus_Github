@@ -26,7 +26,7 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include "cMsgUdpT01.h"
 
 #include "kalmanFilter.h"
-#include "filterCoefficients.h"
+#include "dataFilter.h"
 
 //Global Class Definitions
 MPU6050 mpu;
@@ -104,6 +104,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_kalman, "task_kalman", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_filter, "task_filter", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
@@ -689,6 +690,51 @@ void task_kalman(void * parameter)
 		//Serial.println(micros() - strtTime);
 
 		delay(9);
+	}
+	vTaskDelete(NULL);
+}
+
+void task_filter(void * parameter)
+{
+	vector<double> gyroXBlock;
+	vector<double> gyroYBlock;
+	vector<double> gyroZBlock;
+	for (int i = 0; i < diffFilterLength; i++) gyroXBlock.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) gyroYBlock.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) gyroZBlock.push_back(0.0);
+	
+	unsigned long lastTime = millis();
+
+	while (true)
+	{
+		unsigned long now = millis();
+		unsigned long dTime = (now - lastTime);
+		double dTimeInSec = dTime / 1000.0;
+
+		double newGyroXdata = qc.gyro.x;
+		gyroXBlock.erase(gyroXBlock.begin());
+		gyroXBlock.push_back(newGyroXdata);
+
+		double newGyroYdata = qc.gyro.y;
+		gyroYBlock.erase(gyroYBlock.begin());
+		gyroYBlock.push_back(newGyroYdata);
+
+		double newGyroZdata = qc.gyro.z;
+		gyroZBlock.erase(gyroZBlock.begin());
+		gyroZBlock.push_back(newGyroZdata);
+
+		qc.gyroFiltered.x = dataFilter(gyroXBlock, diffFilterCoefficient);
+		qc.gyroFiltered.y = dataFilter(gyroYBlock, diffFilterCoefficient);
+		qc.gyroFiltered.z = dataFilter(gyroZBlock, diffFilterCoefficient);
+
+		// When Diff Filter is being used
+		qc.gyroFiltered.x = qc.gyroFiltered.x / dTimeInSec;
+		qc.gyroFiltered.y = qc.gyroFiltered.y / dTimeInSec;
+		qc.gyroFiltered.z = qc.gyroFiltered.z / dTimeInSec;
+
+		lastTime = now;
+
+		delay(10);
 	}
 	vTaskDelete(NULL);
 }
@@ -1792,6 +1838,9 @@ void prepareUDPmessages()
 	MsgUdpR01.message.mpuGyroXkalman		= qc.gyroKalman.x;
 	MsgUdpR01.message.mpuGyroYkalman		= qc.gyroKalman.y;
 	MsgUdpR01.message.mpuGyroZkalman		= qc.gyroKalman.z;
+	MsgUdpR01.message.mpuGyroXfilter		= qc.gyroFiltered.x;
+	MsgUdpR01.message.mpuGyroYfilter		= qc.gyroFiltered.y;
+	MsgUdpR01.message.mpuGyroZfilter		= qc.gyroFiltered.z;
 	MsgUdpR01.message.mpuAccX				= qc.accel.x;
 	MsgUdpR01.message.mpuAccY				= qc.accel.y;
 	MsgUdpR01.message.mpuAccZ				= qc.accel.z;

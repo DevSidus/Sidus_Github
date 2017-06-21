@@ -18,10 +18,15 @@ struct structMsgUdpR01
 	short mpuGyroY;
 	short mpuGyroZ;
 
-	//Gyro Measurements
+	//Gyro Measurements Kalman
 	short mpuGyroXkalman;
 	short mpuGyroYkalman;
 	short mpuGyroZkalman;
+
+	//Gyro Measurements Filter
+	short mpuGyroXfilter;
+	short mpuGyroYfilter;
+	short mpuGyroZfilter;
 
 	//Accelerometer Measurements with Gravity
 	short mpuAccX;
