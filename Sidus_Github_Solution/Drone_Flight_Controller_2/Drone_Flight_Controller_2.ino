@@ -26,6 +26,7 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include "cMsgUdpT01.h"
 
 #include "kalmanFilter.h"
+#include "filterCoefficients.h"
 
 //Global Class Definitions
 MPU6050 mpu;
