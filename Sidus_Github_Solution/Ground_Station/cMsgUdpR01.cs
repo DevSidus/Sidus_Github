@@ -27,6 +27,11 @@ namespace Ground_Station
         public short mpuGyroYkalman { get; set; }
         public short mpuGyroZkalman { get; set; }
 
+        //Gyro Measurements Filter
+        public short mpuGyroXfilter { get; set; }
+        public short mpuGyroYfilter { get; set; }
+        public short mpuGyroZfilter { get; set; }
+
         //Accelerometer Measurements with Gravity
         public short mpuAccX { get; set; }
         public short mpuAccY { get; set; }

@@ -81,6 +81,9 @@
     <ClInclude Include="rtwtypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dataFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp">
@@ -126,6 +129,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rtGetNaN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dataFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
