@@ -29,3 +29,4 @@ const double diffFilterCoefficient[5] = {
 
 
 double dataFilter(vector<double> input, const double filterCoefficient[]);
+double diffFilter(vector<double> input, const double filterCoefficient[], double deltaTimeSec);

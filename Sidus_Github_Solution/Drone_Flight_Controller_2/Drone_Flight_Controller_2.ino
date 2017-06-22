@@ -711,26 +711,19 @@ void task_filter(void * parameter)
 		unsigned long dTime = (now - lastTime);
 		double dTimeInSec = dTime / 1000.0;
 
-		double newGyroXdata = qc.gyro.x;
 		gyroXBlock.erase(gyroXBlock.begin());
-		gyroXBlock.push_back(newGyroXdata);
+		gyroXBlock.push_back(qc.gyro.x);
 
-		double newGyroYdata = qc.gyro.y;
 		gyroYBlock.erase(gyroYBlock.begin());
-		gyroYBlock.push_back(newGyroYdata);
+		gyroYBlock.push_back(qc.gyro.y);
 
-		double newGyroZdata = qc.gyro.z;
 		gyroZBlock.erase(gyroZBlock.begin());
-		gyroZBlock.push_back(newGyroZdata);
+		gyroZBlock.push_back(qc.gyro.z);
 
-		qc.gyroFiltered.x = dataFilter(gyroXBlock, diffFilterCoefficient);
-		qc.gyroFiltered.y = dataFilter(gyroYBlock, diffFilterCoefficient);
-		qc.gyroFiltered.z = dataFilter(gyroZBlock, diffFilterCoefficient);
+		qc.gyroFiltered.x = diffFilter(gyroXBlock, diffFilterCoefficient, dTimeInSec);
+		qc.gyroFiltered.y = diffFilter(gyroYBlock, diffFilterCoefficient, dTimeInSec);
+		qc.gyroFiltered.z = diffFilter(gyroZBlock, diffFilterCoefficient, dTimeInSec);
 
-		// When Diff Filter is being used
-		qc.gyroFiltered.x = qc.gyroFiltered.x / dTimeInSec;
-		qc.gyroFiltered.y = qc.gyroFiltered.y / dTimeInSec;
-		qc.gyroFiltered.z = qc.gyroFiltered.z / dTimeInSec;
 
 		lastTime = now;
 
