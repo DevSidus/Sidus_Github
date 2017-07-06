@@ -13,6 +13,8 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include <../../tools/sdk/include/driver/driver/rmt.h>
 
 //Local Include Files
+#include "kalmanFilter.h"
+#include "dataFilter.h"
 #include "cBuzzerMelody.h"
 #include "Local_I2Cdev.h"
 #include "Local_MPU6050_6Axis_MotionApps20.h"
@@ -24,9 +26,10 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include "Config.h"
 #include "cMsgUdpR01.h"
 #include "cMsgUdpT01.h"
+#include "cRxFilter.h"
 
-#include "kalmanFilter.h"
-#include "dataFilter.h"
+
+
 
 //Global Class Definitions
 MPU6050 mpu;
@@ -50,6 +53,12 @@ PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt
 PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint);
 
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
+
+
+cRxFilter filterRxThr(RX_MAX_PULSE_WIDTH), filterRxPitch(RX_MAX_PULSE_WIDTH), filterRxRoll(RX_MAX_PULSE_WIDTH), filterRxYaw(RX_MAX_PULSE_WIDTH);
+
+cRxFilter filterRx5thCh(RX_MAX_PULSE_WIDTH), filterRx6thCh(RX_MAX_PULSE_WIDTH);
+
 
 SemaphoreHandle_t xI2CSemaphore;
 
@@ -104,7 +113,6 @@ void setup() {
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_kalman, "task_kalman", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_filter, "task_filter", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
@@ -141,6 +149,13 @@ void task_mpu(void * parameter)
 		initMPU();
 		xSemaphoreGive(xI2CSemaphore);
 	}
+
+
+	for (int i = 0; i < diffFilterLength; i++) gyroXBlock.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) gyroYBlock.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) gyroZBlock.push_back(0.0);
+	lastTimeDiffFilterGyro = millis();
+
 	while (true)
 	{
 		//mpuProcessStartTime = micros();
@@ -694,44 +709,6 @@ void task_kalman(void * parameter)
 	vTaskDelete(NULL);
 }
 
-void task_filter(void * parameter)
-{
-	vector<double> gyroXBlock;
-	vector<double> gyroYBlock;
-	vector<double> gyroZBlock;
-	for (int i = 0; i < diffFilterLength; i++) gyroXBlock.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) gyroYBlock.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) gyroZBlock.push_back(0.0);
-	
-	unsigned long lastTime = millis();
-
-	while (true)
-	{
-		unsigned long now = millis();
-		unsigned long dTime = (now - lastTime);
-		double dTimeInSec = dTime / 1000.0;
-
-		gyroXBlock.erase(gyroXBlock.begin());
-		gyroXBlock.push_back(qc.gyro.x);
-
-		gyroYBlock.erase(gyroYBlock.begin());
-		gyroYBlock.push_back(qc.gyro.y);
-
-		gyroZBlock.erase(gyroZBlock.begin());
-		gyroZBlock.push_back(qc.gyro.z);
-
-		qc.gyroFiltered.x = diffFilter(gyroXBlock, diffFilterCoefficient, dTimeInSec);
-		qc.gyroFiltered.y = diffFilter(gyroYBlock, diffFilterCoefficient, dTimeInSec);
-		qc.gyroFiltered.z = diffFilter(gyroZBlock, diffFilterCoefficient, dTimeInSec);
-
-
-		lastTime = now;
-
-		delay(10);
-	}
-	vTaskDelete(NULL);
-}
-
 void task_IoT(void * parameter)
 {
 	WiFiClient clientIoT;
@@ -814,12 +791,19 @@ bool initMPU()
 
 	// supply your own gyro offsets here, scaled for min sensitivity
 	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
-	mpu.setXAccelOffset(-2553);
-	mpu.setYAccelOffset(-989);
-	mpu.setZAccelOffset(1689);
-	mpu.setXGyroOffset(88);
-	mpu.setYGyroOffset(-26);
-	mpu.setZGyroOffset(-5);
+	//mpu.setXAccelOffset(-2553);
+	//mpu.setYAccelOffset(-989);
+	//mpu.setZAccelOffset(1689);
+	//mpu.setXGyroOffset(88);
+	//mpu.setYGyroOffset(-26);
+	//mpu.setZGyroOffset(-5);
+	//
+	mpu.setXAccelOffset(-207);
+	mpu.setYAccelOffset(-653);
+	mpu.setZAccelOffset(1641);
+	mpu.setXGyroOffset(57);
+	mpu.setYGyroOffset(-30);
+	mpu.setZGyroOffset(-12);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
@@ -936,7 +920,31 @@ void processMpu()
 
 			qc.euler.psi = -euler[0];  
 			qc.euler.theta = -euler[1]; 
-			qc.euler.phi = euler[2];   
+			qc.euler.phi = euler[2]; 
+
+
+
+
+			unsigned long now = millis();
+			unsigned long dTime = (now - lastTimeDiffFilterGyro);
+			double dTimeInSec = dTime / 1000.0;
+
+			gyroXBlock.erase(gyroXBlock.begin());
+			gyroXBlock.push_back(qc.gyro.x);
+
+			gyroYBlock.erase(gyroYBlock.begin());
+			gyroYBlock.push_back(qc.gyro.y);
+
+			gyroZBlock.erase(gyroZBlock.begin());
+			gyroZBlock.push_back(qc.gyro.z);
+
+			qc.gyroDiff.x = diffFilter(gyroXBlock, diffFilterCoefficient, dTimeInSec);
+			qc.gyroDiff.y = diffFilter(gyroYBlock, diffFilterCoefficient, dTimeInSec);
+			qc.gyroDiff.z = diffFilter(gyroZBlock, diffFilterCoefficient, dTimeInSec);
+
+			lastTimeDiffFilterGyro = now;
+
+
 
 		}
 
@@ -949,13 +957,13 @@ void processMapRxDCtoCmd()
 	//Serial.println(cmdRxPitchCalibrated);
 	if (statusRx == statusType_Normal)
 	{
-		cmdRxPitch = mapping(dutyCycle_Pitch, DC_PITCH_MIN, DC_PITCH_MAX, -CMD_RX_PITCH_ROLL_MAX, CMD_RX_PITCH_ROLL_MAX);  
-		cmdRxRoll = mapping(dutyCycle_Roll, DC_ROLL_MIN, DC_ROLL_MAX, -CMD_RX_PITCH_ROLL_MAX, CMD_RX_PITCH_ROLL_MAX);
-		cmdRxYaw = mapping(dutyCycle_Yaw, DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
-		cmdRxThr = mapping(dutyCycle_Thr, DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
+		cmdRxPitch = mapping(filterRxPitch.process(dutyCycle_Pitch), DC_PITCH_MIN, DC_PITCH_MAX, -CMD_RX_PITCH_ROLL_MAX, CMD_RX_PITCH_ROLL_MAX);
+		cmdRxRoll = mapping(filterRxPitch.process(dutyCycle_Roll), DC_ROLL_MIN, DC_ROLL_MAX, -CMD_RX_PITCH_ROLL_MAX, CMD_RX_PITCH_ROLL_MAX);
+		cmdRxYaw = mapping(filterRxPitch.process(dutyCycle_Yaw), DC_YAW_MIN, DC_YAW_MAX, CMD_YAW_MIN, CMD_YAW_MAX);
+		cmdRxThr = mapping(filterRxPitch.process(dutyCycle_Thr), DC_THR_MIN, DC_THR_MAX, CMD_THR_MIN, CMD_THR_MAX);
 
-		cmdRx5thCh = mapping(dutyCycle_Rx5thCh, DC_5TH_CH_MIN, DC_5TH_CH_MAX, -CMD_5TH_CH_MAX, CMD_5TH_CH_MAX);
-		cmdRx6thCh = mapping(dutyCycle_Rx6thCh, DC_6TH_CH_MIN, DC_6TH_CH_MAX, -CMD_6TH_CH_MAX, CMD_6TH_CH_MAX);
+		cmdRx5thCh = mapping(filterRxPitch.process(dutyCycle_Rx5thCh), DC_5TH_CH_MIN, DC_5TH_CH_MAX, -CMD_5TH_CH_MAX, CMD_5TH_CH_MAX);
+		cmdRx6thCh = mapping(filterRxPitch.process(dutyCycle_Rx6thCh), DC_6TH_CH_MIN, DC_6TH_CH_MAX, -CMD_6TH_CH_MAX, CMD_6TH_CH_MAX);
 
 
 
@@ -1104,25 +1112,31 @@ void processPID()
 	pidVars.angleRoll.setpoint = cmdMotorRoll;
 	pidVars.angleRoll.sensedVal = qc.euler.phi * 180 / M_PI;
 	pidAngleRoll.Compute();
-	pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
 
 
 	pidVars.anglePitch.setpoint = cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = qc.euler.theta * 180 / M_PI;
 	pidAnglePitch.Compute();
-	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
 
 	pidVars.angleYaw.setpoint = cmdMotorYaw;
 	pidVars.angleYaw.sensedVal = qc.euler.psi * 180 / M_PI;
 	pidAngleYaw.Compute();
+
+	//basicFilter fonksiyonu low pass filtre ile degistirilecek
+	pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
+	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
 	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);
 
-	//Transform angle pid outputs to body coordinate axis in order to get correct body angular rate setpoints
-	transformAnglePIDoutputsToBody();
+
+	// rateCmd degerleri icin diff filter yapilacak ve ratePID lerin bu sonucu dogrudan kullanmasi saglanacak
+	rateCmd.x = pidVars.angleRoll.outputFiltered;
+	rateCmd.y = pidVars.anglePitch.outputFiltered;
+	rateCmd.z = pidVars.angleYaw.outputFiltered;
 
 	//Pitch Roll Yaw Rate PID
 
 	pidVars.ratePitch.setpoint = rateCmd.y;
+	//pidVars.ratePitch.setpoint = cmdMotorPitch * 3;
 	pidVars.ratePitch.sensedVal = qc.gyro.y;
 	pidRatePitch.Compute();
 
@@ -1369,18 +1383,6 @@ float basicFilter(float data, float filterConstant, float filteredData)
 	return filteredData;
 }
 
-void transformAnglePIDoutputsToBody()
-{
-	//rateCmd.x = pidVars.angleRoll.outputFiltered - sin(mpu.euler.theta) * pidVars.angleYaw.outputFiltered;
-	//rateCmd.y = cos(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + sin(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
-	//rateCmd.z = -sin(mpu.euler.phi) * pidVars.anglePitch.outputFiltered + cos(mpu.euler.phi)*cos(mpu.euler.theta)*pidVars.angleYaw.outputFiltered;
-
-	rateCmd.x = pidVars.angleRoll.outputFiltered;
-	rateCmd.y = pidVars.anglePitch.outputFiltered;
-	rateCmd.z = pidVars.angleYaw.outputFiltered;
-
-}
-
 void transformVelPIDoutputsToBody()
 {
 
@@ -1441,12 +1443,19 @@ void processRunMotors()
 			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output* PID_THR_BATT_SCALE_FACTOR;
 			pidVars.rateRoll.outputCompensated = pidVars.rateRoll.output*PID_THR_BATT_SCALE_FACTOR;
 			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output*PID_THR_BATT_SCALE_FACTOR;
-			pidVars.velAlt.outputCompensated = pidVars.velAlt.output*PID_THR_BATT_SCALE_FACTOR;
+			pidVars.velAlt.outputCompensated = pidVars.velAlt.output*PID_THR_BATT_SCALE_FACTOR;/*
 
 			pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
 			pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
 			pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
+			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);*/
+
+
+
+			pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated);
+			pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated);
+			pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated);
+			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated);
 
 		}
 		else
