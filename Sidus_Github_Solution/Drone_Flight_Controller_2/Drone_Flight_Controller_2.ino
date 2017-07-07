@@ -150,11 +150,11 @@ void task_mpu(void * parameter)
 		xSemaphoreGive(xI2CSemaphore);
 	}
 
-
-	for (int i = 0; i < diffFilterLength; i++) gyroXBlock.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) gyroYBlock.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) gyroZBlock.push_back(0.0);
-	lastTimeDiffFilterGyro = millis();
+	// Initialize Buffer
+	for (int i = 0; i < diffFilterLength; i++) gyroDiffBuffer.xVector.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) gyroDiffBuffer.yVector.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) gyroDiffBuffer.zVector.push_back(0.0);
+	lastTimeGyroDiff = millis();
 
 	while (true)
 	{
@@ -922,32 +922,25 @@ void processMpu()
 			qc.euler.theta = -euler[1]; 
 			qc.euler.phi = euler[2]; 
 
-
-
-
+			//// Differantiate Gyro Values for PID Kd branch ////
 			unsigned long now = millis();
-			unsigned long dTime = (now - lastTimeDiffFilterGyro);
+			unsigned long dTime = (now - lastTimeGyroDiff);
 			double dTimeInSec = dTime / 1000.0;
+			// Update Buffer
+			gyroDiffBuffer.xVector.erase(gyroDiffBuffer.xVector.begin());
+			gyroDiffBuffer.xVector.push_back(qc.gyro.x);
+			gyroDiffBuffer.yVector.erase(gyroDiffBuffer.yVector.begin());
+			gyroDiffBuffer.yVector.push_back(qc.gyro.y);
+			gyroDiffBuffer.zVector.erase(gyroDiffBuffer.zVector.begin());
+			gyroDiffBuffer.zVector.push_back(qc.gyro.z);
+			// Calculate Filter Output
+			qc.gyroDiff.x = diffFilter(gyroDiffBuffer.xVector, diffFilterCoefficient, dTimeInSec);
+			qc.gyroDiff.y = diffFilter(gyroDiffBuffer.yVector, diffFilterCoefficient, dTimeInSec);
+			qc.gyroDiff.z = diffFilter(gyroDiffBuffer.zVector, diffFilterCoefficient, dTimeInSec);
 
-			gyroXBlock.erase(gyroXBlock.begin());
-			gyroXBlock.push_back(qc.gyro.x);
-
-			gyroYBlock.erase(gyroYBlock.begin());
-			gyroYBlock.push_back(qc.gyro.y);
-
-			gyroZBlock.erase(gyroZBlock.begin());
-			gyroZBlock.push_back(qc.gyro.z);
-
-			qc.gyroDiff.x = diffFilter(gyroXBlock, diffFilterCoefficient, dTimeInSec);
-			qc.gyroDiff.y = diffFilter(gyroYBlock, diffFilterCoefficient, dTimeInSec);
-			qc.gyroDiff.z = diffFilter(gyroZBlock, diffFilterCoefficient, dTimeInSec);
-
-			lastTimeDiffFilterGyro = now;
-
-
+			lastTimeGyroDiff = now;
 
 		}
-
 
 	}
 }
@@ -1123,15 +1116,48 @@ void processPID()
 	pidAngleYaw.Compute();
 
 	//basicFilter fonksiyonu low pass filtre ile degistirilecek
-	pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
+	/*pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
 	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
-	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);
+	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);*/
+
+	//// Filtering PID Outputs by LPF ////
+	// Update Buffer
+	anglePIDoutputLowpassBuffer.xVector.erase(anglePIDoutputLowpassBuffer.xVector.begin());
+	anglePIDoutputLowpassBuffer.xVector.push_back(pidVars.angleRoll.output);
+	anglePIDoutputLowpassBuffer.yVector.erase(anglePIDoutputLowpassBuffer.yVector.begin());
+	anglePIDoutputLowpassBuffer.yVector.push_back(pidVars.anglePitch.output);
+	anglePIDoutputLowpassBuffer.zVector.erase(anglePIDoutputLowpassBuffer.zVector.begin());
+	anglePIDoutputLowpassBuffer.zVector.push_back(pidVars.angleYaw.output);
+	// Calculate Filter Output
+	pidVars.angleRoll.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.xVector, lpfCoefficient);
+	pidVars.anglePitch.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.yVector, lpfCoefficient);
+	pidVars.angleYaw.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.zVector, lpfCoefficient);
 
 
-	// rateCmd degerleri icin diff filter yapilacak ve ratePID lerin bu sonucu dogrudan kullanmasi saglanacak
+	// Rate Commands
 	rateCmd.x = pidVars.angleRoll.outputFiltered;
 	rateCmd.y = pidVars.anglePitch.outputFiltered;
 	rateCmd.z = pidVars.angleYaw.outputFiltered;
+
+
+	//// Differantiate Rate Commands for Rate PID Kd branch ////
+	unsigned long now = millis();
+	unsigned long dTime = (now - lastTimeRateCmdDiff);
+	double dTimeInSec = dTime / 1000.0;
+	// Update Buffer
+	rateCmdDiffBuffer.xVector.erase(rateCmdDiffBuffer.xVector.begin());
+	rateCmdDiffBuffer.xVector.push_back(rateCmd.x);
+	rateCmdDiffBuffer.yVector.erase(rateCmdDiffBuffer.yVector.begin());
+	rateCmdDiffBuffer.yVector.push_back(rateCmd.y);
+	rateCmdDiffBuffer.zVector.erase(rateCmdDiffBuffer.zVector.begin());
+	rateCmdDiffBuffer.zVector.push_back(rateCmd.z);
+	// Calculate Filter Output
+	rateCmdDiff.x = diffFilter(rateCmdDiffBuffer.xVector, diffFilterCoefficient, dTimeInSec);
+	rateCmdDiff.y = diffFilter(rateCmdDiffBuffer.yVector, diffFilterCoefficient, dTimeInSec);
+	rateCmdDiff.z = diffFilter(rateCmdDiffBuffer.zVector, diffFilterCoefficient, dTimeInSec);
+
+	lastTimeRateCmdDiff = now;
+
 
 	//Pitch Roll Yaw Rate PID
 
@@ -1259,6 +1285,19 @@ void initPIDvariables()
 	pidVars.accAlt.outputFilterConstant = PID_ACC_ALT_OUT_FILT_CONSTANT;
 	pidVars.accAlt.output = 0;
 	pidVars.accAlt.outputCompensated = 0;
+
+	// Initialize PID Output Buffer for Low Pass Filtering
+	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.xVector.push_back(0.0);
+	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.yVector.push_back(0.0);
+	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.zVector.push_back(0.0);
+
+	// Initialize Rate Command Buffer for Diff Filtering
+	// Initialize Buffer
+	for (int i = 0; i < diffFilterLength; i++) rateCmdDiffBuffer.xVector.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) rateCmdDiffBuffer.yVector.push_back(0.0);
+	for (int i = 0; i < diffFilterLength; i++) rateCmdDiffBuffer.zVector.push_back(0.0);
+	lastTimeRateCmdDiff = millis();
+
 }
 
 void initPIDtuning()

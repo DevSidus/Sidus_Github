@@ -134,9 +134,6 @@
     <ClCompile Include="rtGetNaN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dataFilter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="cRxFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
