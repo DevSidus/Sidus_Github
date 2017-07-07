@@ -324,6 +324,7 @@ struct structIMU
 }qc;
 
 struct3Daxis rateCmd;
+struct3Daxis rateCmdDiff;
 struct3Daxis accelCmd;
 
 //Enum Type Definitions, two mcu config files may be merged!
@@ -420,7 +421,16 @@ unsigned char statusCompass;
 unsigned char statusUdp;
 unsigned char statusGS;
 
-vector<double> gyroXBlock;
-vector<double> gyroYBlock;
-vector<double> gyroZBlock;
-unsigned long lastTimeDiffFilterGyro;
+struct struct3Dvector
+{
+	vector<double> xVector;
+	vector<double> yVector;
+	vector<double> zVector;
+};
+
+struct3Dvector gyroDiffBuffer;
+struct3Dvector anglePIDoutputLowpassBuffer;
+struct3Dvector rateCmdDiffBuffer;
+
+unsigned long lastTimeGyroDiff;
+unsigned long lastTimeRateCmdDiff;
