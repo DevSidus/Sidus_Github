@@ -263,6 +263,7 @@ uint32_t mpuLastDataTime, mpuFirstDataTime;
 bool mpuFirstDataCheck;
 
 bool wifi_connected = false;
+bool udp_connected = false;
 int wifi_connection_attempt = 0;
 
 

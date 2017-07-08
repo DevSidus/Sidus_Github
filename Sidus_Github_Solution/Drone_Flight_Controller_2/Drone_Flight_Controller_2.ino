@@ -61,10 +61,12 @@ cRxFilter filterRx5thCh(RX_MAX_PULSE_WIDTH), filterRx6thCh(RX_MAX_PULSE_WIDTH);
 
 
 SemaphoreHandle_t xI2CSemaphore;
+SemaphoreHandle_t xUdpSemaphore;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(SERIAL_COM_SPEED);
+	Serial.println("");
 	Serial.println("Serial started");
 
 
@@ -98,6 +100,14 @@ void setup() {
 		if ((xI2CSemaphore) != NULL)
 			xSemaphoreGive((xI2CSemaphore));  // Make the Serial Port available for use, by "Giving" the Semaphore.
 	}
+	
+
+	if (xUdpSemaphore == NULL)  // Check to confirm that the UDP Semaphore has not already been created.
+	{
+		xUdpSemaphore = xSemaphoreCreateMutex();  // Create a mutex semaphore we will use to manage the UDP
+		if ((xUdpSemaphore) != NULL)
+			xSemaphoreGive((xUdpSemaphore));  // Make the UDP available for use, by "Giving" the Semaphore.
+	}
 
 
 
@@ -110,10 +120,10 @@ void setup() {
 	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 8192, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 8192, NULL, 5, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 4096, NULL, 15, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 4096, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 4096, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_melody, "task_melody", 2048, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
@@ -569,17 +579,43 @@ void task_Motor(void * parameter)
 
 void task_UDP(void * parameter)
 {
-
 	while (true)
 	{
 		if (wifi_connected)
 		{
-			prepareUDPmessages();
-			udp.beginPacket(DEFAULT_GROUND_STATION_IP, UDP_PORT);
-			udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
-			udp.endPacket();
+			if (udp_connected)
+			{
+				if (xSemaphoreTake(xUdpSemaphore, (TickType_t)10) == pdTRUE)
+				{
+					if (udp.beginPacket(DEFAULT_GROUND_STATION_IP, UDP_PORT) != 1)
+					{
+						//Serial.println("Could not begin UDP packet");
+					}
+					else
+					{
+						prepareUDPmessages();
+						udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+						if (udp.endPacket() != 1)
+						{
+							//Serial.println("UDP Packet could not send");
+							connectUdp();
+						}
+						else
+						{
+							//Serial.println(millis());
+						}
+					}
+					//Serial.print("X");
+					xSemaphoreGive(xUdpSemaphore);
+				}
+				else
+				{
+					connectUdp();
+				}
+			}			
 		}
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		//Serial.println("t_ok");
 		delay(10);
 	}
 	vTaskDelete(NULL);
@@ -589,21 +625,25 @@ void task_UDPrx(void * parameter)
 {
 	while (true)
 	{
-		if (wifi_connected)
+		if (wifi_connected & udp_connected)
 		{
-
-
-			if (udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
+			if (xSemaphoreTake(xUdpSemaphore, (TickType_t)10) == pdTRUE)
 			{
-				udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
-				MsgUdpT01.setPacket();
+				if (udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
+				{
+					udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
+					MsgUdpT01.setPacket();
 
-				updateUdpMsgVars();
+					updateUdpMsgVars();
 
-				//Serial.println("udp message received");
-				//udpLastMessageTime = millis();
+					//Serial.println("udp message received");
+					//udpLastMessageTime = millis();
+				}
+				//processUDPrx();
+				xSemaphoreGive(xUdpSemaphore);
 			}
-			//processUDPrx();
+
+
 		}
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 		delay(150);
@@ -764,6 +804,12 @@ void processTest() {
 	delay(750);
 	digitalWrite(PIN_LED, LOW);
 	delay(750);
+
+
+	if (WiFi.status() != WL_CONNECTED)
+	{
+		Serial.println("wifi connection lost");
+	}
 	
 /*
 	Serial.print("Temp");
@@ -1641,42 +1687,6 @@ void processCompass()
 	compassHdg = atan2(compassNorm.YAxis, compassNorm.XAxis);
 }
 
-void connectToWiFi()
-{
-	Serial.print("Connecting to ");
-	Serial.println(WIFI_SSID);
-
-	WiFi.begin(WIFI_SSID, WIFI_PASS);
-	unsigned long startTimeWifi = millis();
-	while (WiFi.status() != WL_CONNECTED) {
-		delay(500);
-		Serial.print(".");
-		if (millis() - startTimeWifi > WIFI_CONNECTION_THRESHOLD)
-		{
-			Serial.println("Wifi connection timed out!");
-			break;
-		}
-	}
-
-	if (WiFi.status() == WL_CONNECTED)
-	{
-
-		wifi_connected = true;
-		Serial.println("");
-		Serial.println("WiFi connected");
-		Serial.println("IP address: ");
-		Serial.println(WiFi.localIP());
-	}
-	else
-	{
-		wifi_connected = false;
-		Serial.println("Wifi is not connected!");
-	}
-
-
-
-}
-
 void initOTA()
 {
 	while (!wifi_connected)
@@ -2010,5 +2020,82 @@ void checkMpuGSHealth()
 	else
 	{
 		statusGS = statusType_Normal;
+	}
+}
+
+void connectToWiFi()
+{
+
+	// delete old config
+	WiFi.disconnect(true);
+	//register event handler
+	WiFi.onEvent(WiFiEvent);
+
+	Serial.print("Connecting to ");
+	Serial.println(WIFI_SSID);
+
+	WiFi.begin(WIFI_SSID, WIFI_PASS);
+	unsigned long startTimeWifi = millis();
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(500);
+		Serial.print(".");
+		if (millis() - startTimeWifi > WIFI_CONNECTION_THRESHOLD)
+		{
+			Serial.println("Wifi connection timed out!");
+			break;
+		}
+	}
+
+	if (WiFi.status() == WL_CONNECTED)
+	{
+
+		wifi_connected = true;
+		Serial.println("");
+		Serial.println("WiFi connected");
+		Serial.print("IP address: ");
+		Serial.println(WiFi.localIP());
+		connectUdp();
+
+	}
+	else
+	{
+		wifi_connected = false;
+		Serial.println("Wifi could not be connected!");
+	}
+
+
+
+}
+
+void connectUdp()
+{
+
+	if (udp.begin(WiFi.localIP(), UDP_PORT) == 1)
+	{
+		udp.clearWriteError();
+		udp_connected = true;
+		Serial.print("UDP Started on IP:");
+		Serial.print(WiFi.localIP());
+		Serial.print("@");
+		Serial.println(UDP_PORT);
+	}
+	else
+	{
+		udp_connected = false;
+		Serial.println("UDP could not be started!");
+	}
+}
+//wifi event handler
+void WiFiEvent(WiFiEvent_t event) {
+	switch (event) {
+	case SYSTEM_EVENT_STA_GOT_IP:
+		//When connected set 
+		Serial.print("Event Handler: WiFi connected! IP address: ");
+		Serial.println(WiFi.localIP());
+		break;
+	case SYSTEM_EVENT_STA_DISCONNECTED:
+		Serial.println("Event Handler: WiFi lost connection");
+		connectToWiFi();
+		break;
 	}
 }
