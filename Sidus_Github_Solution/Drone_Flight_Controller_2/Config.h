@@ -4,9 +4,9 @@ This header file define all the configurable variables including constants, pin 
 */
 
 //Wifi, UDP Definitions
-#define			WIFI_SSID						"khorfo_net"
-#define			WIFI_PASS						"ahmet_ipek_12082004"
-#define			DEFAULT_GROUND_STATION_IP		"192.168.1.7"
+#define			WIFI_SSID						"iPhone"
+#define			WIFI_PASS						"YanikTurkiye06"
+#define			DEFAULT_GROUND_STATION_IP		"172.20.10.4"
 //#define		WIFI_SSID						"AAGCA"
 //#define		WIFI_PASS						"ahmet(12082004)"
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2"
@@ -111,16 +111,16 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
 
-#define		PID_RATE_PITCH_KP			1.6
-#define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.13
+#define		PID_RATE_PITCH_KP			0.7 //
+#define		PID_RATE_PITCH_KI			0.0 //
+#define		PID_RATE_PITCH_KD			0.05 //
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
 #define		PID_RATE_PITCH_F1_DEFAULT	0.0
 #define		PID_RATE_PITCH_F2_DEFAULT	0.0
 #define		PID_RATE_PITCH_OUT_FILT_CONSTANT	0.0
 
-#define		PID_ANGLE_PITCH_KP			4.0
+#define		PID_ANGLE_PITCH_KP			3.0 //
 #define		PID_ANGLE_PITCH_KI			0.0
 #define		PID_ANGLE_PITCH_KD			0.0
 #define		PID_ANGLE_PITCH_OUTMIN		-250
@@ -129,16 +129,16 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_PITCH_F2_DEFAULT	0.0
 #define		PID_ANGLE_PITCH_OUT_FILT_CONSTANT	0.0
 
-#define		PID_RATE_ROLL_KP			1.6
-#define		PID_RATE_ROLL_KI			0.0
-#define		PID_RATE_ROLL_KD			0.13
+#define		PID_RATE_ROLL_KP			0.7 //
+#define		PID_RATE_ROLL_KI			0.0 //
+#define		PID_RATE_ROLL_KD			0.05 //
 #define		PID_RATE_ROLL_OUTMIN		-250
 #define		PID_RATE_ROLL_OUTMAX		250
 #define		PID_RATE_ROLL_F1_DEFAULT	0.0
 #define		PID_RATE_ROLL_F2_DEFAULT	0.0
 #define		PID_RATE_ROLL_OUT_FILT_CONSTANT		0.0
 
-#define		PID_ANGLE_ROLL_KP			4.0
+#define		PID_ANGLE_ROLL_KP			3.0 //
 #define		PID_ANGLE_ROLL_KI			0.0
 #define		PID_ANGLE_ROLL_KD			0.0
 #define		PID_ANGLE_ROLL_OUTMIN		-250

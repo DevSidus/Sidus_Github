@@ -849,12 +849,12 @@ bool initMPU()
 	//mpu.setYGyroOffset(-26);
 	//mpu.setZGyroOffset(-5);
 	//
-	mpu.setXAccelOffset(-195);
-	mpu.setYAccelOffset(-669);
-	mpu.setZAccelOffset(1631);
-	mpu.setXGyroOffset(59);
-	mpu.setYGyroOffset(-22);
-	mpu.setZGyroOffset(-12);
+	mpu.setXAccelOffset(1079);
+	mpu.setYAccelOffset(1715);
+	mpu.setZAccelOffset(1298);
+	mpu.setXGyroOffset(31);
+	mpu.setYGyroOffset(18);
+	mpu.setZGyroOffset(24);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
