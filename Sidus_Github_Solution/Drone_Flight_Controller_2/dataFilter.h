@@ -29,13 +29,24 @@ const double lpfCoefficient[7] = {
 
 // Diff Filter Coefficients with Following Parameters
 // FilterOrder: 6
-// Group Delay: 3 (30ms)
-// PassbandFrequency: 0.1 (5Hz)
-// StopbandFrequency: 0.2 (10Hz)
+// Group Delay: 3 Sample
+// PassbandFrequency: 2Hz
+// StopbandFrequency: 2.1Hz
+// Fs: 200 Hz
+const int diffFilter200HzLength = 7;
+const double diffFilter200HzCoefficient[7] = {
+	-0.101988983017612, -0.0680787959196394, -0.0340652650142217, 0, 0.0340652650142217, 0.0680787959196394, 0.101988983017612
+};
 
-const int diffFilterLength = 7;
-const double diffFilterCoefficient[7] = {
-	-0.323697929820352, -0.260702457937993, -0.144786577123061, 0, 0.144786577123061, 0.260702457937993, 0.323697929820352
+// Diff Filter Coefficients with Following Parameters
+// FilterOrder: 6
+// Group Delay: 3 Sample
+// PassbandFrequency: 2Hz
+// StopbandFrequency: 2.1Hz
+// Fs: 100 Hz
+const int diffFilter100HzLength = 7;
+const double diffFilter100HzCoefficient[7] = {
+	-0.104799329538250, -0.0702839469518364, -0.0352678034184209, 0, 0.0352678034184209, 0.0702839469518364, 0.104799329538250
 };
 
 // FIR Filter Function

@@ -23,9 +23,12 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint)
     myOutput = Output;
     myMeasuredVal = MeasuredVal;
     mySetpoint = Setpoint;
+	myMeasuredValDiff = 0;
+	mySetpointDiff = 0;
 	inAuto = false;
 	d_bypass = 0;
 	d_bypass_enabled = false;
+	diff_data_available = false;
 	
 	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
 	
@@ -43,9 +46,12 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* _d_bypas
 	myOutput = Output;
 	myMeasuredVal = MeasuredVal;
 	mySetpoint = Setpoint;
+	myMeasuredValDiff = 0;
+	mySetpointDiff = 0;
 	inAuto = false;
 	d_bypass = _d_bypass;
 	d_bypass_enabled = true;
+	diff_data_available = false;
 
 	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
 
@@ -57,6 +63,28 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* _d_bypas
 	PID::SetMode(AUTOMATIC);
 }
 
+PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* MeasuredValDiff, double* SetpointDiff)
+{
+
+	myOutput = Output;
+	myMeasuredVal = MeasuredVal;
+	mySetpoint = Setpoint;
+	myMeasuredValDiff = MeasuredValDiff;
+	mySetpointDiff = SetpointDiff;
+	inAuto = false;
+	d_bypass = 0;
+	d_bypass_enabled = false;
+	diff_data_available = true;
+
+	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
+
+													//PID::SetTunings(Kp, Ki, Kd);
+	Kp = 1;
+	Ki = 0;
+	Kd = 0;
+
+	PID::SetMode(AUTOMATIC);
+}
 
 bool PID::Compute()
 {
@@ -115,19 +143,29 @@ bool PID::Compute()
 	  
 	  //Calculate Derivative Term
 	  //bypass value could be inserted just before errorderivativesmooth
-	  if (d_bypass_enabled)
+	  
+	  if (diff_data_available)
 	  {
-		  errorDerivative = (*mySetpoint - lastSetpoint) / dTimeInSec;
-		  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-		  D_Result = Kd * (errorDerivativeSmooth + (-*d_bypass));
+		  errorDerivative = *mySetpointDiff - *myMeasuredValDiff;
+		  D_Result = Kd * errorDerivative;
 	  }
 	  else
 	  {
-		  errorDerivative = (errorSmooth - lastError) / dTimeInSec;
-		  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+		  if (d_bypass_enabled)
+		  {
+			  errorDerivative = (*mySetpoint - lastSetpoint) / dTimeInSec;
+			  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+			  D_Result = Kd * (errorDerivativeSmooth + (-*d_bypass));
+		  }
+		  else
+		  {
+			  errorDerivative = (errorSmooth - lastError) / dTimeInSec;
+			  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
 
-		  D_Result = Kd * errorDerivativeSmooth;
+			  D_Result = Kd * errorDerivativeSmooth;
+		  }
 	  }
+	  
 
 
 	  double output = P_Result + I_Result + D_Result;
