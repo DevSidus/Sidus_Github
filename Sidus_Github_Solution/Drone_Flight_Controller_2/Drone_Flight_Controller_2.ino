@@ -1187,9 +1187,6 @@ void processPID()
 
 
 	//// Differantiate Rate Commands for Rate PID Kd branch ////
-	unsigned long now = millis();
-	unsigned long dTime = (now - lastTimeRateCmdDiff);
-	double dTimeInSec = dTime / 1000.0;
 	// Update Buffer
 	rateCmdDiffBuffer.xVector.erase(rateCmdDiffBuffer.xVector.begin());
 	rateCmdDiffBuffer.xVector.push_back(rateCmd.x);
@@ -1202,13 +1199,13 @@ void processPID()
 	rateCmdDiff.y = diffFilter(rateCmdDiffBuffer.yVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
 	rateCmdDiff.z = diffFilter(rateCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
 
-	lastTimeRateCmdDiff = now;
 
 	//Pitch Roll Yaw Rate PID
 
 	//pidVars.ratePitch.setpoint = cmdMotorPitch * 3;
 	pidVars.ratePitch.setpoint = rateCmd.y;
 	pidVars.ratePitch.sensedVal = qc.gyro.y;
+	//pidVars.ratePitch.setpointDiff = 0;
 	pidVars.ratePitch.setpointDiff = rateCmdDiff.y;
 	pidVars.ratePitch.sensedValDiff = qc.gyroDiff.y;
 	pidRatePitch.Compute();
@@ -1347,7 +1344,7 @@ void initPIDvariables()
 	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.xVector.push_back(0.0);
 	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.yVector.push_back(0.0);
 	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.zVector.push_back(0.0);
-	deltaTimeRateCmdDiff = 0.009;
+	deltaTimeRateCmdDiff = 0.01;
 
 }
 
@@ -1535,19 +1532,19 @@ void processRunMotors()
 			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output*PID_THR_BATT_SCALE_FACTOR;
 			pidVars.velAlt.outputCompensated = pidVars.velAlt.output*PID_THR_BATT_SCALE_FACTOR;
 			
-			/*
+			
 
 			pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
 			pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
 			pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
-			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);*/
+			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated + pidVars.rateYaw.outputCompensated);
 
 
 
-			pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated);
-			pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated);
-			pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated);
-			pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated);
+			//pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated);
+			//pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated);
+			//pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated);
+			//pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated);
 
 		}
 		else
@@ -1587,8 +1584,8 @@ void calculate_pid_thr_batt_scale_factor() //this function will be modified to i
 	//Use linear interpolation for battery voltage level compensation
 	//Make sure that voltage read is in valid range of operation
 	if (batteryVoltageInVolts > 9.0 && batteryVoltageInVolts < 13.2)
-	{
-		PID_THR_BATT_SCALE_FACTOR = PID_THR_BATT_SCALE_FACTOR * 12.0 / batteryVoltageInVolts;
+	{		
+		PID_THR_BATT_SCALE_FACTOR = PID_THR_BATT_SCALE_FACTOR * (1.0 + (batteryVoltageInVolts - PID_BATT_MIDDLE_VOLTAGE)*PID_BATT_VOLTAGE_SLOPE);
 	}
 }
 

@@ -111,41 +111,41 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
 
-#define		PID_RATE_PITCH_KP			0.80
+#define		PID_RATE_PITCH_KP			1.6
 #define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.07
+#define		PID_RATE_PITCH_KD			0.13
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
 #define		PID_RATE_PITCH_F1_DEFAULT	0.0
-#define		PID_RATE_PITCH_F2_DEFAULT	0.3
+#define		PID_RATE_PITCH_F2_DEFAULT	0.0
 #define		PID_RATE_PITCH_OUT_FILT_CONSTANT	0.0
 
-#define		PID_ANGLE_PITCH_KP			3.0
-#define		PID_ANGLE_PITCH_KI			1.0
-#define		PID_ANGLE_PITCH_KD			0.08
+#define		PID_ANGLE_PITCH_KP			4.0
+#define		PID_ANGLE_PITCH_KI			0.0
+#define		PID_ANGLE_PITCH_KD			0.0
 #define		PID_ANGLE_PITCH_OUTMIN		-250
 #define		PID_ANGLE_PITCH_OUTMAX		250
 #define		PID_ANGLE_PITCH_F1_DEFAULT	0.0
-#define		PID_ANGLE_PITCH_F2_DEFAULT	0.9
-#define		PID_ANGLE_PITCH_OUT_FILT_CONSTANT	0.88
+#define		PID_ANGLE_PITCH_F2_DEFAULT	0.0
+#define		PID_ANGLE_PITCH_OUT_FILT_CONSTANT	0.0
 
-#define		PID_RATE_ROLL_KP			0.80
+#define		PID_RATE_ROLL_KP			1.6
 #define		PID_RATE_ROLL_KI			0.0
-#define		PID_RATE_ROLL_KD			0.07
+#define		PID_RATE_ROLL_KD			0.13
 #define		PID_RATE_ROLL_OUTMIN		-250
 #define		PID_RATE_ROLL_OUTMAX		250
 #define		PID_RATE_ROLL_F1_DEFAULT	0.0
-#define		PID_RATE_ROLL_F2_DEFAULT	0.3
+#define		PID_RATE_ROLL_F2_DEFAULT	0.0
 #define		PID_RATE_ROLL_OUT_FILT_CONSTANT		0.0
 
-#define		PID_ANGLE_ROLL_KP			3.0
-#define		PID_ANGLE_ROLL_KI			1.0
-#define		PID_ANGLE_ROLL_KD			0.08
+#define		PID_ANGLE_ROLL_KP			4.0
+#define		PID_ANGLE_ROLL_KI			0.0
+#define		PID_ANGLE_ROLL_KD			0.0
 #define		PID_ANGLE_ROLL_OUTMIN		-250
 #define		PID_ANGLE_ROLL_OUTMAX		250
 #define		PID_ANGLE_ROLL_F1_DEFAULT	0.0
-#define		PID_ANGLE_ROLL_F2_DEFAULT	0.9
-#define		PID_ANGLE_ROLL_OUT_FILT_CONSTANT	0.88
+#define		PID_ANGLE_ROLL_F2_DEFAULT	0.0
+#define		PID_ANGLE_ROLL_OUT_FILT_CONSTANT	0.0
 
 
 #define		PID_RATE_YAW_KP			1.4
@@ -211,7 +211,7 @@ This header file define all the configurable variables including constants, pin 
 
 #define     BAT_VOLT_DIV_R1				51.0
 #define		BAT_VOLT_DIV_R2				10.0
-#define     ADC_ERROR_FACTOR			1.098
+#define     ADC_ERROR_FACTOR			1.11
 
 
 #define		RMT_CLK_DIV						80    /*!< RMT counter clock divider */
@@ -224,6 +224,8 @@ This header file define all the configurable variables including constants, pin 
 #define		BATT_LEVEL_EXIST			2.5
 
 double		PID_THR_BATT_SCALE_FACTOR = 1.0;
+double		PID_BATT_VOLTAGE_SLOPE = -0.15;
+double		PID_BATT_MIDDLE_VOLTAGE = 11.5;
 float		batteryVoltageInVolts;
 double		commandedAltitude = 0;
 
@@ -436,5 +438,4 @@ struct3Dvector anglePIDoutputLowpassBuffer;
 struct3Dvector rateCmdDiffBuffer;
 
 double deltaTimeGyroDiff; // will be used at Exact Filtering
-unsigned long lastTimeRateCmdDiff; // will be used for Sample Rate Analysis
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering
