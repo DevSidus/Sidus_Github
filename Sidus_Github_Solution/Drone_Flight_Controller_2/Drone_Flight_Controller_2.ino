@@ -42,11 +42,11 @@ WiFiUDP udp;
 cMsgUdpR01 MsgUdpR01;
 cMsgUdpT01 MsgUdpT01;
 
-PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint, &pidVars.ratePitch.d_bypass);
+PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint, &pidVars.ratePitch.sensedValDiff, &pidVars.ratePitch.setpointDiff);
 PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.d_bypass);
-PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint, &pidVars.rateRoll.d_bypass);
+PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint, &pidVars.rateRoll.sensedValDiff, &pidVars.rateRoll.setpointDiff);
 PID pidAngleRoll(&pidVars.angleRoll.sensedVal, &pidVars.angleRoll.output, &pidVars.angleRoll.setpoint, &pidVars.angleRoll.d_bypass);
-PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rateYaw.setpoint, &pidVars.rateYaw.d_bypass);
+PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rateYaw.setpoint, &pidVars.rateYaw.sensedValDiff, &pidVars.rateYaw.setpointDiff);
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.d_bypass);
 
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.d_bypass);
@@ -158,10 +158,10 @@ void task_mpu(void * parameter)
 	}
 
 	// Initialize Buffer
-	for (int i = 0; i < diffFilterLength; i++) gyroDiffBuffer.xVector.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) gyroDiffBuffer.yVector.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) gyroDiffBuffer.zVector.push_back(0.0);
-	lastTimeGyroDiff = millis();
+	for (int i = 0; i < diffFilter200HzLength; i++) gyroDiffBuffer.xVector.push_back(0.0);
+	for (int i = 0; i < diffFilter200HzLength; i++) gyroDiffBuffer.yVector.push_back(0.0);
+	for (int i = 0; i < diffFilter200HzLength; i++) gyroDiffBuffer.zVector.push_back(0.0);
+	deltaTimeGyroDiff = 0.005;
 
 	while (true)
 	{
@@ -927,10 +927,7 @@ void processMpu()
 			qc.euler.theta = -euler[1]; 
 			qc.euler.phi = euler[2]; 
 
-			//// Differantiate Gyro Values for PID Kd branch ////
-			unsigned long now = millis();
-			unsigned long dTime = (now - lastTimeGyroDiff);
-			double dTimeInSec = dTime / 1000.0;
+			// Differantiate Gyro Values for PID Kd branch
 			// Update Buffer
 			gyroDiffBuffer.xVector.erase(gyroDiffBuffer.xVector.begin());
 			gyroDiffBuffer.xVector.push_back(qc.gyro.x);
@@ -939,11 +936,9 @@ void processMpu()
 			gyroDiffBuffer.zVector.erase(gyroDiffBuffer.zVector.begin());
 			gyroDiffBuffer.zVector.push_back(qc.gyro.z);
 			// Calculate Filter Output
-			qc.gyroDiff.x = diffFilter(gyroDiffBuffer.xVector, diffFilterCoefficient, dTimeInSec);
-			qc.gyroDiff.y = diffFilter(gyroDiffBuffer.yVector, diffFilterCoefficient, dTimeInSec);
-			qc.gyroDiff.z = diffFilter(gyroDiffBuffer.zVector, diffFilterCoefficient, dTimeInSec);
-
-			lastTimeGyroDiff = now;
+			qc.gyroDiff.x = diffFilter(gyroDiffBuffer.xVector, diffFilter200HzCoefficient, deltaTimeGyroDiff);
+			qc.gyroDiff.y = diffFilter(gyroDiffBuffer.yVector, diffFilter200HzCoefficient, deltaTimeGyroDiff);
+			qc.gyroDiff.z = diffFilter(gyroDiffBuffer.zVector, diffFilter200HzCoefficient, deltaTimeGyroDiff);
 
 		}
 
@@ -1157,33 +1152,33 @@ void processPID()
 	rateCmdDiffBuffer.zVector.erase(rateCmdDiffBuffer.zVector.begin());
 	rateCmdDiffBuffer.zVector.push_back(rateCmd.z);
 	// Calculate Filter Output
-	rateCmdDiff.x = diffFilter(rateCmdDiffBuffer.xVector, diffFilterCoefficient, dTimeInSec);
-	rateCmdDiff.y = diffFilter(rateCmdDiffBuffer.yVector, diffFilterCoefficient, dTimeInSec);
-	rateCmdDiff.z = diffFilter(rateCmdDiffBuffer.zVector, diffFilterCoefficient, dTimeInSec);
+	rateCmdDiff.x = diffFilter(rateCmdDiffBuffer.xVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
+	rateCmdDiff.y = diffFilter(rateCmdDiffBuffer.yVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
+	rateCmdDiff.z = diffFilter(rateCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
 
 	lastTimeRateCmdDiff = now;
 
-
 	//Pitch Roll Yaw Rate PID
-
-
-	pidVars.rateRoll.d_bypass = qc.gyroDiff.x;
-	pidVars.ratePitch.d_bypass = qc.gyroDiff.y;
-	pidVars.rateYaw.d_bypass = qc.gyroDiff.z;
 
 	//pidVars.ratePitch.setpoint = cmdMotorPitch * 3;
 	pidVars.ratePitch.setpoint = rateCmd.y;
 	pidVars.ratePitch.sensedVal = qc.gyro.y;
+	pidVars.ratePitch.setpointDiff = rateCmdDiff.y;
+	pidVars.ratePitch.sensedValDiff = qc.gyroDiff.y;
 	pidRatePitch.Compute();
 
 
 	pidVars.rateRoll.setpoint = rateCmd.x;
 	pidVars.rateRoll.sensedVal = qc.gyro.x;
+	pidVars.rateRoll.setpointDiff = rateCmdDiff.x;
+	pidVars.rateRoll.sensedValDiff = qc.gyroDiff.x;
 	pidRateRoll.Compute();
 
 
 	pidVars.rateYaw.setpoint = rateCmd.z;
 	pidVars.rateYaw.sensedVal = qc.gyro.z;
+	pidVars.rateYaw.setpointDiff = rateCmdDiff.z;
+	pidVars.rateYaw.sensedValDiff = qc.gyroDiff.z;
 	pidRateYaw.Compute();
 
 
@@ -1303,10 +1298,10 @@ void initPIDvariables()
 
 	// Initialize Rate Command Buffer for Diff Filtering
 	// Initialize Buffer
-	for (int i = 0; i < diffFilterLength; i++) rateCmdDiffBuffer.xVector.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) rateCmdDiffBuffer.yVector.push_back(0.0);
-	for (int i = 0; i < diffFilterLength; i++) rateCmdDiffBuffer.zVector.push_back(0.0);
-	lastTimeRateCmdDiff = millis();
+	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.xVector.push_back(0.0);
+	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.yVector.push_back(0.0);
+	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.zVector.push_back(0.0);
+	deltaTimeRateCmdDiff = 0.009;
 
 }
 
