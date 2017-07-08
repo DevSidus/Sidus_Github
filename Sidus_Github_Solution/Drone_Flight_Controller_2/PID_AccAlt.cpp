@@ -12,9 +12,11 @@ PID_AccAlt::PID_AccAlt(double* MeasuredVal, double* Output, double* Setpoint)
 	myOutput = Output;
 	myMeasuredVal = MeasuredVal;
 	mySetpoint = Setpoint;
+	myMeasuredValDiff = 0;
+	mySetpointDiff = 0;
 	inAuto = false;
-	d_bypass = 0;
-	d_bypass_enabled = false;
+	diff_setpoint_available = false;
+	diff_measuredval_available = false;
 
 	PID_AccAlt::SetOutputLimits(1100, 1900);				//default output limit corresponds to 
 	range_2 = 400;
@@ -76,18 +78,23 @@ bool PID_AccAlt::Compute()
 
 
 		//Calculate Derivative Term
-		//bypass value could be inserted just before errorderivativesmooth
-		if (d_bypass_enabled)
+		if (diff_setpoint_available && diff_measuredval_available)
+		{
+			///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// This case should be checked
+			errorDerivative = *mySetpointDiff - *myMeasuredValDiff;
+			D_Result = Kd * errorDerivative;
+		}
+		else if (diff_measuredval_available)
 		{
 			errorDerivative = (*mySetpoint - lastSetpoint) / dTimeInSec;
 			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-			D_Result = Kd * (errorDerivativeSmooth + (-*d_bypass));
+			D_Result = Kd * (errorDerivativeSmooth + (-*myMeasuredValDiff));
 		}
 		else
 		{
 			errorDerivative = (errorSmooth - lastError) / dTimeInSec;
 			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-
 			D_Result = Kd * errorDerivativeSmooth;
 		}
 

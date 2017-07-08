@@ -12,8 +12,12 @@ public:
 	//commonly used functions **************************************************************************
 	PID_YawAngle(double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
 													//   Setpoint. 
-	PID_YawAngle(double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
-															//   Setpoint. 
+	
+	PID_YawAngle(double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, Setpoint, and 
+															//   Derivative of Input. 
+	
+	PID_YawAngle(double*, double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, Setpoint, and 
+															// Derivative of Input, Derivative of Setpoint.
 
 	void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
@@ -74,7 +78,8 @@ private:
 	double *myOutput;             //   This creates a hard link between the variables and the 
 	double *mySetpoint;           //   PID_YawAngle, freeing the user from having to constantly tell us
 								  //   what these values are.  with pointers we'll just know.
-	double *d_bypass;
+	double *myMeasuredValDiff;
+	double *mySetpointDiff;
 
 	unsigned long lastTime;
 	double lastError;
@@ -85,7 +90,8 @@ private:
 
 	double outMin, outMax;
 	bool inAuto;
-	bool d_bypass_enabled;
+	bool diff_measuredval_available;
+	bool diff_setpoint_available;
 
 	bool inFlight;
 	bool transientInterval;

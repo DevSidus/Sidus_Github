@@ -286,7 +286,6 @@ struct structPID
 	double outputLimitMax;
 	float f1;
 	float f2;
-	double d_bypass;
 };
 struct structSuperPID
 {
