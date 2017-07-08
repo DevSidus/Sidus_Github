@@ -21,6 +21,9 @@ class PID
 	PID(double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
 												//   Setpoint. 
 	
+	PID(double*, double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, Setpoint, and 
+													// Derivative of Input, Derivative of Output. 
+
     void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
     bool Compute();                       // * performs the PID calculation.  it should be
@@ -82,6 +85,8 @@ class PID
     double *myOutput;             //   This creates a hard link between the variables and the 
     double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                   //   what these values are.  with pointers we'll just know.
+	double *myMeasuredValDiff;
+	double *mySetpointDiff;
 	double *d_bypass;
 			  
 	unsigned long lastTime;
@@ -94,6 +99,7 @@ class PID
 	double outMin, outMax;
 	bool inAuto;
 	bool d_bypass_enabled;
+	bool diff_data_available;
 
 	bool inFlight;
 	bool transientInterval;

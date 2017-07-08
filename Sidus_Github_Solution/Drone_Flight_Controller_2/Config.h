@@ -272,7 +272,9 @@ struct structPID
 	double Ki;
 	double Kd;
 	double sensedVal;
+	double sensedValDiff;
 	double setpoint;
+	double setpointDiff;
 	double output;
 	double outputFiltered;
 	float  outputFilterConstant;
@@ -432,5 +434,6 @@ struct3Dvector gyroDiffBuffer;
 struct3Dvector anglePIDoutputLowpassBuffer;
 struct3Dvector rateCmdDiffBuffer;
 
-unsigned long lastTimeGyroDiff;
-unsigned long lastTimeRateCmdDiff;
+double deltaTimeGyroDiff; // will be used at Exact Filtering
+unsigned long lastTimeRateCmdDiff; // will be used for Sample Rate Analysis
+double deltaTimeRateCmdDiff; // will be used at Exact Filtering
