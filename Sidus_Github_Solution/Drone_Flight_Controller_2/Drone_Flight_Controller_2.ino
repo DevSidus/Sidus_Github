@@ -50,7 +50,7 @@ PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rat
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.sensedValDiff);
 
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff);
-PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint);
+PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
 
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
@@ -763,6 +763,17 @@ void task_altitude_kalman(void * parameter)
 
 		//Serial.println(micros() - strtTime);
 
+
+		//bura tamamlanacak dogru sekilde
+		accelDiffBuffer.zVector.erase(accelDiffBuffer.zVector.begin());
+		accelDiffBuffer.zVector.push_back(qc.accelWorldEstimated.z);
+		// Calculate Filter Output
+		qc.accelDiff.z = diffFilter(accelDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeAccelDiff);
+
+
+
+
+
 		delay(9);
 	}
 	vTaskDelete(NULL);
@@ -1166,7 +1177,6 @@ void processPID()
 	pidVars.angleRoll.sensedVal = qc.euler.phi * 180 / M_PI;
 	pidAngleRoll.Compute();
 
-
 	pidVars.anglePitch.setpoint = cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = qc.euler.theta * 180 / M_PI;
 	pidAnglePitch.Compute();
@@ -1239,18 +1249,32 @@ void processPID()
 	pidRateYaw.Compute();
 
 
-	pidVars.velAlt.sensedValDiff = qc.accelWorld.z / 8.36;  // cm/second^2
+	pidVars.velAlt.sensedValDiff = qc.accelWorldEstimated.z * 100;  // cm/second^2
 	pidVars.velAlt.setpoint = cmdRx6thCh;
-	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z;  // cm/second
+	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z * 100;  // cm/second
 	pidVelAlt.Compute();
-	pidVars.velAlt.outputFiltered = basicFilter(pidVars.velAlt.output, pidVars.velAlt.outputFilterConstant, pidVars.velAlt.outputFiltered);
+
+	velPIDoutputLowpassBuffer.zVector.erase(velPIDoutputLowpassBuffer.zVector.begin());
+	velPIDoutputLowpassBuffer.zVector.push_back(pidVars.velAlt.output);
+
+	pidVars.velAlt.outputFiltered = dataFilter(velPIDoutputLowpassBuffer.zVector, lpfCoefficient);
 
 
 	//Transform vel pid outputs to body coordinate axis in order to get correct acceleration wrt world
-	transformVelPIDoutputsToBody();
+	//transformVelPIDoutputsToBody();
 
+
+	accelCmd.z = pidVars.velAlt.outputFiltered;
+
+	accelCmdDiffBuffer.zVector.erase(accelCmdDiffBuffer.zVector.begin());
+	accelCmdDiffBuffer.zVector.push_back(accelCmd.z);
+	
+	accelCmdDiff.z = diffFilter(accelCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
+
+	pidVars.accAlt.setpointDiff = accelCmdDiff.z;
+	pidVars.accAlt.sensedValDiff = qc.accelDiff.z;
 	pidVars.accAlt.setpoint = accelCmd.z;   // cmd/second^2
-	pidVars.accAlt.sensedVal = qc.accel.z / 8.3;  // cm/second^2
+	pidVars.accAlt.sensedVal = qc.accelWorldEstimated.z;  // cm/second^2
 	pidAccAlt.Compute();
 
 	postPIDprocesses();
@@ -1352,6 +1376,8 @@ void initPIDvariables()
 	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.xVector.push_back(0.0);
 	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.yVector.push_back(0.0);
 	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.zVector.push_back(0.0);
+
+	for (int i = 0; i < lpfLength; i++) velPIDoutputLowpassBuffer.zVector.push_back(0.0);
 
 	// Initialize Rate Command Buffer for Diff Filtering
 	// Initialize Buffer
@@ -1502,7 +1528,6 @@ void transformVelPIDoutputsToBody()
 	//	accelCmd.z = ((pidVars.velAlt.outputFiltered + 500) / -0.5) -500;   //this condition should be discussed
 	//}
 
-	accelCmd.z = (pidVars.velAlt.outputFiltered + 1000);
 
 }
 

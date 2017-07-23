@@ -325,11 +325,13 @@ struct structIMU
 	struct3Daxis velWorldEstimated;
 	struct3Daxis posWorldEstimated;
 	struct3Daxis gyroDiff;
+	struct3Daxis accelDiff;
 }qc;
 
 struct3Daxis rateCmd;
 struct3Daxis rateCmdDiff;
 struct3Daxis accelCmd;
+struct3Daxis accelCmdDiff;
 
 //Enum Type Definitions, two mcu config files may be merged!
 typedef enum
@@ -435,6 +437,11 @@ struct struct3Dvector
 struct3Dvector gyroDiffBuffer;
 struct3Dvector anglePIDoutputLowpassBuffer;
 struct3Dvector rateCmdDiffBuffer;
+struct3Dvector velPIDoutputLowpassBuffer;
+struct3Dvector accelDiffBuffer;
+struct3Dvector accelCmdDiffBuffer;
+
 
 double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering
+double deltaTimeAccelDiff; // will be used at Exact Filtering
