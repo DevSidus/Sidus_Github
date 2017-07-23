@@ -18,11 +18,12 @@ class PID
   //commonly used functions **************************************************************************
 	PID(double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
 											//   Setpoint. 
-	PID(double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, and 
-												//   Setpoint. 
+	
+	PID(double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, Setpoint, and 
+												//   Derivative of Input. 
 	
 	PID(double*, double*, double*, double*, double*);		// * constructor.  links the PID to the Input, Output, Setpoint, and 
-													// Derivative of Input, Derivative of Output. 
+													//Derivative of Input, Derivative of Setpoint. 
 
     void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
@@ -87,7 +88,6 @@ class PID
                                   //   what these values are.  with pointers we'll just know.
 	double *myMeasuredValDiff;
 	double *mySetpointDiff;
-	double *d_bypass;
 			  
 	unsigned long lastTime;
 	double lastError;
@@ -98,8 +98,8 @@ class PID
 
 	double outMin, outMax;
 	bool inAuto;
-	bool d_bypass_enabled;
-	bool diff_data_available;
+	bool diff_measuredval_available;
+	bool diff_setpoint_available;
 
 	bool inFlight;
 	bool transientInterval;

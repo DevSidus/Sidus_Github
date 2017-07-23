@@ -1,9 +1,4 @@
-//
 // File: kalmanFilter_initialize.cpp
-//
-// MATLAB Coder version            : 3.3
-// C/C++ source code generated on  : 04-Jun-2017 19:49:51
-//
 
 // Include Files
 #include "rt_nonfinite.h"

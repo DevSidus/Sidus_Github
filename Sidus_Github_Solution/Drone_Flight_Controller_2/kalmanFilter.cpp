@@ -1,8 +1,4 @@
 // File: kalmanFilter.cpp
-//
-// MATLAB Coder version            : 3.3
-// C/C++ source code generated on  : 04-Jun-2017 19:49:51
-//
 
 // Include Files
 #include "rt_nonfinite.h"
@@ -28,149 +24,131 @@
 //  P_n - (DxD matrix) Gaussian posterior covariance at time step n
 // Arguments    : const double m_n1[3]
 //                const double P_n1[9]
-//                const double y_n[3]
+//                const double y_n[2]
 //                const double F[9]
 //                const double Q[9]
-//                const double H[9]
-//                const double R[9]
+//                const double H[6]
+//                const double R[4]
 //                double m_n[3]
 //                double P_n[9]
 // Return Type  : void
 //
-void kalmanFilter(const double m_n1[3], const double P_n1[9], const double y_n[3],
-                  const double F[9], const double Q[9], const double H[9], const
-                  double R[9], double m_n[3], double P_n[9])
+void kalmanFilter(const double m_n1[3], const double P_n1[9], const double y_n[2],
+	const double F[9], const double Q[9], const double H[6], const
+	double R[4], double m_n[3], double P_n[9])
 {
-  int i0;
-  double m_nn1[3];
-  int rtemp;
-  int r1;
-  double b_F[9];
-  int r2;
-  int k;
-  int r3;
-  double maxval;
-  double S[9];
-  double a21;
-  double P_nn1[9];
-  double y[9];
-  double K[9];
-  double b_y_n[3];
+	int r1;
+	double m_nn1[3];
+	int r2;
+	double b_F[9];
+	int k;
+	double S[4];
+	double K[6];
+	double a21;
+	double y[6];
+	double P_nn1[9];
+	double a22;
+	double b_y_n[2];
 
-  //  Predict
-  for (i0 = 0; i0 < 3; i0++) {
-    m_nn1[i0] = 0.0;
-    for (rtemp = 0; rtemp < 3; rtemp++) {
-      b_F[i0 + 3 * rtemp] = 0.0;
-      for (k = 0; k < 3; k++) {
-        b_F[i0 + 3 * rtemp] += F[i0 + 3 * k] * P_n1[k + 3 * rtemp];
-      }
+	//  Predict
+	for (r1 = 0; r1 < 3; r1++) {
+		m_nn1[r1] = 0.0;
+		for (r2 = 0; r2 < 3; r2++) {
+			b_F[r1 + 3 * r2] = 0.0;
+			for (k = 0; k < 3; k++) {
+				b_F[r1 + 3 * r2] += F[r1 + 3 * k] * P_n1[k + 3 * r2];
+			}
 
-      m_nn1[i0] += F[i0 + 3 * rtemp] * m_n1[rtemp];
-    }
+			m_nn1[r1] += F[r1 + 3 * r2] * m_n1[r2];
+		}
 
-    for (rtemp = 0; rtemp < 3; rtemp++) {
-      maxval = 0.0;
-      for (k = 0; k < 3; k++) {
-        maxval += b_F[i0 + 3 * k] * F[rtemp + 3 * k];
-      }
+		for (r2 = 0; r2 < 3; r2++) {
+			a21 = 0.0;
+			for (k = 0; k < 3; k++) {
+				a21 += b_F[r1 + 3 * k] * F[r2 + 3 * k];
+			}
 
-      P_nn1[i0 + 3 * rtemp] = maxval + Q[i0 + 3 * rtemp];
-    }
-  }
+			P_nn1[r1 + 3 * r2] = a21 + Q[r1 + 3 * r2];
+		}
+	}
 
-  //  Update
-  for (i0 = 0; i0 < 3; i0++) {
-    for (rtemp = 0; rtemp < 3; rtemp++) {
-      b_F[i0 + 3 * rtemp] = 0.0;
-      for (k = 0; k < 3; k++) {
-        b_F[i0 + 3 * rtemp] += H[i0 + 3 * k] * P_nn1[k + 3 * rtemp];
-      }
-    }
+	//  Update
+	for (r1 = 0; r1 < 2; r1++) {
+		for (r2 = 0; r2 < 3; r2++) {
+			K[r1 + (r2 << 1)] = 0.0;
+			for (k = 0; k < 3; k++) {
+				K[r1 + (r2 << 1)] += H[r1 + (k << 1)] * P_nn1[k + 3 * r2];
+			}
+		}
 
-    for (rtemp = 0; rtemp < 3; rtemp++) {
-      maxval = 0.0;
-      for (k = 0; k < 3; k++) {
-        maxval += b_F[i0 + 3 * k] * H[rtemp + 3 * k];
-      }
+		for (r2 = 0; r2 < 2; r2++) {
+			a21 = 0.0;
+			for (k = 0; k < 3; k++) {
+				a21 += K[r1 + (k << 1)] * H[r2 + (k << 1)];
+			}
 
-      S[i0 + 3 * rtemp] = maxval + R[i0 + 3 * rtemp];
-      y[i0 + 3 * rtemp] = 0.0;
-      for (k = 0; k < 3; k++) {
-        y[i0 + 3 * rtemp] += P_nn1[i0 + 3 * k] * H[rtemp + 3 * k];
-      }
-    }
-  }
+			S[r1 + (r2 << 1)] = a21 + R[r1 + (r2 << 1)];
+		}
+	}
 
-  r1 = 0;
-  r2 = 1;
-  r3 = 2;
-  maxval = std::abs(S[0]);
-  a21 = std::abs(S[1]);
-  if (a21 > maxval) {
-    maxval = a21;
-    r1 = 1;
-    r2 = 0;
-  }
+	for (r1 = 0; r1 < 3; r1++) {
+		for (r2 = 0; r2 < 2; r2++) {
+			y[r1 + 3 * r2] = 0.0;
+			for (k = 0; k < 3; k++) {
+				y[r1 + 3 * r2] += P_nn1[r1 + 3 * k] * H[r2 + (k << 1)];
+			}
+		}
+	}
 
-  if (std::abs(S[2]) > maxval) {
-    r1 = 2;
-    r2 = 1;
-    r3 = 0;
-  }
+	if (std::abs(S[1]) > std::abs(S[0])) {
+		r1 = 1;
+		r2 = 0;
+	}
+	else {
+		r1 = 0;
+		r2 = 1;
+	}
 
-  S[r2] /= S[r1];
-  S[r3] /= S[r1];
-  S[3 + r2] -= S[r2] * S[3 + r1];
-  S[3 + r3] -= S[r3] * S[3 + r1];
-  S[6 + r2] -= S[r2] * S[6 + r1];
-  S[6 + r3] -= S[r3] * S[6 + r1];
-  if (std::abs(S[3 + r3]) > std::abs(S[3 + r2])) {
-    rtemp = r2;
-    r2 = r3;
-    r3 = rtemp;
-  }
+	a21 = S[r2] / S[r1];
+	a22 = S[2 + r2] - a21 * S[2 + r1];
+	for (k = 0; k < 3; k++) {
+		K[k + 3 * r1] = y[k] / S[r1];
+		K[k + 3 * r2] = (y[3 + k] - K[k + 3 * r1] * S[2 + r1]) / a22;
+		K[k + 3 * r1] -= K[k + 3 * r2] * a21;
+	}
 
-  S[3 + r3] /= S[3 + r2];
-  S[6 + r3] -= S[3 + r3] * S[6 + r2];
-  for (k = 0; k < 3; k++) {
-    K[k + 3 * r1] = y[k] / S[r1];
-    K[k + 3 * r2] = y[3 + k] - K[k + 3 * r1] * S[3 + r1];
-    K[k + 3 * r3] = y[6 + k] - K[k + 3 * r1] * S[6 + r1];
-    K[k + 3 * r2] /= S[3 + r2];
-    K[k + 3 * r3] -= K[k + 3 * r2] * S[6 + r2];
-    K[k + 3 * r3] /= S[6 + r3];
-    K[k + 3 * r2] -= K[k + 3 * r3] * S[3 + r3];
-    K[k + 3 * r1] -= K[k + 3 * r3] * S[r3];
-    K[k + 3 * r1] -= K[k + 3 * r2] * S[r2];
-    maxval = 0.0;
-    for (i0 = 0; i0 < 3; i0++) {
-      maxval += H[k + 3 * i0] * m_nn1[i0];
-    }
+	for (r1 = 0; r1 < 2; r1++) {
+		a21 = 0.0;
+		for (r2 = 0; r2 < 3; r2++) {
+			a21 += H[r1 + (r2 << 1)] * m_nn1[r2];
+		}
 
-    b_y_n[k] = y_n[k] - maxval;
-  }
+		b_y_n[r1] = y_n[r1] - a21;
+	}
 
-  for (i0 = 0; i0 < 3; i0++) {
-    maxval = 0.0;
-    for (rtemp = 0; rtemp < 3; rtemp++) {
-      maxval += K[i0 + 3 * rtemp] * b_y_n[rtemp];
-      b_F[i0 + 3 * rtemp] = 0.0;
-      for (k = 0; k < 3; k++) {
-        b_F[i0 + 3 * rtemp] += K[i0 + 3 * k] * H[k + 3 * rtemp];
-      }
-    }
+	for (r1 = 0; r1 < 3; r1++) {
+		a21 = 0.0;
+		for (r2 = 0; r2 < 2; r2++) {
+			a21 += K[r1 + 3 * r2] * b_y_n[r2];
+		}
 
-    m_n[i0] = m_nn1[i0] + maxval;
-    for (rtemp = 0; rtemp < 3; rtemp++) {
-      maxval = 0.0;
-      for (k = 0; k < 3; k++) {
-        maxval += b_F[i0 + 3 * k] * P_nn1[k + 3 * rtemp];
-      }
+		m_n[r1] = m_nn1[r1] + a21;
+		for (r2 = 0; r2 < 3; r2++) {
+			b_F[r1 + 3 * r2] = 0.0;
+			for (k = 0; k < 2; k++) {
+				b_F[r1 + 3 * r2] += K[r1 + 3 * k] * H[k + (r2 << 1)];
+			}
+		}
 
-      P_n[i0 + 3 * rtemp] = P_nn1[i0 + 3 * rtemp] - maxval;
-    }
-  }
+		for (r2 = 0; r2 < 3; r2++) {
+			a21 = 0.0;
+			for (k = 0; k < 3; k++) {
+				a21 += b_F[r1 + 3 * k] * P_nn1[k + 3 * r2];
+			}
+
+			P_n[r1 + 3 * r2] = P_nn1[r1 + 3 * r2] - a21;
+		}
+	}
 }
 
 //

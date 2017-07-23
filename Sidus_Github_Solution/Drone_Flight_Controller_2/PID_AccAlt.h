@@ -76,7 +76,8 @@ private:
 	double *myOutput;             //   This creates a hard link between the variables and the 
 	double *mySetpoint;           //   PID_AccAlt, freeing the user from having to constantly tell us
 								  //   what these values are.  with pointers we'll just know.
-	double *d_bypass;
+	double *myMeasuredValDiff;
+	double *mySetpointDiff;
 
 	unsigned long lastTime;
 	double lastError;
@@ -88,7 +89,8 @@ private:
 	double outMin, outMax;
 	double range_2;
 	bool inAuto;
-	bool d_bypass_enabled;
+	bool diff_measuredval_available;
+	bool diff_setpoint_available;
 
 	bool inFlight;
 	bool transientInterval;
