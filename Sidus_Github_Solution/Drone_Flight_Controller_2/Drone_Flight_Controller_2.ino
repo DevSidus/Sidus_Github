@@ -128,7 +128,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_melody, "task_melody", 2048, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_kalman, "task_kalman", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 10, NULL, 0);
 	//xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
 	//xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 
@@ -713,36 +713,42 @@ void task_2Hz(void * parameter)
 	vTaskDelete(NULL);
 }
 
-void task_kalman(void * parameter)
+void task_altitude_kalman(void * parameter)
 {
-	double F_n[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
-	double H_n[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+	double T = 0.010; // Sampling Period
+	double F[9] = { 1, T, 1/2*pow(T,2), 0, 1, T, 0, 0, 1 }; // State-transition matrix
+	double H[6] = { 1, 0, 0, 0, 0, 1 }; // Measurement matrix
 
-	double Q_n[9] = { 0.0000018, 0, 0, 0, 0.0000018, 0, 0, 0, 0.0000018 };
-	double R_n[9] = { 0.000324, 0, 0, 0, 0.000324, 0, 0, 0, 0.000324 };
+	double deltA = 0.2; // max(diff(accWorldZ));
+	double sigmaV = 0.5*deltA;
+	double Q[9] =  { 1/4*pow(T,4), 1/2*pow(T,3), 1/2*pow(T,2), 1/2*pow(T,3), pow(T,2), T, 1/2*pow(T,2), T, 1 };
+	for (int i = 0; i < 9; i++) Q[i] *= pow(sigmaV,2); // Process noise covariance matrix
 
+	double sigmaP = sqrt(1);
+	double sigmaA = sqrt(0.2);
+	double R[4] = { pow(sigmaP,2), 0, 0, pow(sigmaA,2) }; // Measurement noise covariance matrix
 
-	double P_n1[9] = { 0.018, 0, 0, 0, 0.018, 0, 0, 0, 0.018 };
+	// Initialization
+	double P_n1[9] = { pow(sigmaP,2), 0, 0, 0, pow(sigmaA,2), 0, 0, 0, pow(sigmaA,2) };
 	double m_n1[3] = { 0, 0, 0 };
 
 	double m_n[3] = { 0, 0, 0 };
 	double P_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	double y_n[3] = { 0, 0, 0 };
+	double y_n[2] = { 0, 0 };
 	
 	//unsigned long strtTime;
 	
 	while (true)
 	{
 		//strtTime = micros();
-		y_n[0] = qc.gyro.x;
-		y_n[1] = qc.gyro.y;
-		y_n[2] = qc.gyro.z;
+		y_n[0] = barometerAlt;
+		y_n[1] = qc.accelWorld.z;
 
-		kalmanFilter(m_n1, P_n1, y_n, F_n, Q_n, H_n, R_n, m_n, P_n);
+		kalmanFilter(m_n1, P_n1, y_n, F, Q, H, R, m_n, P_n);
 		
-		qc.gyroKalman.x = m_n[0];
-		qc.gyroKalman.y = m_n[1];
-		qc.gyroKalman.z = m_n[2];
+		qc.posWorldEstimated.z = m_n[0];
+		qc.velWorldEstimated.z = m_n[1];
+		qc.accelWorldEstimated.z = m_n[2];
 
 		memcpy(m_n1, m_n, sizeof(m_n));
 		memcpy(P_n1, P_n, sizeof(P_n));
@@ -1227,7 +1233,7 @@ void processPID()
 
 	pidVars.velAlt.sensedValDiff = qc.accelWorld.z / 8.36;  // cm/second^2
 	pidVars.velAlt.setpoint = cmdRx6thCh;
-	pidVars.velAlt.sensedVal = qc.velWorld.z;  // cm/second
+	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z;  // cm/second
 	pidVelAlt.Compute();
 	pidVars.velAlt.outputFiltered = basicFilter(pidVars.velAlt.output, pidVars.velAlt.outputFilterConstant, pidVars.velAlt.outputFiltered);
 
@@ -1881,12 +1887,6 @@ void prepareUDPmessages()
 	MsgUdpR01.message.mpuGyroX				= qc.gyro.x;
 	MsgUdpR01.message.mpuGyroY				= qc.gyro.y;
 	MsgUdpR01.message.mpuGyroZ				= qc.gyro.z;
-	MsgUdpR01.message.mpuGyroXkalman		= qc.gyroKalman.x;
-	MsgUdpR01.message.mpuGyroYkalman		= qc.gyroKalman.y;
-	MsgUdpR01.message.mpuGyroZkalman		= qc.gyroKalman.z;
-	MsgUdpR01.message.mpuGyroXfilter		= qc.gyroFiltered.x;
-	MsgUdpR01.message.mpuGyroYfilter		= qc.gyroFiltered.y;
-	MsgUdpR01.message.mpuGyroZfilter		= qc.gyroFiltered.z;
 	MsgUdpR01.message.mpuAccX				= qc.accel.x;
 	MsgUdpR01.message.mpuAccY				= qc.accel.y;
 	MsgUdpR01.message.mpuAccZ				= qc.accel.z;
@@ -1900,8 +1900,9 @@ void prepareUDPmessages()
 	MsgUdpR01.message.baroAlt				= barometerAlt;
 	MsgUdpR01.message.compassHdg			= compassHdg;
 	MsgUdpR01.message.batteryVoltage    	= batteryVoltageInVolts;
-	MsgUdpR01.message.quadVelocityWorldZ	= 0;
-	MsgUdpR01.message.quadPositionWorldZ	= 0;
+	MsgUdpR01.message.quadAccelerationWorldZ = qc.accelWorldEstimated.z;
+	MsgUdpR01.message.quadVelocityWorldZ	= qc.velWorldEstimated.z;
+	MsgUdpR01.message.quadPositionWorldZ	= qc.posWorldEstimated.z;
 	MsgUdpR01.message.modeQuad				= modeQuad;
 	MsgUdpR01.message.autoModeStatus		= autoModeStatus;
 	MsgUdpR01.message.statusRx				= statusRx;
