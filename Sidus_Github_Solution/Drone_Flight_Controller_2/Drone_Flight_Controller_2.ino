@@ -1166,32 +1166,29 @@ void processPID()
 
 	getBodyToEulerAngularRates();
 
-	//Set sensed diff values to euler angle rates
-	pidVars.angleRoll.sensedValDiff = qc.eulerRate.phi;
-	pidVars.anglePitch.sensedValDiff = qc.eulerRate.theta;
-	pidVars.angleYaw.sensedValDiff = qc.eulerRate.psi;
-
-	//Pitch Roll Yaw Angle PID
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Pitch Roll Yaw Angle PID
+	
+	// Roll PID
 	pidVars.angleRoll.setpoint = cmdMotorRoll;
 	pidVars.angleRoll.sensedVal = qc.euler.phi * 180 / M_PI;
+	pidVars.angleRoll.sensedValDiff = qc.eulerRate.phi;
 	pidAngleRoll.Compute();
-
+	
+	// Pitch PID
 	pidVars.anglePitch.setpoint = cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = qc.euler.theta * 180 / M_PI;
+	pidVars.anglePitch.sensedValDiff = qc.eulerRate.theta;
 	pidAnglePitch.Compute();
 
+	// Yaw PID
 	pidVars.angleYaw.setpoint = cmdMotorYaw;
 	pidVars.angleYaw.sensedVal = qc.euler.psi * 180 / M_PI;
+	pidVars.angleYaw.sensedValDiff = qc.eulerRate.psi;
 	pidAngleYaw.Compute();
 
-	//basicFilter fonksiyonu low pass filtre ile degistirilecek
-	/*pidVars.angleRoll.outputFiltered = basicFilter(pidVars.angleRoll.output, pidVars.angleRoll.outputFilterConstant, pidVars.angleRoll.outputFiltered);
-	pidVars.anglePitch.outputFiltered = basicFilter(pidVars.anglePitch.output, pidVars.anglePitch.outputFilterConstant, pidVars.anglePitch.outputFiltered);
-	pidVars.angleYaw.outputFiltered = basicFilter(pidVars.angleYaw.output, pidVars.angleYaw.outputFilterConstant, pidVars.angleYaw.outputFiltered);*/
-
-	// Filtering PID Outputs by LPF ////
-	//Update Buffer
+	// Filtering Angle PID Outputs by LPF
+	// Update Buffer
 	anglePIDoutputLowpassBuffer.xVector.erase(anglePIDoutputLowpassBuffer.xVector.begin());
 	anglePIDoutputLowpassBuffer.xVector.push_back(pidVars.angleRoll.output);
 	anglePIDoutputLowpassBuffer.yVector.erase(anglePIDoutputLowpassBuffer.yVector.begin());
@@ -1203,14 +1200,13 @@ void processPID()
 	pidVars.anglePitch.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.yVector, lpfCoefficient);
 	pidVars.angleYaw.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.zVector, lpfCoefficient);
 
-
 	// Rate Commands
 	rateCmd.x = pidVars.angleRoll.outputFiltered;
 	rateCmd.y = pidVars.anglePitch.outputFiltered;
 	rateCmd.z = pidVars.angleYaw.outputFiltered;
 
 
-	//// Differantiate Rate Commands for Rate PID Kd branch ////
+	// Differantiate Rate Commands for Rate PID Kd branch
 	// Update Buffer
 	rateCmdDiffBuffer.xVector.erase(rateCmdDiffBuffer.xVector.begin());
 	rateCmdDiffBuffer.xVector.push_back(rateCmd.x);
@@ -1222,59 +1218,68 @@ void processPID()
 	rateCmdDiff.x = diffFilter(rateCmdDiffBuffer.xVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
 	rateCmdDiff.y = diffFilter(rateCmdDiffBuffer.yVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
 	rateCmdDiff.z = diffFilter(rateCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Pitch Roll Yaw Rate PID
-
-	//pidVars.ratePitch.setpoint = cmdMotorPitch * 3;
+	
+	//Pitch Rate PID
 	pidVars.ratePitch.setpoint = rateCmd.y;
 	pidVars.ratePitch.sensedVal = qc.gyro.y;
-	//pidVars.ratePitch.setpointDiff = 0;
 	pidVars.ratePitch.setpointDiff = rateCmdDiff.y;
 	pidVars.ratePitch.sensedValDiff = qc.gyroDiff.y;
 	pidRatePitch.Compute();
 
-
+	//Roll Rate PID
 	pidVars.rateRoll.setpoint = rateCmd.x;
 	pidVars.rateRoll.sensedVal = qc.gyro.x;
 	pidVars.rateRoll.setpointDiff = rateCmdDiff.x;
 	pidVars.rateRoll.sensedValDiff = qc.gyroDiff.x;
 	pidRateRoll.Compute();
 
-
+	//Yaw Rate PID
 	pidVars.rateYaw.setpoint = rateCmd.z;
 	pidVars.rateYaw.sensedVal = qc.gyro.z;
 	pidVars.rateYaw.setpointDiff = rateCmdDiff.z;
 	pidVars.rateYaw.sensedValDiff = qc.gyroDiff.z;
 	pidRateYaw.Compute();
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	pidVars.velAlt.sensedValDiff = qc.accelWorldEstimated.z * 100;  // cm/second^2
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Velocity Altitude PID
 	pidVars.velAlt.setpoint = cmdRx6thCh;
 	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z * 100;  // cm/second
+	pidVars.velAlt.sensedValDiff = qc.accelWorldEstimated.z * 100;  // cm/second^2
 	pidVelAlt.Compute();
 
+	// Filtering Velocity Altitude PID Outputs by LPF
+	// Update Buffer
 	velPIDoutputLowpassBuffer.zVector.erase(velPIDoutputLowpassBuffer.zVector.begin());
 	velPIDoutputLowpassBuffer.zVector.push_back(pidVars.velAlt.output);
-
+	// Calculate Filter Output
 	pidVars.velAlt.outputFiltered = dataFilter(velPIDoutputLowpassBuffer.zVector, lpfCoefficient);
-
 
 	//Transform vel pid outputs to body coordinate axis in order to get correct acceleration wrt world
 	//transformVelPIDoutputsToBody();
 
-
+	// Acceleration Commands
 	accelCmd.z = pidVars.velAlt.outputFiltered;
 
+
+	//// Differantiate Acceleration Commands for Acceleration PID Kd branch ////
+	// Update Buffer
 	accelCmdDiffBuffer.zVector.erase(accelCmdDiffBuffer.zVector.begin());
 	accelCmdDiffBuffer.zVector.push_back(accelCmd.z);
-	
-	accelCmdDiff.z = diffFilter(accelCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
+	// Calculate Filter Output
+	accelCmdDiff.z = diffFilter(accelCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeAccelCmdDiff);
 
-	pidVars.accAlt.setpointDiff = accelCmdDiff.z;
-	pidVars.accAlt.sensedValDiff = qc.accelDiff.z;
+	// Acceleration Altitude PID
 	pidVars.accAlt.setpoint = accelCmd.z;   // cmd/second^2
 	pidVars.accAlt.sensedVal = qc.accelWorldEstimated.z;  // cm/second^2
+	pidVars.accAlt.setpointDiff = accelCmdDiff.z;
+	pidVars.accAlt.sensedValDiff = qc.accelDiff.z;
 	pidAccAlt.Compute();
 
 	postPIDprocesses();
@@ -1384,7 +1389,11 @@ void initPIDvariables()
 	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.xVector.push_back(0.0);
 	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.yVector.push_back(0.0);
 	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.zVector.push_back(0.0);
+
+	for (int i = 0; i < diffFilter100HzLength; i++) accelCmdDiffBuffer.zVector.push_back(0.0);
+	
 	deltaTimeRateCmdDiff = 0.01;
+	deltaTimeAccelCmdDiff = 0.01;
 
 }
 

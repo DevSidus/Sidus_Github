@@ -15,6 +15,12 @@ public:
 	PID_AccAlt(double*, double*, double*);		// * constructor.  links the PID_AccAlt to the Input, Output, and 
 										//   Setpoint. 
 
+	PID_AccAlt(double*, double*, double*, double*);		// * constructor.  links the PID_AccAlt to the Input, Output, Setpoint, and 
+													//   Derivative of Input. 
+
+	PID_AccAlt(double*, double*, double*, double*, double*);		// * constructor.  links the PID_AccAlt to the Input, Output, Setpoint, and 
+															//Derivative of Input, Derivative of Setpoint. 
+
 	void SetMode(int Mode);               // * sets PID_AccAlt to either Manual (0) or Auto (non-0)
 
 	bool Compute();                       // * performs the PID_AccAlt calculation.  it should be

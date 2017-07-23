@@ -445,3 +445,4 @@ struct3Dvector accelCmdDiffBuffer;
 double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering
 double deltaTimeAccelDiff; // will be used at Exact Filtering
+double deltaTimeAccelCmdDiff; // will be used at Exact Filtering

@@ -28,6 +28,49 @@ PID_AccAlt::PID_AccAlt(double* MeasuredVal, double* Output, double* Setpoint)
 	PID_AccAlt::SetMode(AUTOMATIC);
 }
 
+PID_AccAlt::PID_AccAlt(double* MeasuredVal, double* Output, double* Setpoint, double* MeasuredValDiff)
+{
+
+	myOutput = Output;
+	myMeasuredVal = MeasuredVal;
+	mySetpoint = Setpoint;
+	myMeasuredValDiff = MeasuredValDiff;
+	mySetpointDiff = 0;
+	inAuto = false;
+	diff_setpoint_available = false;
+	diff_measuredval_available = true;
+
+	PID_AccAlt::SetOutputLimits(1100, 1900);				//default output limit corresponds to 
+	range_2 = 400;
+	//PID_AccAlt::SetTunings(Kp, Ki, Kd);
+	Kp = 1;
+	Ki = 0;
+	Kd = 0;
+
+	PID_AccAlt::SetMode(AUTOMATIC);
+}
+
+PID_AccAlt::PID_AccAlt(double* MeasuredVal, double* Output, double* Setpoint, double* MeasuredValDiff, double* SetpointDiff)
+{
+
+	myOutput = Output;
+	myMeasuredVal = MeasuredVal;
+	mySetpoint = Setpoint;
+	myMeasuredValDiff = MeasuredValDiff;
+	mySetpointDiff = SetpointDiff;
+	inAuto = false;
+	diff_setpoint_available = true;
+	diff_measuredval_available = true;
+
+	PID_AccAlt::SetOutputLimits(1100, 1900);				//default output limit corresponds to 
+	range_2 = 400;
+	//PID_AccAlt::SetTunings(Kp, Ki, Kd);
+	Kp = 1;
+	Ki = 0;
+	Kd = 0;
+
+	PID_AccAlt::SetMode(AUTOMATIC);
+}
 
 bool PID_AccAlt::Compute()
 {
@@ -80,8 +123,6 @@ bool PID_AccAlt::Compute()
 		//Calculate Derivative Term
 		if (diff_setpoint_available && diff_measuredval_available)
 		{
-			///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// This case should be checked
 			errorDerivative = *mySetpointDiff - *myMeasuredValDiff;
 			D_Result = Kd * errorDerivative;
 		}
