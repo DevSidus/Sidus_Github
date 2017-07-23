@@ -174,7 +174,7 @@ namespace Ground_Station
             pointList.Clear();
             for (int i = 0; i < dataList.Count; i++)
             {
-                pointList.Add(new Point(drawAreaSize.Width - (int)(i * hScale) + hOffset, drawAreaSize.Height / 2 - (int)(dataList.ElementAt(i) * vScale) - vOffset));
+                pointList.Add(new Point(drawAreaSize.Width - (int)(i * hScale) + hOffset, drawAreaSize.Height / 2 - (int)((dataList.ElementAt(i) - vOffset) * vScale)));
             }
         }
 

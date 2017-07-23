@@ -716,12 +716,12 @@ void task_2Hz(void * parameter)
 void task_altitude_kalman(void * parameter)
 {
 	double T = 0.010; // Sampling Period
-	double F[9] = { 1, T, 1/2*pow(T,2), 0, 1, T, 0, 0, 1 }; // State-transition matrix
+	double F[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
 	double H[6] = { 1, 0, 0, 0, 0, 1 }; // Measurement matrix
 
 	double deltA = 0.2; // max(diff(accWorldZ));
 	double sigmaV = 0.5*deltA;
-	double Q[9] =  { 1/4*pow(T,4), 1/2*pow(T,3), 1/2*pow(T,2), 1/2*pow(T,3), pow(T,2), T, 1/2*pow(T,2), T, 1 };
+	double Q[9] =  { 1/4*pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,2), 1 / 2 * pow(T,3), pow(T,2), T, 1 / 2 * pow(T,2), T, 1 };
 	for (int i = 0; i < 9; i++) Q[i] *= pow(sigmaV,2); // Process noise covariance matrix
 
 	double sigmaP = sqrt(1);
@@ -735,6 +735,7 @@ void task_altitude_kalman(void * parameter)
 	double m_n[3] = { 0, 0, 0 };
 	double P_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	double y_n[2] = { 0, 0 };
+
 	
 	//unsigned long strtTime;
 	
@@ -743,6 +744,7 @@ void task_altitude_kalman(void * parameter)
 		//strtTime = micros();
 		y_n[0] = barometerAlt;
 		y_n[1] = qc.accelWorld.z / 8300 * 9.80665;
+
 
 		kalmanFilter(m_n1, P_n1, y_n, F, Q, H, R, m_n, P_n);
 		
@@ -1645,7 +1647,14 @@ void processBarometer()
 	barometer.runProcess();
 	barometerTemp = barometer.readTemperature(false);
 	barometerPress = barometer.readPressure(false);
-	barometerAlt = barometer.getAltitude(barometerPress);
+	float tempVal = barometer.getAltitude(barometerPress);
+
+	if (isnan(tempVal))
+		barometerAlt = 0;
+	else
+		barometerAlt = tempVal;
+
+
 
 }
 
