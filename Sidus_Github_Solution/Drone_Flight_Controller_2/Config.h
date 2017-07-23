@@ -320,11 +320,10 @@ struct structIMU
 	struct3Daxis gyro;
 	struct3Daxis accel;
 	struct3Daxis accelWorld;
+	struct3Daxis accelWorldEstimated;
 	struct3Daxis accelBody;
-	struct3Daxis velWorld;
-	struct3Daxis posWorld;
-	struct3Daxis gyroKalman;
-	struct3Daxis gyroFiltered;
+	struct3Daxis velWorldEstimated;
+	struct3Daxis posWorldEstimated;
 	struct3Daxis gyroDiff;
 }qc;
 

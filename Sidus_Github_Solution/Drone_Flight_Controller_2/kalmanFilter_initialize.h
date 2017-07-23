@@ -1,8 +1,5 @@
 // File: kalmanFilter_initialize.h
-//
-// MATLAB Coder version            : 3.3
-// C/C++ source code generated on  : 04-Jun-2017 19:49:51
-//
+
 #ifndef KALMANFILTER_INITIALIZE_H
 #define KALMANFILTER_INITIALIZE_H
 

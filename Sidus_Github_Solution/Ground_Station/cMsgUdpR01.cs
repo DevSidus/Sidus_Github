@@ -22,16 +22,6 @@ namespace Ground_Station
         public short mpuGyroY { get; set; }
         public short mpuGyroZ { get; set; }
 
-        //Gyro Measurements Kalman
-        public short mpuGyroXkalman { get; set; }
-        public short mpuGyroYkalman { get; set; }
-        public short mpuGyroZkalman { get; set; }
-
-        //Gyro Measurements Filter
-        public short mpuGyroXfilter { get; set; }
-        public short mpuGyroYfilter { get; set; }
-        public short mpuGyroZfilter { get; set; }
-
         //Accelerometer Measurements with Gravity
         public short mpuAccX { get; set; }
         public short mpuAccY { get; set; }
@@ -54,6 +44,8 @@ namespace Ground_Station
 
         public float batteryVoltage { get; set; }
 
+        // Altitude Parameter Estimation with Kalman Filter
+        public float quadAccelerationWorldZ { get; set; }
         public float quadVelocityWorldZ { get; set; }
         public float quadPositionWorldZ { get; set; }
         

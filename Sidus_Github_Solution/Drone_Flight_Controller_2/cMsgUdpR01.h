@@ -18,16 +18,6 @@ struct structMsgUdpR01
 	short mpuGyroY;
 	short mpuGyroZ;
 
-	//Gyro Measurements Kalman
-	short mpuGyroXkalman;
-	short mpuGyroYkalman;
-	short mpuGyroZkalman;
-
-	//Gyro Measurements Filter
-	short mpuGyroXfilter;
-	short mpuGyroYfilter;
-	short mpuGyroZfilter;
-
 	//Accelerometer Measurements with Gravity
 	short mpuAccX;
 	short mpuAccY;
@@ -50,8 +40,10 @@ struct structMsgUdpR01
 
 	float batteryVoltage;
 
-	float quadVelocityWorldZ;   //kalman filtered output
-	float quadPositionWorldZ;   //kalman filtered output
+	// Altitude Parameter Estimation with Kalman Filter
+	float quadAccelerationWorldZ; // kalman filtered output
+	float quadVelocityWorldZ;   // kalman filtered output
+	float quadPositionWorldZ;   // kalman filtered output
 	
 	unsigned char modeQuad;
 	unsigned char autoModeStatus;
