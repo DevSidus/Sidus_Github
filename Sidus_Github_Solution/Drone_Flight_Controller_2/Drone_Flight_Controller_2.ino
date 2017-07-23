@@ -742,7 +742,10 @@ void task_altitude_kalman(void * parameter)
 	double P_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	double y_n[2] = { 0, 0 };
 
-	
+	// Initialize Buffer
+	for (int i = 0; i < diffFilter100HzLength; i++) accelDiffBuffer.zVector.push_back(0.0);
+	deltaTimeAccelDiff = 0.01;
+
 	//unsigned long strtTime;
 	
 	while (true)
@@ -764,15 +767,11 @@ void task_altitude_kalman(void * parameter)
 		//Serial.println(micros() - strtTime);
 
 
-		//bura tamamlanacak dogru sekilde
+		//Acceleration Derivative
 		accelDiffBuffer.zVector.erase(accelDiffBuffer.zVector.begin());
 		accelDiffBuffer.zVector.push_back(qc.accelWorldEstimated.z);
 		// Calculate Filter Output
 		qc.accelDiff.z = diffFilter(accelDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeAccelDiff);
-
-
-
-
 
 		delay(9);
 	}
