@@ -17,9 +17,11 @@ PID_YawAngle::PID_YawAngle(double* MeasuredVal, double* Output, double* Setpoint
 	myOutput = Output;
 	myMeasuredVal = MeasuredVal;
 	mySetpoint = Setpoint;
+	myMeasuredValDiff = 0;
+	mySetpointDiff = 0;
 	inAuto = false;
-	d_bypass = 0;
-	d_bypass_enabled = false;
+	diff_setpoint_available = false;
+	diff_measuredval_available = false;
 
 	PID_YawAngle::SetOutputLimits(-150, 150);				//default output limit corresponds to 
 
@@ -31,15 +33,17 @@ PID_YawAngle::PID_YawAngle(double* MeasuredVal, double* Output, double* Setpoint
 	PID_YawAngle::SetMode(AUTOMATIC);
 }
 
-PID_YawAngle::PID_YawAngle(double* MeasuredVal, double* Output, double* Setpoint, double* _d_bypass)
+PID_YawAngle::PID_YawAngle(double* MeasuredVal, double* Output, double* Setpoint, double* MeasuredValDiff)
 {
 
 	myOutput = Output;
 	myMeasuredVal = MeasuredVal;
 	mySetpoint = Setpoint;
+	myMeasuredValDiff = MeasuredValDiff;
+	mySetpointDiff = 0;
 	inAuto = false;
-	d_bypass = _d_bypass;
-	d_bypass_enabled = true;
+	diff_setpoint_available = false;
+	diff_measuredval_available = true;
 
 	PID_YawAngle::SetOutputLimits(-250, 250);				//default output limit corresponds to 
 
@@ -51,6 +55,27 @@ PID_YawAngle::PID_YawAngle(double* MeasuredVal, double* Output, double* Setpoint
 	PID_YawAngle::SetMode(AUTOMATIC);
 }
 
+PID_YawAngle::PID_YawAngle(double* MeasuredVal, double* Output, double* Setpoint, double* MeasuredValDiff, double* SetpointDiff)
+{
+
+	myOutput = Output;
+	myMeasuredVal = MeasuredVal;
+	mySetpoint = Setpoint;
+	myMeasuredValDiff = MeasuredValDiff;
+	mySetpointDiff = SetpointDiff;
+	inAuto = false;
+	diff_setpoint_available = true;
+	diff_measuredval_available = true;
+
+	PID_YawAngle::SetOutputLimits(-250, 250);				//default output limit corresponds to 
+
+													//PID::SetTunings(Kp, Ki, Kd);
+	Kp = 1;
+	Ki = 0;
+	Kd = 0;
+
+	PID_YawAngle::SetMode(AUTOMATIC);
+}
 
 bool PID_YawAngle::Compute()
 {
@@ -123,18 +148,23 @@ bool PID_YawAngle::Compute()
 		}
 
 		//Calculate Derivative Term
-		//bypass value could be inserted just before errorderivativesmooth
-		if (d_bypass_enabled)
+		if (diff_setpoint_available && diff_measuredval_available)
+		{
+			///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// This case should be checked
+			errorDerivative = *mySetpointDiff - *myMeasuredValDiff;
+			D_Result = Kd * errorDerivative;
+		}
+		else if (diff_measuredval_available)
 		{
 			errorDerivative = (deltaSetpoint) / dTimeInSec;
-			errorDerivativeSmooth =  errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-			D_Result = Kd * (errorDerivativeSmooth + (-*d_bypass));
+			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
+			D_Result = Kd * (errorDerivativeSmooth + (-*myMeasuredValDiff));
 		}
 		else
 		{
 			errorDerivative = (errorSmooth - lastError) / dTimeInSec;
 			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-
 			D_Result = Kd * errorDerivativeSmooth;
 		}
 

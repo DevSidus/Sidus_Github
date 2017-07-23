@@ -43,13 +43,13 @@ cMsgUdpR01 MsgUdpR01;
 cMsgUdpT01 MsgUdpT01;
 
 PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint, &pidVars.ratePitch.sensedValDiff, &pidVars.ratePitch.setpointDiff);
-PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.d_bypass);
+PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.sensedValDiff);
 PID pidRateRoll(&pidVars.rateRoll.sensedVal, &pidVars.rateRoll.output, &pidVars.rateRoll.setpoint, &pidVars.rateRoll.sensedValDiff, &pidVars.rateRoll.setpointDiff);
-PID pidAngleRoll(&pidVars.angleRoll.sensedVal, &pidVars.angleRoll.output, &pidVars.angleRoll.setpoint, &pidVars.angleRoll.d_bypass);
+PID pidAngleRoll(&pidVars.angleRoll.sensedVal, &pidVars.angleRoll.output, &pidVars.angleRoll.setpoint, &pidVars.angleRoll.sensedValDiff);
 PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rateYaw.setpoint, &pidVars.rateYaw.sensedValDiff, &pidVars.rateYaw.setpointDiff);
-PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.d_bypass);
+PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.sensedValDiff);
 
-PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.d_bypass);
+PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff);
 PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint);
 
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
@@ -1141,10 +1141,10 @@ void processPID()
 
 	getBodyToEulerAngularRates();
 
-	//Set bypass values to euler angle rates
-	pidVars.angleRoll.d_bypass = qc.eulerRate.phi;
-	pidVars.anglePitch.d_bypass = qc.eulerRate.theta;
-	pidVars.angleYaw.d_bypass = qc.eulerRate.psi;
+	//Set sensed diff values to euler angle rates
+	pidVars.angleRoll.sensedValDiff = qc.eulerRate.phi;
+	pidVars.anglePitch.sensedValDiff = qc.eulerRate.theta;
+	pidVars.angleYaw.sensedValDiff = qc.eulerRate.psi;
 
 	//Pitch Roll Yaw Angle PID
 
@@ -1225,7 +1225,7 @@ void processPID()
 	pidRateYaw.Compute();
 
 
-	pidVars.velAlt.d_bypass = qc.accelWorld.z / 8.36;  // cm/second^2
+	pidVars.velAlt.sensedValDiff = qc.accelWorld.z / 8.36;  // cm/second^2
 	pidVars.velAlt.setpoint = cmdRx6thCh;
 	pidVars.velAlt.sensedVal = qc.velWorld.z;  // cm/second
 	pidVelAlt.Compute();
