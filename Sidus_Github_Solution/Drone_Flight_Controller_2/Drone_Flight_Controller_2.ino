@@ -129,7 +129,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 20, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 10, NULL, 0);
-	//xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
 	//xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
@@ -742,7 +742,7 @@ void task_altitude_kalman(void * parameter)
 	{
 		//strtTime = micros();
 		y_n[0] = barometerAlt;
-		y_n[1] = qc.accelWorld.z;
+		y_n[1] = qc.accelWorld.z / 8300 * 9.80665;
 
 		kalmanFilter(m_n1, P_n1, y_n, F, Q, H, R, m_n, P_n);
 		
@@ -848,19 +848,19 @@ bool initMPU()
 
 	// supply your own gyro offsets here, scaled for min sensitivity
 	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
-	//mpu.setXAccelOffset(-2553);
-	//mpu.setYAccelOffset(-989);
-	//mpu.setZAccelOffset(1689);
-	//mpu.setXGyroOffset(88);
-	//mpu.setYGyroOffset(-26);
-	//mpu.setZGyroOffset(-5);
+	mpu.setXAccelOffset(-2553);
+	mpu.setYAccelOffset(-989);
+	mpu.setZAccelOffset(1689);
+	mpu.setXGyroOffset(88);
+	mpu.setYGyroOffset(-26);
+	mpu.setZGyroOffset(-5);
 	//
-	mpu.setXAccelOffset(-195);
-	mpu.setYAccelOffset(-669);
-	mpu.setZAccelOffset(1631);
-	mpu.setXGyroOffset(59);
-	mpu.setYGyroOffset(-22);
-	mpu.setZGyroOffset(-12);
+	//mpu.setXAccelOffset(-195);
+	//mpu.setYAccelOffset(-669);
+	//mpu.setZAccelOffset(1631);
+	//mpu.setXGyroOffset(59);
+	//mpu.setYGyroOffset(-22);
+	//mpu.setZGyroOffset(-12);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
