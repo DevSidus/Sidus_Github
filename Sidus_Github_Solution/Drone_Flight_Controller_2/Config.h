@@ -251,6 +251,7 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 float barometerTemp = 0.0;
 double barometerAlt = 0.0;
 int32_t barometerPress;
+bool baroReady = false;
 
 float compassHdg;
 

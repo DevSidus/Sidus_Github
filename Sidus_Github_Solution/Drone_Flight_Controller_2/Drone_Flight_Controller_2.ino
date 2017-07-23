@@ -715,24 +715,30 @@ void task_2Hz(void * parameter)
 
 void task_altitude_kalman(void * parameter)
 {
+
+	while (!baroReady)
+	{
+		delay(500);
+	}
+
 	double T = 0.010; // Sampling Period
 	double F[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
 	double H[6] = { 1, 0, 0, 0, 0, 1 }; // Measurement matrix
 
-	double deltA = 0.2; // max(diff(accWorldZ));
-	double sigmaV = 0.5*deltA;
+	double deltA = 0.4; // max(diff(accWorldZ));
+	double sigmaV = 1*deltA;
 	double Q[9] =  { 1/4*pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,2), 1 / 2 * pow(T,3), pow(T,2), T, 1 / 2 * pow(T,2), T, 1 };
 	for (int i = 0; i < 9; i++) Q[i] *= pow(sigmaV,2); // Process noise covariance matrix
 
-	double sigmaP = sqrt(1);
-	double sigmaA = sqrt(0.2);
+	double sigmaP = 0.1;
+	double sigmaA = 0.4;
 	double R[4] = { pow(sigmaP,2), 0, 0, pow(sigmaA,2) }; // Measurement noise covariance matrix
 
 	// Initialization
 	double P_n1[9] = { pow(sigmaP,2), 0, 0, 0, pow(sigmaA,2), 0, 0, 0, pow(sigmaA,2) };
 	double m_n1[3] = { 0, 0, 0 };
 
-	double m_n[3] = { 0, 0, 0 };
+	double m_n[3] = { barometerAlt, 0, 0 };
 	double P_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	double y_n[2] = { 0, 0 };
 
@@ -1649,10 +1655,11 @@ void processBarometer()
 	barometerPress = barometer.readPressure(false);
 	float tempVal = barometer.getAltitude(barometerPress);
 
-	if (isnan(tempVal))
-		barometerAlt = 0;
-	else
+	if (!isnan(tempVal))
+	{
 		barometerAlt = tempVal;
+		baroReady = true;
+	}
 
 
 
