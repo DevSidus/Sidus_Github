@@ -1292,9 +1292,6 @@ void initPIDvariables()
 	pidVars.ratePitch.Kd = PID_RATE_PITCH_KD;
 	pidVars.ratePitch.outputLimitMin = PID_RATE_PITCH_OUTMIN;
 	pidVars.ratePitch.outputLimitMax = PID_RATE_PITCH_OUTMAX;
-	pidVars.ratePitch.f1 = PID_RATE_PITCH_F1_DEFAULT;
-	pidVars.ratePitch.f2 = PID_RATE_PITCH_F2_DEFAULT;
-	pidVars.ratePitch.outputFilterConstant = PID_RATE_PITCH_OUT_FILT_CONSTANT;
 	pidVars.ratePitch.output = 0;
 	pidVars.ratePitch.outputCompensated = 0;
 
@@ -1303,9 +1300,6 @@ void initPIDvariables()
 	pidVars.anglePitch.Kd = PID_ANGLE_PITCH_KD;
 	pidVars.anglePitch.outputLimitMin = PID_ANGLE_PITCH_OUTMIN;
 	pidVars.anglePitch.outputLimitMax = PID_ANGLE_PITCH_OUTMAX;
-	pidVars.anglePitch.f1 = PID_ANGLE_PITCH_F1_DEFAULT;
-	pidVars.anglePitch.f2 = PID_ANGLE_PITCH_F2_DEFAULT;
-	pidVars.anglePitch.outputFilterConstant = PID_ANGLE_PITCH_OUT_FILT_CONSTANT;
 	pidVars.anglePitch.output = 0;
 	pidVars.anglePitch.outputCompensated = 0;
 
@@ -1314,9 +1308,6 @@ void initPIDvariables()
 	pidVars.rateRoll.Kd = PID_RATE_ROLL_KD;
 	pidVars.rateRoll.outputLimitMin = PID_RATE_ROLL_OUTMIN;
 	pidVars.rateRoll.outputLimitMax = PID_RATE_ROLL_OUTMAX;
-	pidVars.rateRoll.f1 = PID_RATE_ROLL_F1_DEFAULT;
-	pidVars.rateRoll.f2 = PID_RATE_ROLL_F2_DEFAULT;
-	pidVars.rateRoll.outputFilterConstant = PID_RATE_ROLL_OUT_FILT_CONSTANT;
 	pidVars.rateRoll.output = 0;
 	pidVars.rateRoll.outputCompensated = 0;
 
@@ -1325,9 +1316,6 @@ void initPIDvariables()
 	pidVars.angleRoll.Kd = PID_ANGLE_ROLL_KD;
 	pidVars.angleRoll.outputLimitMin = PID_ANGLE_ROLL_OUTMIN;
 	pidVars.angleRoll.outputLimitMax = PID_ANGLE_ROLL_OUTMAX;
-	pidVars.angleRoll.f1 = PID_ANGLE_ROLL_F1_DEFAULT;
-	pidVars.angleRoll.f2 = PID_ANGLE_ROLL_F2_DEFAULT;
-	pidVars.angleRoll.outputFilterConstant = PID_ANGLE_ROLL_OUT_FILT_CONSTANT;
 	pidVars.angleRoll.output = 0;
 	pidVars.angleRoll.outputCompensated = 0;
 
@@ -1336,9 +1324,6 @@ void initPIDvariables()
 	pidVars.rateYaw.Kd = PID_RATE_YAW_KD;
 	pidVars.rateYaw.outputLimitMin = PID_RATE_YAW_OUTMIN;
 	pidVars.rateYaw.outputLimitMax = PID_RATE_YAW_OUTMAX;
-	pidVars.rateYaw.f1 = PID_RATE_YAW_F1_DEFAULT;
-	pidVars.rateYaw.f2 = PID_RATE_YAW_F2_DEFAULT;
-	pidVars.rateYaw.outputFilterConstant = PID_RATE_YAW_OUT_FILT_CONSTANT;
 	pidVars.rateYaw.output = 0;
 	pidVars.rateYaw.outputCompensated = 0;
 
@@ -1347,9 +1332,6 @@ void initPIDvariables()
 	pidVars.angleYaw.Kd = PID_ANGLE_YAW_KD;
 	pidVars.angleYaw.outputLimitMin = PID_ANGLE_YAW_OUTMIN;
 	pidVars.angleYaw.outputLimitMax = PID_ANGLE_YAW_OUTMAX;
-	pidVars.angleYaw.f1 = PID_ANGLE_YAW_F1_DEFAULT;
-	pidVars.angleYaw.f2 = PID_ANGLE_YAW_F2_DEFAULT;
-	pidVars.angleYaw.outputFilterConstant = PID_ANGLE_YAW_OUT_FILT_CONSTANT;
 	pidVars.angleYaw.output = 0;
 	pidVars.angleYaw.outputCompensated = 0;
 
@@ -1359,9 +1341,6 @@ void initPIDvariables()
 	pidVars.velAlt.Kd = PID_VEL_ALT_KD;
 	pidVars.velAlt.outputLimitMin = PID_VEL_ALT_OUTMIN;
 	pidVars.velAlt.outputLimitMax = PID_VEL_ALT_OUTMAX;
-	pidVars.velAlt.f1 = PID_VEL_ALT_F1_DEFAULT;
-	pidVars.velAlt.f2 = PID_VEL_ALT_F2_DEFAULT;
-	pidVars.velAlt.outputFilterConstant = PID_VEL_ALT_OUT_FILT_CONSTANT;
 	pidVars.velAlt.output = 0;
 	pidVars.velAlt.outputCompensated = 0;
 
@@ -1370,9 +1349,6 @@ void initPIDvariables()
 	pidVars.accAlt.Kd = PID_ACC_ALT_KD;
 	pidVars.accAlt.outputLimitMin = CMD_THR_ARM_START;
 	pidVars.accAlt.outputLimitMax = CMD_THR_MAX;
-	pidVars.accAlt.f1 = PID_ACC_ALT_F1_DEFAULT;
-	pidVars.accAlt.f2 = PID_ACC_ALT_F2_DEFAULT;
-	pidVars.accAlt.outputFilterConstant = PID_ACC_ALT_OUT_FILT_CONSTANT;
 	pidVars.accAlt.output = 0;
 	pidVars.accAlt.outputCompensated = 0;
 
@@ -1400,44 +1376,28 @@ void initPIDtuning()
 {
 	pidRatePitch.SetOutputLimits(pidVars.ratePitch.outputLimitMin, pidVars.ratePitch.outputLimitMax);
 	pidRatePitch.SetTunings(pidVars.ratePitch.Kp, pidVars.ratePitch.Ki, pidVars.ratePitch.Kd);
-	pidRatePitch.SetF1(pidVars.ratePitch.f1);
-	pidRatePitch.SetF2(pidVars.ratePitch.f2);
 
 	pidAnglePitch.SetOutputLimits(pidVars.anglePitch.outputLimitMin, pidVars.anglePitch.outputLimitMax);
 	pidAnglePitch.SetTunings(pidVars.anglePitch.Kp, pidVars.anglePitch.Ki, pidVars.anglePitch.Kd);
-	pidAnglePitch.SetF1(pidVars.anglePitch.f1);
-	pidAnglePitch.SetF2(pidVars.anglePitch.f2);
 
 	pidRateRoll.SetOutputLimits(pidVars.rateRoll.outputLimitMin, pidVars.rateRoll.outputLimitMax);
 	pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
-	pidRateRoll.SetF1(pidVars.rateRoll.f1);
-	pidRateRoll.SetF2(pidVars.rateRoll.f2);
 
 	pidAngleRoll.SetOutputLimits(pidVars.angleRoll.outputLimitMin, pidVars.angleRoll.outputLimitMax);
 	pidAngleRoll.SetTunings(pidVars.angleRoll.Kp, pidVars.angleRoll.Ki, pidVars.angleRoll.Kd);
-	pidAngleRoll.SetF1(pidVars.angleRoll.f1);
-	pidAngleRoll.SetF2(pidVars.angleRoll.f2);
 
 	pidRateYaw.SetOutputLimits(pidVars.rateYaw.outputLimitMin, pidVars.rateYaw.outputLimitMax);
 	pidRateYaw.SetTunings(pidVars.rateYaw.Kp, pidVars.rateYaw.Ki, pidVars.rateYaw.Kd);
-	pidRateYaw.SetF1(pidVars.rateYaw.f1);
-	pidRateYaw.SetF2(pidVars.rateYaw.f2);
 
 	pidAngleYaw.SetOutputLimits(pidVars.angleYaw.outputLimitMin, pidVars.angleYaw.outputLimitMax);
 	pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
-	pidAngleYaw.SetF1(pidVars.angleYaw.f1);
-	pidAngleYaw.SetF2(pidVars.angleYaw.f2);
 
 
 	pidVelAlt.SetOutputLimits(pidVars.velAlt.outputLimitMin, pidVars.velAlt.outputLimitMax);
 	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
-	pidVelAlt.SetF1(pidVars.velAlt.f1);
-	pidVelAlt.SetF2(pidVars.velAlt.f2);
 
 	pidAccAlt.SetOutputLimits(pidVars.accAlt.outputLimitMin, pidVars.accAlt.outputLimitMax);
 	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
-	pidAccAlt.SetF1(pidVars.accAlt.f1);
-	pidAccAlt.SetF2(pidVars.accAlt.f2);
 }
 
 void prePIDprocesses()
@@ -1831,20 +1791,12 @@ void applyPidCommandRatePitchRoll()
 	pidVars.ratePitch.Kp = MsgUdpT01.message.pidRatePitchRollKp * RESOLUTION_PID_RATE_KP;
 	pidVars.ratePitch.Ki = MsgUdpT01.message.pidRatePitchRollKi * RESOLUTION_PID_RATE_KI;
 	pidVars.ratePitch.Kd = MsgUdpT01.message.pidRatePitchRollKd * RESOLUTION_PID_RATE_KD;
-	pidVars.ratePitch.f1 = MsgUdpT01.message.pidRatePitchRollF1 * RESOLUTION_PID_F;
-	pidVars.ratePitch.f2 = MsgUdpT01.message.pidRatePitchRollF2 * RESOLUTION_PID_F;
 	pidRatePitch.SetTunings(pidVars.ratePitch.Kp, pidVars.ratePitch.Ki, pidVars.ratePitch.Kd);
-	pidRatePitch.SetF1(pidVars.ratePitch.f1);
-	pidRatePitch.SetF2(pidVars.ratePitch.f2);
 	//Set Roll Rate PID parameters
 	pidVars.rateRoll.Kp = pidVars.ratePitch.Kp;
 	pidVars.rateRoll.Ki = pidVars.ratePitch.Ki;
 	pidVars.rateRoll.Kd = pidVars.ratePitch.Kd;
-	pidVars.rateRoll.f1 = pidVars.ratePitch.f1;
-	pidVars.rateRoll.f2 = pidVars.ratePitch.f2;
 	pidRateRoll.SetTunings(pidVars.rateRoll.Kp, pidVars.rateRoll.Ki, pidVars.rateRoll.Kd);
-	pidRateRoll.SetF1(pidVars.rateRoll.f1);
-	pidRateRoll.SetF2(pidVars.rateRoll.f2);
 }
 
 void applyPidCommandAnglePitchRoll()
@@ -1853,22 +1805,12 @@ void applyPidCommandAnglePitchRoll()
 	pidVars.anglePitch.Kp = MsgUdpT01.message.pidAnglePitchRollKp * RESOLUTION_PID_ANGLE_KP;
 	pidVars.anglePitch.Ki = MsgUdpT01.message.pidAnglePitchRollKi * RESOLUTION_PID_ANGLE_KI;
 	pidVars.anglePitch.Kd = MsgUdpT01.message.pidAnglePitchRollKd * RESOLUTION_PID_ANGLE_KD;
-	pidVars.anglePitch.f1 = MsgUdpT01.message.pidAnglePitchRollF1 * RESOLUTION_PID_F;
-	pidVars.anglePitch.f2 = MsgUdpT01.message.pidAnglePitchRollF2 * RESOLUTION_PID_F;
-	pidVars.anglePitch.outputFilterConstant = MsgUdpT01.message.pidAnglePitchRollOutFilter * RESOLUTION_PID_F;
-	pidVars.angleRoll.outputFilterConstant = pidVars.anglePitch.outputFilterConstant;
 	pidAnglePitch.SetTunings(pidVars.anglePitch.Kp, pidVars.anglePitch.Ki, pidVars.anglePitch.Kd);
-	pidAnglePitch.SetF1(pidVars.anglePitch.f1);
-	pidAnglePitch.SetF2(pidVars.anglePitch.f2);
 	//Set Roll Angle PID parameters
 	pidVars.angleRoll.Kp = pidVars.anglePitch.Kp;
 	pidVars.angleRoll.Ki = pidVars.anglePitch.Ki;
 	pidVars.angleRoll.Kd = pidVars.anglePitch.Kd;
-	pidVars.angleRoll.f1 = pidVars.anglePitch.f1;
-	pidVars.angleRoll.f2 = pidVars.anglePitch.f2;
 	pidAngleRoll.SetTunings(pidVars.angleRoll.Kp, pidVars.angleRoll.Ki, pidVars.angleRoll.Kd);
-	pidAngleRoll.SetF1(pidVars.angleRoll.f1);
-	pidAngleRoll.SetF2(pidVars.angleRoll.f2);
 }
 
 void applyPidCommandRateYaw()
@@ -1877,11 +1819,7 @@ void applyPidCommandRateYaw()
 	pidVars.rateYaw.Kp = MsgUdpT01.message.pidRateYawKp * RESOLUTION_PID_RATE_KP;
 	pidVars.rateYaw.Ki = MsgUdpT01.message.pidRateYawKi * RESOLUTION_PID_RATE_KI;
 	pidVars.rateYaw.Kd = MsgUdpT01.message.pidRateYawKd * RESOLUTION_PID_RATE_KD;
-	pidVars.rateYaw.f1 = MsgUdpT01.message.pidRateYawF1 * RESOLUTION_PID_F;
-	pidVars.rateYaw.f2 = MsgUdpT01.message.pidRateYawF2 * RESOLUTION_PID_F;
 	pidRateYaw.SetTunings(pidVars.rateYaw.Kp, pidVars.rateYaw.Ki, pidVars.rateYaw.Kd);
-	pidRateYaw.SetF1(pidVars.rateYaw.f1);
-	pidRateYaw.SetF2(pidVars.rateYaw.f2);
 }
 
 void applyPidCommandAngleYaw()
@@ -1890,12 +1828,7 @@ void applyPidCommandAngleYaw()
 	pidVars.angleYaw.Kp = MsgUdpT01.message.pidAngleYawKp * RESOLUTION_PID_ANGLE_KP;
 	pidVars.angleYaw.Ki = MsgUdpT01.message.pidAngleYawKi * RESOLUTION_PID_ANGLE_KI;
 	pidVars.angleYaw.Kd = MsgUdpT01.message.pidAngleYawKd * RESOLUTION_PID_ANGLE_YAW_KD;
-	pidVars.angleYaw.f1 = MsgUdpT01.message.pidAngleYawF1 * RESOLUTION_PID_F;
-	pidVars.angleYaw.f2 = MsgUdpT01.message.pidAngleYawF2 * RESOLUTION_PID_F;
-	pidVars.angleYaw.outputFilterConstant = MsgUdpT01.message.pidAngleYawOutFilter * RESOLUTION_PID_F;
 	pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
-	pidAngleYaw.SetF1(pidVars.angleYaw.f1);
-	pidAngleYaw.SetF2(pidVars.angleYaw.f2);
 }
 
 void applyPidCommandVelAlt()
@@ -1904,12 +1837,7 @@ void applyPidCommandVelAlt()
 	pidVars.velAlt.Kp = MsgUdpT01.message.pidVelAltKp * RESOLUTION_PID_VEL_KP;
 	pidVars.velAlt.Ki = MsgUdpT01.message.pidVelAltKi * RESOLUTION_PID_VEL_KI;
 	pidVars.velAlt.Kd = MsgUdpT01.message.pidVelAltKd * RESOLUTION_PID_VEL_KD;
-	pidVars.velAlt.f1 = MsgUdpT01.message.pidVelAltF1 * RESOLUTION_PID_F;
-	pidVars.velAlt.f2 = MsgUdpT01.message.pidVelAltF2 * RESOLUTION_PID_F;
-	pidVars.velAlt.outputFilterConstant = MsgUdpT01.message.pidVelAltOutFilter * RESOLUTION_PID_F;
 	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
-	pidVelAlt.SetF1(pidVars.velAlt.f1);
-	pidVelAlt.SetF2(pidVars.velAlt.f2);
 }
 
 void applyPidCommandAccAlt()
@@ -1918,11 +1846,7 @@ void applyPidCommandAccAlt()
 	pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_POS_KP;
 	pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_POS_KI;
 	pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_POS_KD;
-	pidVars.accAlt.f1 = MsgUdpT01.message.pidAccAltF1 * RESOLUTION_PID_F;
-	pidVars.accAlt.f2 = MsgUdpT01.message.pidAccAltF2 * RESOLUTION_PID_F;
 	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
-	pidAccAlt.SetF1(pidVars.accAlt.f1);
-	pidAccAlt.SetF2(pidVars.accAlt.f2);
 }
 
 void prepareUDPmessages()
@@ -1966,8 +1890,6 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidRatePitchPresult	= pidRatePitch.Get_P_Result();
 	MsgUdpR01.message.pidRatePitchIresult	= pidRatePitch.Get_I_Result();
 	MsgUdpR01.message.pidRatePitchDresult	= pidRatePitch.Get_D_Result();
-	MsgUdpR01.message.pidRatePitchF1		= pidVars.ratePitch.f1 / RESOLUTION_PID_F;
-	MsgUdpR01.message.pidRatePitchF2		= pidVars.ratePitch.f2 / RESOLUTION_PID_F;
 	MsgUdpR01.message.pidAnglePitchKp		= pidVars.anglePitch.Kp / RESOLUTION_PID_ANGLE_KP;
 	MsgUdpR01.message.pidAnglePitchKi		= pidVars.anglePitch.Ki / RESOLUTION_PID_ANGLE_KI;
 	MsgUdpR01.message.pidAnglePitchKd		= pidVars.anglePitch.Kd / RESOLUTION_PID_ANGLE_KD;
@@ -1975,9 +1897,6 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidAnglePitchPresult	= pidAnglePitch.Get_P_Result();
 	MsgUdpR01.message.pidAnglePitchIresult	= pidAnglePitch.Get_I_Result();
 	MsgUdpR01.message.pidAnglePitchDresult	= pidAnglePitch.Get_D_Result();
-	MsgUdpR01.message.pidAnglePitchF1		= pidVars.anglePitch.f1 / RESOLUTION_PID_F;
-	MsgUdpR01.message.pidAnglePitchF2		= pidVars.anglePitch.f2 / RESOLUTION_PID_F;
-	MsgUdpR01.message.pidAnglePitchOutFilter = pidVars.anglePitch.outputFilterConstant / RESOLUTION_PID_F;
 	//MsgUdpR01.message.pidRateRollKp			= pidVars.rateRoll.Kp / RESOLUTION_PID_RATE_KP;
 	//MsgUdpR01.message.pidRateRollKi			= pidVars.rateRoll.Ki / RESOLUTION_PID_RATE_KI;
 	//MsgUdpR01.message.pidRateRollKd			= pidVars.rateRoll.Kd / RESOLUTION_PID_RATE_KD;

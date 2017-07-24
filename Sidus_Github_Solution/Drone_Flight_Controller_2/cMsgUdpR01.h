@@ -60,8 +60,6 @@ struct structMsgUdpR01
 	short pidRatePitchPresult;
 	short pidRatePitchIresult;
 	short pidRatePitchDresult;
-	unsigned char pidRatePitchF1;
-	unsigned char pidRatePitchF2;
 
 	unsigned char pidAnglePitchKp;
 	unsigned char pidAnglePitchKi;
@@ -70,9 +68,6 @@ struct structMsgUdpR01
 	short pidAnglePitchPresult;
 	short pidAnglePitchIresult;
 	short pidAnglePitchDresult;
-	unsigned char pidAnglePitchF1;
-	unsigned char pidAnglePitchF2;
-	unsigned char pidAnglePitchOutFilter;
 
 	//unsigned char pidRateRollKp;
 	//unsigned char pidRateRollKi;
@@ -81,8 +76,6 @@ struct structMsgUdpR01
 	//short pidRateRollPresult;
 	//short pidRateRollIresult;
 	//short pidRateRollDresult;
-	//unsigned char pidRateRollF1;
-	//unsigned char pidRateRollF2;
 
 	//unsigned char pidAngleRollKp;
 	//unsigned char pidAngleRollKi;
@@ -91,9 +84,6 @@ struct structMsgUdpR01
 	//short pidAngleRollPresult;
 	//short pidAngleRollIresult;
 	//short pidAngleRollDresult;
-	//unsigned char pidAngleRollF1;
-	//unsigned char pidAngleRollF2;
-	//unsigned char pidAngleRollOutFilter;
 
 	//unsigned char pidRateYawKp;
 	//unsigned char pidRateYawKi;
@@ -102,8 +92,6 @@ struct structMsgUdpR01
 	//short pidRateYawPresult;
 	//short pidRateYawIresult;
 	//short pidRateYawDresult;
-	//unsigned char pidRateYawF1;
-	//unsigned char pidRateYawF2;
 
 	//unsigned char pidAngleYawKp;
 	//unsigned char pidAngleYawKi;
@@ -112,9 +100,6 @@ struct structMsgUdpR01
 	//short pidAngleYawPresult;
 	//short pidAngleYawIresult;
 	//short pidAngleYawDresult;
-	//unsigned char pidAngleYawF1;
-	//unsigned char pidAngleYawF2;
-	//unsigned char pidAngleYawOutFilter;
 
 	//short commandedYawAngle;
 
@@ -125,8 +110,6 @@ struct structMsgUdpR01
 	//short pidVelAltPresult;
 	//short pidVelAltIresult;
 	//short pidVelAltDresult;
-	//unsigned char pidVelAltF1;
-	//unsigned char pidVelAltF2;
 
 	//unsigned char pidAccAltKp;
 	//unsigned char pidAccAltKi;
@@ -135,9 +118,6 @@ struct structMsgUdpR01
 	//short pidAccAltPresult;
 	//short pidAccAltIresult;
 	//short pidAccAltDresult;
-	//unsigned char pidAccAltF1;
-	//unsigned char pidAccAltF2;
-	//unsigned char pidAccAltOutFilter;
 
 };
 #pragma pack(pop)

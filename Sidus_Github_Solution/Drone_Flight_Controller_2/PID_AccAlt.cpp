@@ -84,13 +84,11 @@ bool PID_AccAlt::Compute()
 
 		double dTimeInSec = dTime / 1000.0;
 		double error = *mySetpoint - *myMeasuredVal;
-
-		errorSmooth = error * (1 - f1) + errorSmooth * f1;
-
+		
 		/*Compute PID_AccAlt Output*/
 
 		//Calculate Proportional Term
-		P_Result = Kp * errorSmooth;
+		P_Result = Kp * error;
 
 		if (P_Result > range_2) P_Result = range_2;
 		else if (P_Result < -range_2) P_Result = -range_2;
@@ -111,7 +109,7 @@ bool PID_AccAlt::Compute()
 
 			if (!transientInterval)
 			{
-				I_Result += (Ki * dTimeInSec * errorSmooth);
+				I_Result += (Ki * dTimeInSec * error);
 
 				//We may choose to limit the I term one third of maximum PID_AccAlt output
 				if (I_Result > outMax) I_Result = outMax;
@@ -129,14 +127,12 @@ bool PID_AccAlt::Compute()
 		else if (diff_measuredval_available)
 		{
 			errorDerivative = (*mySetpoint - lastSetpoint) / dTimeInSec;
-			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-			D_Result = Kd * (errorDerivativeSmooth + (-*myMeasuredValDiff));
+			D_Result = Kd * (errorDerivative + (-*myMeasuredValDiff));
 		}
 		else
 		{
-			errorDerivative = (errorSmooth - lastError) / dTimeInSec;
-			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-			D_Result = Kd * errorDerivativeSmooth;
+			errorDerivative = (error - lastError) / dTimeInSec;
+			D_Result = Kd * errorDerivative;
 		}
 
 
@@ -149,7 +145,7 @@ bool PID_AccAlt::Compute()
 
 		/*Remember some variables for next time*/
 		lastTime = now;
-		lastError = errorSmooth;
+		lastError = error;
 		lastSetpoint = *mySetpoint;
 		return true;
 	}
@@ -223,10 +219,6 @@ void PID_AccAlt::Initialize()
 	lastTime = millis();
 	lastError = 0;
 
-	f1 = 0;
-	f2 = 0.5;
-	errorSmooth = 0;
-	errorDerivativeSmooth = 0;
 	inFlight = false;
 	transientInterval = true;
 	transientSetpointThreshold = 5;
@@ -243,16 +235,9 @@ double PID_AccAlt::GetKp() { return  Kp; }
 double PID_AccAlt::GetKi() { return  Ki; }
 double PID_AccAlt::GetKd() { return  Kd; }
 
-float PID_AccAlt::GetF1() { return  f1; }
-float PID_AccAlt::GetF2() { return  f2; }
-
 void PID_AccAlt::SetKp(double _Kp) { Kp = _Kp; }
 void PID_AccAlt::SetKi(double _Ki) { Ki = _Ki; }
 void PID_AccAlt::SetKd(double _Kd) { Kd = _Kd; }
-
-void PID_AccAlt::SetF1(float _f1) { f1 = _f1; }
-void PID_AccAlt::SetF2(float _f2) { f2 = _f2; }
-
 
 double PID_AccAlt::Get_P_Result() { return P_Result; }
 double PID_AccAlt::Get_I_Result() { return I_Result; }

@@ -49,16 +49,10 @@ class PID
 	double GetKp();						  // These functions query the pid for interal values.
 	double GetKi();						  //  they were created mainly for the pid front-end,
 	double GetKd();						  // where it's important to know what is actually 
-
-	float GetF1();
-	float GetF2();
-
+	
 	void SetKp(double);
 	void SetKi(double);
 	void SetKd(double);
-
-	void SetF1(float);
-	void SetF2(float);
 
 	double Get_P_Result();
 	double Get_I_Result();
@@ -92,9 +86,7 @@ class PID
 	unsigned long lastTime;
 	double lastError;
 	double errorDerivative;
-	double errorSmooth, errorDerivativeSmooth;
 	double lastSetpoint;
-	float f1, f2;
 
 	double outMin, outMax;
 	bool inAuto;

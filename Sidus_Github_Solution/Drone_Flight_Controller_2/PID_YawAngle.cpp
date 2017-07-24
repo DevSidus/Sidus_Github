@@ -101,20 +101,16 @@ bool PID_YawAngle::Compute()
 			error = lastError;
 
 
-		errorSmooth = error * (1 - f1) + errorSmooth * f1;
-
 		double deltaSetpoint = *mySetpoint - lastSetpoint;
 		//Make sure that the deltaSetpoint is in between -PI and +PI
 		if (deltaSetpoint > 180) deltaSetpoint -= 360;
 		else if (deltaSetpoint <= -180) deltaSetpoint += 360;
-
-
-
+		
 
 		/*Compute PID_YawAngle Output*/
 
 		//Calculate Proportional Term
-		P_Result = Kp * errorSmooth;
+		P_Result = Kp * error;
 
 		if (P_Result > outMax) P_Result = outMax;
 		else if (P_Result < outMin) P_Result = outMin;
@@ -135,7 +131,7 @@ bool PID_YawAngle::Compute()
 
 			if (!transientInterval)
 			{
-				I_Result += (Ki * dTimeInSec * errorSmooth);
+				I_Result += (Ki * dTimeInSec * error);
 
 				//We may choose to limit the I term one third of maximum PID output
 				if (I_Result > outMax / 3) I_Result = outMax / 3;
@@ -158,14 +154,12 @@ bool PID_YawAngle::Compute()
 		else if (diff_measuredval_available)
 		{
 			errorDerivative = (deltaSetpoint) / dTimeInSec;
-			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-			D_Result = Kd * (errorDerivativeSmooth + (-*myMeasuredValDiff));
+			D_Result = Kd * (errorDerivative + (-*myMeasuredValDiff));
 		}
 		else
 		{
-			errorDerivative = (errorSmooth - lastError) / dTimeInSec;
-			errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-			D_Result = Kd * errorDerivativeSmooth;
+			errorDerivative = (error - lastError) / dTimeInSec;
+			D_Result = Kd * errorDerivative;
 		}
 
 
@@ -178,7 +172,7 @@ bool PID_YawAngle::Compute()
 
 		/*Remember some variables for next time*/
 		lastTime = now;
-		lastError = errorSmooth;
+		lastError = error;
 		lastSetpoint = *mySetpoint;
 		return true;
 	}
@@ -252,10 +246,6 @@ void PID_YawAngle::Initialize()
 	lastTime = millis();
 	lastError = 0;
 
-	f1 = 0;
-	f2 = 0.5;
-	errorSmooth = 0;
-	errorDerivativeSmooth = 0;
 	inFlight = false;
 	transientInterval = true;
 	transientSetpointThreshold = 5;
@@ -272,16 +262,9 @@ double PID_YawAngle::GetKp() { return  Kp; }
 double PID_YawAngle::GetKi() { return  Ki; }
 double PID_YawAngle::GetKd() { return  Kd; }
 
-float PID_YawAngle::GetF1() { return  f1; }
-float PID_YawAngle::GetF2() { return  f2; }
-
 void PID_YawAngle::SetKp(double _Kp) { Kp = _Kp; }
 void PID_YawAngle::SetKi(double _Ki) { Ki = _Ki; }
 void PID_YawAngle::SetKd(double _Kd) { Kd = _Kd; }
-
-void PID_YawAngle::SetF1(float _f1) { f1 = _f1; }
-void PID_YawAngle::SetF2(float _f2) { f2 = _f2; }
-
 
 double PID_YawAngle::Get_P_Result() { return P_Result; }
 double PID_YawAngle::Get_I_Result() { return I_Result; }
@@ -289,11 +272,8 @@ double PID_YawAngle::Get_D_Result() { return D_Result; }
 
 int PID_YawAngle::GetMode() { return  inAuto ? AUTOMATIC : MANUAL; }
 
-
 void PID_YawAngle::SetFlightMode(bool isInFlight)
 {
-
 	inFlight = isInFlight;
-
 }
 

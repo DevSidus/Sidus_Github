@@ -95,17 +95,12 @@ bool PID::Compute()
 
 	  double dTimeInSec = dTime / 1000.0;
       double error = *mySetpoint - *myMeasuredVal;
-
-	  errorSmooth = error * (1 - f1) + errorSmooth * f1;
-
-
-
-
+	  
  
       /*Compute PID Output*/
 
 	  //Calculate Proportional Term
-	  P_Result = Kp * errorSmooth;
+	  P_Result = Kp * error;
 
 	  if (P_Result > outMax) P_Result = outMax;
 	  else if (P_Result < outMin) P_Result = outMin;
@@ -126,7 +121,7 @@ bool PID::Compute()
 
 		  if (!transientInterval)
 		  {
-			  I_Result += (Ki * dTimeInSec * errorSmooth);
+			  I_Result += (Ki * dTimeInSec * error);
 
 			  //We may choose to limit the I term one third of maximum PID output
 			  if (I_Result > outMax/3) I_Result = outMax/3;
@@ -147,14 +142,12 @@ bool PID::Compute()
 	  else if (diff_measuredval_available)
 	  {
 		  errorDerivative = (*mySetpoint - lastSetpoint) / dTimeInSec;
-		  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-		  D_Result = Kd * (errorDerivativeSmooth + (-*myMeasuredValDiff));
+		  D_Result = Kd * (errorDerivative + (-*myMeasuredValDiff));
 	  }
 	  else
 	  {
-		  errorDerivative = (errorSmooth - lastError) / dTimeInSec;
-		  errorDerivativeSmooth = errorDerivative * (1 - f2) + errorDerivativeSmooth * (f2);
-		  D_Result = Kd * errorDerivativeSmooth;
+		  errorDerivative = (error - lastError) / dTimeInSec;
+		  D_Result = Kd * errorDerivative;
 	  }
 	  
 
@@ -167,7 +160,7 @@ bool PID::Compute()
 	  
       /*Remember some variables for next time*/
       lastTime = now;
-	  lastError = errorSmooth;
+	  lastError = error;
 	  lastSetpoint = *mySetpoint;
 	  return true;
    }
@@ -241,10 +234,6 @@ void PID::Initialize()
    lastTime = millis();
    lastError = 0;
 
-   f1 = 0;
-   f2 = 0.5;
-   errorSmooth = 0;
-   errorDerivativeSmooth = 0;
    inFlight = false;
    transientInterval = true;
    transientSetpointThreshold = 5;
@@ -261,16 +250,9 @@ double PID::GetKp(){ return  Kp; }
 double PID::GetKi(){ return  Ki;}
 double PID::GetKd(){ return  Kd;}
 
-float PID::GetF1() { return  f1; }
-float PID::GetF2() { return  f2; }
-
 void PID::SetKp(double _Kp) { Kp = _Kp; }
 void PID::SetKi(double _Ki) { Ki = _Ki; }
 void PID::SetKd(double _Kd) { Kd = _Kd; }
-
-void PID::SetF1(float _f1) { f1 = _f1; }
-void PID::SetF2(float _f2) { f2 = _f2; }
-
 
 double PID::Get_P_Result() { return P_Result; }
 double PID::Get_I_Result() { return I_Result; }
