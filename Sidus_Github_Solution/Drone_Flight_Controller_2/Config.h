@@ -4,9 +4,9 @@ This header file define all the configurable variables including constants, pin 
 */
 
 //Wifi, UDP Definitions
-#define			WIFI_SSID						"khorfo_net"
-#define			WIFI_PASS						"ahmet_ipek_12082004"
-#define			DEFAULT_GROUND_STATION_IP		"192.168.1.8"
+#define			WIFI_SSID						"SUPERONLINE_WiFi_4661"
+#define			WIFI_PASS						"JMXPFCTAY3YV"
+#define			DEFAULT_GROUND_STATION_IP		"192.168.1.22"
 //#define		WIFI_SSID						"AAGCA"
 //#define		WIFI_PASS						"ahmet(12082004)"
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2"
@@ -445,3 +445,4 @@ struct3Dvector accelCmdDiffBuffer;
 double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering
 double deltaTimeAccelDiff; // will be used at Exact Filtering
+double deltaTimeAccelCmdDiff; // will be used at Exact Filtering
