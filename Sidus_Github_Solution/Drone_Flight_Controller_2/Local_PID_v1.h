@@ -89,6 +89,8 @@ class PID
 	double lastSetpoint;
 
 	double outMin, outMax;
+	double outputRange;
+	double outputRangeHalf;
 	bool inAuto;
 	bool diff_measuredval_available;
 	bool diff_setpoint_available;

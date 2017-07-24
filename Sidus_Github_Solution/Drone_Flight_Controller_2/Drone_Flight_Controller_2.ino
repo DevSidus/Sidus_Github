@@ -22,13 +22,10 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include "Local_HMC5883L.h"
 #include "Local_PID_v1.h"
 #include "PID_YawAngle.h"
-#include "PID_AccAlt.h"
 #include "Config.h"
 #include "cMsgUdpR01.h"
 #include "cMsgUdpT01.h"
 #include "cRxFilter.h"
-
-
 
 
 //Global Class Definitions
@@ -50,7 +47,7 @@ PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rat
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.sensedValDiff);
 
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff);
-PID_AccAlt pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
+PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
 
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 

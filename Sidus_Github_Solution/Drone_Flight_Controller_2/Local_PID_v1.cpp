@@ -29,7 +29,6 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint)
 	diff_setpoint_available = false;
 	diff_measuredval_available = false;
 	
-	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
 	
     //PID::SetTunings(Kp, Ki, Kd);
 	Kp = 1;
@@ -51,9 +50,8 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* Measured
 	diff_setpoint_available = false;
 	diff_measuredval_available = true;
 
-	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
 
-													//PID::SetTunings(Kp, Ki, Kd);
+	//PID::SetTunings(Kp, Ki, Kd);
 	Kp = 1;
 	Ki = 0;
 	Kd = 0;
@@ -73,9 +71,8 @@ PID::PID(double* MeasuredVal, double* Output, double* Setpoint, double* Measured
 	diff_setpoint_available = true;
 	diff_measuredval_available = true;
 
-	PID::SetOutputLimits(-250, 250);				//default output limit corresponds to 
 
-													//PID::SetTunings(Kp, Ki, Kd);
+	//PID::SetTunings(Kp, Ki, Kd);
 	Kp = 1;
 	Ki = 0;
 	Kd = 0;
@@ -102,8 +99,8 @@ bool PID::Compute()
 	  //Calculate Proportional Term
 	  P_Result = Kp * error;
 
-	  if (P_Result > outMax) P_Result = outMax;
-	  else if (P_Result < outMin) P_Result = outMin;
+	  if (P_Result > outputRangeHalf) P_Result = outputRangeHalf;
+	  else if (P_Result < -outputRangeHalf) P_Result = -outputRangeHalf;
 
 	  //Calculate Integral Term
 	  if (inFlight)
@@ -124,8 +121,8 @@ bool PID::Compute()
 			  I_Result += (Ki * dTimeInSec * error);
 
 			  //We may choose to limit the I term one third of maximum PID output
-			  if (I_Result > outMax/3) I_Result = outMax/3;
-			  else if (I_Result < outMin/3) I_Result = outMin/3;
+			  if (I_Result > outMax) I_Result = outMax;
+			  else if (I_Result < outMin) I_Result = outMin;
 		  }
 	  }
 	  else
@@ -195,6 +192,9 @@ void PID::SetOutputLimits(double Min, double Max)
    if(Min >= Max) return;
    outMin = Min;
    outMax = Max;
+
+   outputRange = outMax - outMin;
+   outputRangeHalf = (outMax - outMin) / 2;
  
    if(inAuto)
    {
