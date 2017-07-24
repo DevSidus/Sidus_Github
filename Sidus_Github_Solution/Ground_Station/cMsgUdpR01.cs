@@ -64,8 +64,6 @@ namespace Ground_Station
         public short pidRatePitchPresult { get; set; }
         public short pidRatePitchIresult { get; set; }
         public short pidRatePitchDresult { get; set; }
-        public byte pidRatePitchF1 { get; set; }
-        public byte pidRatePitchF2 { get; set; }
 
         public byte pidAnglePitchKp { get; set; }
         public byte pidAnglePitchKi { get; set; }
@@ -74,9 +72,6 @@ namespace Ground_Station
         public short pidAnglePitchPresult { get; set; }
         public short pidAnglePitchIresult { get; set; }
         public short pidAnglePitchDresult { get; set; }
-        public byte pidAnglePitchF1 { get; set; }
-        public byte pidAnglePitchF2 { get; set; }
-        public byte pidAnglePitchOutFilter { get; set; }
 
         //public byte pidRateRollKp { get; set; }
         //public byte pidRateRollKi { get; set; }
@@ -85,8 +80,6 @@ namespace Ground_Station
         //public short pidRateRollPresult { get; set; }
         //public short pidRateRollIresult { get; set; }
         //public short pidRateRollDresult { get; set; }
-        //public byte pidRateRollF1 { get; set; }
-        //public byte pidRateRollF2 { get; set; }
 
         //public byte pidAngleRollKp { get; set; }
         //public byte pidAngleRollKi { get; set; }
@@ -95,9 +88,6 @@ namespace Ground_Station
         //public short pidAngleRollPresult { get; set; }
         //public short pidAngleRollIresult { get; set; }
         //public short pidAngleRollDresult { get; set; }
-        //public byte pidAngleRollF1 { get; set; }
-        //public byte pidAngleRollF2 { get; set; }
-        //public byte pidAngleRollOutFilter { get; set; }
 
         //public byte pidRateYawKp { get; set; }
         //public byte pidRateYawKi { get; set; }
@@ -106,8 +96,6 @@ namespace Ground_Station
         //public short pidRateYawPresult { get; set; }
         //public short pidRateYawIresult { get; set; }
         //public short pidRateYawDresult { get; set; }
-        //public byte pidRateYawF1 { get; set; }
-        //public byte pidRateYawF2 { get; set; }
 
         //public byte pidAngleYawKp { get; set; }
         //public byte pidAngleYawKi { get; set; }
@@ -116,9 +104,6 @@ namespace Ground_Station
         //public short pidAngleYawPresult { get; set; }
         //public short pidAngleYawIresult { get; set; }
         //public short pidAngleYawDresult { get; set; }
-        //public byte pidAngleYawF1 { get; set; }
-        //public byte pidAngleYawF2 { get; set; }
-        //public byte pidAngleYawOutFilter { get; set; }
 
         //public short commandedYawAngle { get; set; }
 
@@ -129,8 +114,6 @@ namespace Ground_Station
         //public short pidVelAltPresult { get; set; }
         //public short pidVelAltIresult { get; set; }
         //public short pidVelAltDresult { get; set; }
-        //public byte pidVelAltF1 { get; set; }
-        //public byte pidVelAltF2 { get; set; }
 
         //public byte pidAccAltKp { get; set; }
         //public byte pidAccAltKi { get; set; }
@@ -139,9 +122,6 @@ namespace Ground_Station
         //public short pidAccAltPresult { get; set; }
         //public short pidAccAltIresult { get; set; }
         //public short pidAccAltDresult { get; set; }
-        //public byte pidAccAltF1 { get; set; }
-        //public byte pidAccAltF2 { get; set; }
-        //public byte pidAccAltOutFilter { get; set; }
     }
     class cMsgUdpR01
     {

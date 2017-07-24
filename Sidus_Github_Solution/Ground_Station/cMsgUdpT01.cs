@@ -15,45 +15,27 @@ namespace Ground_Station
         public byte pidRatePitchRollKp { get; set; }
         public byte pidRatePitchRollKi { get; set; }
         public byte pidRatePitchRollKd { get; set; }
-        public byte pidRatePitchRollF1 { get; set; }
-        public byte pidRatePitchRollF2 { get; set; }
 
         public byte pidAnglePitchRollKp { get; set; }
         public byte pidAnglePitchRollKi { get; set; }
         public byte pidAnglePitchRollKd { get; set; }
-        public byte pidAnglePitchRollF1 { get; set; }
-        public byte pidAnglePitchRollF2 { get; set; }
 
         public byte pidRateYawKp { get; set; }
         public byte pidRateYawKi { get; set; }
         public byte pidRateYawKd { get; set; }
-        public byte pidRateYawF1 { get; set; }
-        public byte pidRateYawF2 { get; set; }
 
         public byte pidAngleYawKp { get; set; }
         public byte pidAngleYawKi { get; set; }
         public byte pidAngleYawKd { get; set; }
-        public byte pidAngleYawF1 { get; set; }
-        public byte pidAngleYawF2 { get; set; }
-
-        public byte pidAnglePitchRollOutFilter { get; set; }
-        public byte pidAngleYawOutFilter { get; set; }
-
-
+        
         public byte pidVelAltKp { get; set; }
         public byte pidVelAltKi { get; set; }
         public byte pidVelAltKd { get; set; }
-        public byte pidVelAltF1 { get; set; }
-        public byte pidVelAltF2 { get; set; }
 
         public byte pidAccAltKp { get; set; }
         public byte pidAccAltKi { get; set; }
         public byte pidAccAltKd { get; set; }
-        public byte pidAccAltF1 { get; set; }
-        public byte pidAccAltF2 { get; set; }
-
-        public byte pidVelAltOutFilter { get; set; }
-
+        
     }
     class cMsgUdpT01
     {
