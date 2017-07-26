@@ -202,7 +202,7 @@ void task_baro(void * parameter)
 			xSemaphoreGive(xI2CSemaphore);
 		}
 
-		delay(3);
+		delay(10);
 	}
 	vTaskDelete(NULL);
 	return;
