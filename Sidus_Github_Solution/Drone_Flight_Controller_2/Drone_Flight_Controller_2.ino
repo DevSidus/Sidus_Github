@@ -735,8 +735,8 @@ void task_altitude_kalman(void * parameter)
 	double m_Alt_n1 = barometerAlt;
 	double P_Alt_n1 = pow(sigmaRowAlt, 2);
 
-	double *m_Alt_n = nullptr;
-	double *P_Alt_n = nullptr;
+	double *m_Alt_n;
+	double *P_Alt_n;
 	//***********************************************************************************
 
 
@@ -754,8 +754,8 @@ void task_altitude_kalman(void * parameter)
 	double m_AccelZ_n1 = qc.accelWorld.z / 8300 * 9.80665;
 	double P_AccelZ_n1 = pow(sigmaRowAccelZ, 2);
 
-	double *m_AccelZ_n = nullptr;
-	double *P_AccelZ_n = nullptr;
+	double *m_AccelZ_n;
+	double *P_AccelZ_n;
 	//***********************************************************************************
 
 
@@ -798,25 +798,25 @@ void task_altitude_kalman(void * parameter)
 
 		//***********************************************************************************
 		// Kalman Filter for Single Altitude Estimation
-		kalmanFilterOneParameter(m_Alt_n1, P_Alt_n1, barometerAlt, 1, Q_Alt, 1, R_Alt, m_Alt_n, P_Alt_n);
+		/*kalmanFilterOneParameter(m_Alt_n1, P_Alt_n1, barometerAlt, 1.0, Q_Alt, 1.0, R_Alt, m_Alt_n, P_Alt_n);
 
 		m_Alt_n1 = *m_Alt_n;
-		P_Alt_n1 = *P_Alt_n;
+		P_Alt_n1 = *P_Alt_n;*/
 		//***********************************************************************************
 
 
 		//***********************************************************************************
 		// Kalman Filter for Single Acceleration Estimation
-		kalmanFilterOneParameter(m_AccelZ_n1, P_AccelZ_n1, qc.accelWorld.z / 8300 * 9.80665, 1, Q_AccelZ, 1, R_AccelZ, m_AccelZ_n, P_AccelZ_n);
+		/*kalmanFilterOneParameter(m_AccelZ_n1, P_AccelZ_n1, qc.accelWorld.z / 8300 * 9.80665, 1.0, Q_AccelZ, 1.0, R_AccelZ, m_AccelZ_n, P_AccelZ_n);
 
 		m_AccelZ_n1 = *m_AccelZ_n;
-		P_AccelZ_n1 = *P_AccelZ_n;
+		P_AccelZ_n1 = *P_AccelZ_n;*/
 		//***********************************************************************************
 
 		//***********************************************************************************
 		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
-		y_AltVelAcc_n[0] = *m_Alt_n; // If cascaded Kalman is not used: barometerAlt;
-		y_AltVelAcc_n[1] = *m_AccelZ_n; // If cascaded Kalman is not used: qc.accelWorld.z / 8300 * 9.80665;
+		y_AltVelAcc_n[0] = barometerAlt; // *m_Alt_n; // If cascaded Kalman is not used: barometerAlt;
+		y_AltVelAcc_n[1] = qc.accelWorld.z / 8300 * 9.80665; // *m_AccelZ_n; // If cascaded Kalman is not used: qc.accelWorld.z / 8300 * 9.80665;
 
 		kalmanFilter(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
 		
