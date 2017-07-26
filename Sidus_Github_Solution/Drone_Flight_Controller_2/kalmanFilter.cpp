@@ -4,8 +4,9 @@
 #include "rt_nonfinite.h"
 #include "kalmanFilter.h"
 
-// Function Definitions
+// Function Declarations
 
+// Kalman Filter for 3 Parameters Estimation with 2 Measurements
 //
 // Kalman filter prediction and update steps. propagates Gaussian
 //  posterior state distribution from time step n-1 to time step n
@@ -149,6 +150,52 @@ void kalmanFilter(const double m_n1[3], const double P_n1[9], const double y_n[2
 			P_n[r1 + 3 * r2] = P_nn1[r1 + 3 * r2] - a21;
 		}
 	}
+}
+
+
+// Kalman Filter for 1 Parameter Estimation with 1 Measurement
+//
+// Kalman filter prediction and update steps. propagates Gaussian
+//  posterior state distribution from time step n-1 to time step n
+//
+//  Inputs:
+//  m_n1 - (Dx1 vector) Gaussian posterior mean at time step n-1
+//  P_n1 - (DxD matrix) Gaussian posterior covariance at time step n-1
+//  y_n - (Mx1 vector) measurements at time step n
+//  F - (DxD matrix) state-transition matrix at time step n
+//  Q - (DxD matrix) Gaussian state noise covariance at time step n
+//  H - (MxD matrix) measurement matrix at time step n
+//  R - (MxM matrix) Gaussian measurement noise covariance at time step n
+//
+//  Outputs:
+//  m_n - (Dx1 vector) Gaussian posterior mean at time step n
+//  P_n - (DxD matrix) Gaussian posterior covariance at time step n
+// Arguments    : double m_n1
+//                double P_n1
+//                double y_n
+//                double F
+//                double Q
+//                double H
+//                double R
+//                double *m_n
+//                double *P_n
+// Return Type  : void
+//
+void kalmanFilterOneParameter(double m_n1, double P_n1, double y_n, double F, double Q,
+	double H, double R, double *m_n, double *P_n)
+{
+	double m_nn1;
+	double P_nn1;
+	double K;
+
+	//  Predict
+	m_nn1 = F * m_n1;
+	P_nn1 = F * P_n1 * F + Q;
+
+	//  Update
+	K = P_nn1 * H / (H * P_nn1 * H + R);
+	*m_n = m_nn1 + K * (y_n - H * m_nn1);
+	*P_n = P_nn1 - K * H * P_nn1;
 }
 
 //

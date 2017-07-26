@@ -14,6 +14,7 @@ Description: This is the main code for Drone_Flight_Controller Project
 
 //Local Include Files
 #include "kalmanFilter.h"
+#include "kalmanFilter_initialize.h"
 #include "dataFilter.h"
 #include "cBuzzerMelody.h"
 #include "Local_I2Cdev.h"
@@ -201,7 +202,7 @@ void task_baro(void * parameter)
 			xSemaphoreGive(xI2CSemaphore);
 		}
 
-		delay(15);
+		delay(10);
 	}
 	vTaskDelete(NULL);
 	return;
@@ -719,47 +720,114 @@ void task_altitude_kalman(void * parameter)
 	}
 
 	double T = 0.010; // Sampling Period
-	double F[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
-	double H[6] = { 1, 0, 0, 0, 0, 1 }; // Measurement matrix
 
-	double deltA = 0.4; // max(diff(accWorldZ));
-	double sigmaV = 1*deltA;
-	double Q[9] =  { 1/4*pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,2), 1 / 2 * pow(T,3), pow(T,2), T, 1 / 2 * pow(T,2), T, 1 };
-	for (int i = 0; i < 9; i++) Q[i] *= pow(sigmaV,2); // Process noise covariance matrix
+	//***********************************************************************************
+	// Kalman Parameters for Single Altitude Estimation
+	double deltaRowAlt = 1.0; // max(diff(baroAlt));
+	double sigmaRowAlt = 1.0; // histogram(diff(baroAlt));
 
-	double sigmaP = 0.1;
-	double sigmaA = 0.4;
-	double R[4] = { pow(sigmaP,2), 0, 0, pow(sigmaA,2) }; // Measurement noise covariance matrix
+	double sigmaQ_Alt = deltaRowAlt;
+	double Q_Alt = pow(sigmaQ_Alt, 2) * T; // Process noise covariance matrix
+
+	double R_Alt = pow(sigmaRowAlt,2); // Measurement noise covariance matrix
 
 	// Initialization
-	double P_n1[9] = { pow(sigmaP,2), 0, 0, 0, pow(sigmaA,2), 0, 0, 0, pow(sigmaA,2) };
-	double m_n1[3] = { 0, 0, 0 };
+	double m_Alt_n1 = barometerAlt;
+	double P_Alt_n1 = pow(sigmaRowAlt, 2);
 
-	double m_n[3] = { barometerAlt, 0, 0 };
-	double P_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	double y_n[2] = { 0, 0 };
+	double m_Alt_n = 0.0;
+	double P_Alt_n = 0.0;
+	//***********************************************************************************
+
+
+	//***********************************************************************************
+	// Kalman Parameters for Single Acceleration Estimation
+	double deltaRowAccelZ = 0.6; // max(diff(accelerationZ));
+	double sigmaRowAccelZ = 0.6; // histogram(diff(accelerationZ));
+
+	double sigmaQ_AccelZ = deltaRowAccelZ;
+	double Q_AccelZ = pow(sigmaQ_AccelZ, 2) * T; // Process noise covariance matrix
+
+	double R_AccelZ = pow(sigmaRowAccelZ, 2); // Measurement noise covariance matrix
+
+	// Initialization
+	double m_AccelZ_n1 = qc.accelWorld.z / 8300 * 9.80665;
+	double P_AccelZ_n1 = pow(sigmaRowAccelZ, 2);
+
+	double m_AccelZ_n = 0.0;
+	double P_AccelZ_n = 0.0;
+	//***********************************************************************************
+
+
+	//***********************************************************************************
+	// Kalman Parameters for Altitude, Velocity and Acceleration Estimation
+	double F_AltVelAcc[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
+	double H_AltVelAcc[6] = { 1, 0, 0, 0, 0, 1 }; // Measurement matrix
+
+	double deltaAccelZ = 0.16;
+	double sigmaQ_AltVelAcc = deltaAccelZ; // max(diff(accelerationZ));
+	double Q_AltVelAcc[9] =  { 1/4*pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,2), 1 / 2 * pow(T,3), pow(T,2), T, 1 / 2 * pow(T,2), T, 1 };
+	for (int i = 0; i < 9; i++) Q_AltVelAcc[i] *= pow(sigmaQ_AltVelAcc,2); // Process noise covariance matrix
+
+	double sigmaAlt = 0.1; // histogram(diff(baroAlt));
+	double sigmaAccelZ = 0.2; // histogram(diff(accelerationZ));
+	double R_AltVelAcc[4] = { pow(sigmaAlt,2), 0, 0, pow(sigmaAccelZ,2) }; // Measurement noise covariance matrix
+
+	// Initialization
+	double m_AltVelAcc_n1[3] = { barometerAlt, 0, qc.accelWorld.z / 8300 * 9.80665 };
+	double P_AltVelAcc_n1[9] = { pow(sigmaAlt,2), 0, 0, 0, pow(sigmaAccelZ,2), 0, 0, 0, pow(sigmaAccelZ,2) };
+
+	double m_AltVelAcc_n[3] = { 0, 0, 0 };
+	double P_AltVelAcc_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	double y_AltVelAcc_n[2] = { 0, 0 };
+	//***********************************************************************************
+
 
 	// Initialize Buffer
 	for (int i = 0; i < diffFilter100HzLength; i++) accelDiffBuffer.zVector.push_back(0.0);
 	deltaTimeAccelDiff = 0.01;
+
+	// Initialize Kalman Filtering
+	kalmanFilter_initialize();
 
 	//unsigned long strtTime;
 	
 	while (true)
 	{
 		//strtTime = micros();
-		y_n[0] = barometerAlt;
-		y_n[1] = qc.accelWorld.z / 8300 * 9.80665;
+
+		//***********************************************************************************
+		// Kalman Filter for Single Altitude Estimation
+		kalmanFilterOneParameter(m_Alt_n1, P_Alt_n1, barometerAlt, 1.0, Q_Alt, 1.0, R_Alt, &m_Alt_n, &P_Alt_n);
+
+		m_Alt_n1 = m_Alt_n;
+		P_Alt_n1 = P_Alt_n;
+		//***********************************************************************************
 
 
-		kalmanFilter(m_n1, P_n1, y_n, F, Q, H, R, m_n, P_n);
+		//***********************************************************************************
+		// Kalman Filter for Single Acceleration Estimation
+		kalmanFilterOneParameter(m_AccelZ_n1, P_AccelZ_n1, qc.accelWorld.z / 8300 * 9.80665, 1.0, Q_AccelZ, 1.0, R_AccelZ, &m_AccelZ_n, &P_AccelZ_n);
+
+		m_AccelZ_n1 = m_AccelZ_n;
+		P_AccelZ_n1 = P_AccelZ_n;
+		//***********************************************************************************
+
+		//***********************************************************************************
+		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
+		y_AltVelAcc_n[0] = m_Alt_n; // If cascaded Kalman is not used: barometerAlt;
+		y_AltVelAcc_n[1] = m_AccelZ_n; // *m_AccelZ_n; // If cascaded Kalman is not used: qc.accelWorld.z / 8300 * 9.80665;
+
+		kalmanFilter(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
 		
-		qc.posWorldEstimated.z = m_n[0];
-		qc.velWorldEstimated.z = m_n[1];
-		qc.accelWorldEstimated.z = m_n[2];
+		qc.posWorldEstimated.z = m_AltVelAcc_n[0];
+		qc.velWorldEstimated.z = m_AltVelAcc_n[1];
+		qc.accelWorldEstimated.z = m_AltVelAcc_n[2];
 
-		memcpy(m_n1, m_n, sizeof(m_n));
-		memcpy(P_n1, P_n, sizeof(P_n));
+		memcpy(m_AltVelAcc_n1, m_AltVelAcc_n, sizeof(m_AltVelAcc_n));
+		memcpy(P_AltVelAcc_n1, P_AltVelAcc_n, sizeof(P_AltVelAcc_n));
+		//***********************************************************************************
+
 
 		//Serial.println(micros() - strtTime);
 

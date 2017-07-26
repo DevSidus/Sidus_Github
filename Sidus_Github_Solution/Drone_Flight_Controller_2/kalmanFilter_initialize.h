@@ -8,7 +8,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
-#include "kalmanFilter_types.h"
 
 // Function Declarations
 extern void kalmanFilter_initialize();
