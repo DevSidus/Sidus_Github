@@ -931,19 +931,19 @@ bool initMPU()
 
 	// supply your own gyro offsets here, scaled for min sensitivity
 	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
-	mpu.setXAccelOffset(-2553);
-	mpu.setYAccelOffset(-989);
-	mpu.setZAccelOffset(1689);
-	mpu.setXGyroOffset(88);
-	mpu.setYGyroOffset(-26);
-	mpu.setZGyroOffset(-5);
+	//mpu.setXAccelOffset(-2553);
+	//mpu.setYAccelOffset(-989);
+	//mpu.setZAccelOffset(1689);
+	//mpu.setXGyroOffset(88);
+	//mpu.setYGyroOffset(-26);
+	//mpu.setZGyroOffset(-5);
 	//
-	//mpu.setXAccelOffset(-195);
-	//mpu.setYAccelOffset(-669);
-	//mpu.setZAccelOffset(1631);
-	//mpu.setXGyroOffset(59);
-	//mpu.setYGyroOffset(-22);
-	//mpu.setZGyroOffset(-12);
+	mpu.setXAccelOffset(-195);
+	mpu.setYAccelOffset(-669);
+	mpu.setZAccelOffset(1631);
+	mpu.setXGyroOffset(59);
+	mpu.setYGyroOffset(-22);
+	mpu.setZGyroOffset(-12);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
@@ -1209,7 +1209,7 @@ void processCheckMode()
 		pidAngleRoll.SetFlightMode(true);
 		pidAngleYaw.SetFlightMode(true);
 		pidVelAlt.SetFlightMode(true);
-		pidAccAlt.SetFlightMode(true);
+		pidAccAlt.SetFlightMode(true);   //this will be discussed later
 	}
 	else
 	{
@@ -1220,7 +1220,7 @@ void processCheckMode()
 		pidAngleRoll.SetFlightMode(false);
 		pidAngleYaw.SetFlightMode(false);
 		pidVelAlt.SetFlightMode(false);
-		pidAccAlt.SetFlightMode(false);
+		//pidAccAlt.SetFlightMode(false);   //this will be discussed later
 	}
 }
 
@@ -1304,11 +1304,23 @@ void processPID()
 
 	calculateAccelCmdDifferentials();
 
+	//Serial.print("accelCmd:");
+	//Serial.print(accelCmd.z);
+
+	//Serial.print("  accWEst:");
+	//Serial.print(qc.accelWorldEstimated.z * 100);
+
+	//Serial.print("  spDif:");
+	//Serial.print(accelCmdDiff.z);
+
+	//Serial.print("  svDif:");
+	//Serial.println(qc.accelDiff.z * 100);
+
 	// Acceleration Altitude PID
 	pidVars.accAlt.setpoint = accelCmd.z;   // cmd/second^2
-	pidVars.accAlt.sensedVal = qc.accelWorldEstimated.z;  // cm/second^2
-	pidVars.accAlt.setpointDiff = accelCmdDiff.z;
-	pidVars.accAlt.sensedValDiff = qc.accelDiff.z;
+	pidVars.accAlt.sensedVal = qc.accelWorldEstimated.z * 100;  // cm/second^2
+	pidVars.accAlt.setpointDiff = accelCmdDiff.z;          // cm/second^3
+	pidVars.accAlt.sensedValDiff = qc.accelDiff.z * 100;  // cm/second^3
 	pidAccAlt.Compute();
 
 	postPIDprocesses();
@@ -1609,9 +1621,9 @@ void processRunMotors()
 
 }
 
-void calculate_pid_thr_batt_scale_factor() //this function will be modified to include battery voltage compensation also
+void calculate_pid_thr_batt_scale_factor()
 {
-	float total_thr_cmd = cmdMotorThr + pidVars.velAlt.outputCompensated;   // compensated output or normal output, will be discussed later
+	float total_thr_cmd = cmdMotorThr;
 
 	if (total_thr_cmd <= CMD_THR_MAX && total_thr_cmd >= CMD_THR_MIN)
 		PID_THR_BATT_SCALE_FACTOR = (CMD_THR_MAX - total_thr_cmd) / (CMD_THR_MAX - CMD_THR_MIN) + 0.2;
@@ -1966,25 +1978,20 @@ void prepareUDPmessages()
 	//MsgUdpR01.message.pidAngleYawF2			= pidVars.angleYaw.f2 / RESOLUTION_PID_F;
 	//MsgUdpR01.message.pidAngleYawOutFilter	= pidVars.angleYaw.outputFilterConstant / RESOLUTION_PID_F;
 	//MsgUdpR01.message.commandedYawAngle		= cmdMotorYaw;
-	//MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
-	//MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
-	//MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
-	//MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
-	//MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
-	//MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
-	//MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
-	//MsgUdpR01.message.pidVelAltF1			= pidVars.velAlt.f1 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidVelAltF2			= pidVars.velAlt.f2 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_POS_KP;
-	//MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_POS_KI;
-	//MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_POS_KD;
-	//MsgUdpR01.message.pidAccAltOutput		= pidVars.accAlt.output;
-	//MsgUdpR01.message.pidAccAltPresult		= pidAccAlt.Get_P_Result();
-	//MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
-	//MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
-	//MsgUdpR01.message.pidAccAltF1			= pidVars.accAlt.f1 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAccAltF2			= pidVars.accAlt.f2 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAccAltOutFilter	= pidVars.accAlt.outputFilterConstant / RESOLUTION_PID_F;
+	MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
+	MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
+	MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
+	MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
+	MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
+	MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
+	MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
+	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_POS_KP;
+	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_POS_KI;
+	MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_POS_KD;
+	MsgUdpR01.message.pidAccAltOutput		= pidVars.accAlt.output;
+	MsgUdpR01.message.pidAccAltPresult		= pidAccAlt.Get_P_Result();
+	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
+	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
 
 
 	MsgUdpR01.getPacket();

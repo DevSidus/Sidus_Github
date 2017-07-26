@@ -107,21 +107,21 @@ namespace Ground_Station
 
         //public short commandedYawAngle { get; set; }
 
-        //public byte pidVelAltKp { get; set; }
-        //public byte pidVelAltKi { get; set; }
-        //public byte pidVelAltKd { get; set; }
-        //public short pidVelAltOutput { get; set; }
-        //public short pidVelAltPresult { get; set; }
-        //public short pidVelAltIresult { get; set; }
-        //public short pidVelAltDresult { get; set; }
+        public byte pidVelAltKp { get; set; }
+        public byte pidVelAltKi { get; set; }
+        public byte pidVelAltKd { get; set; }
+        public short pidVelAltOutput { get; set; }
+        public short pidVelAltPresult { get; set; }
+        public short pidVelAltIresult { get; set; }
+        public short pidVelAltDresult { get; set; }
 
-        //public byte pidAccAltKp { get; set; }
-        //public byte pidAccAltKi { get; set; }
-        //public byte pidAccAltKd { get; set; }
-        //public short pidAccAltOutput { get; set; }
-        //public short pidAccAltPresult { get; set; }
-        //public short pidAccAltIresult { get; set; }
-        //public short pidAccAltDresult { get; set; }
+        public byte pidAccAltKp { get; set; }
+        public byte pidAccAltKi { get; set; }
+        public byte pidAccAltKd { get; set; }
+        public short pidAccAltOutput { get; set; }
+        public short pidAccAltPresult { get; set; }
+        public short pidAccAltIresult { get; set; }
+        public short pidAccAltDresult { get; set; }
     }
     class cMsgUdpR01
     {

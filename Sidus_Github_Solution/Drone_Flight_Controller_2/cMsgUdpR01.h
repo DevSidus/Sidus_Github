@@ -103,21 +103,21 @@ struct structMsgUdpR01
 
 	//short commandedYawAngle;
 
-	//unsigned char pidVelAltKp;
-	//unsigned char pidVelAltKi;
-	//unsigned char pidVelAltKd;
-	//short pidVelAltOutput;
-	//short pidVelAltPresult;
-	//short pidVelAltIresult;
-	//short pidVelAltDresult;
+	unsigned char pidVelAltKp;
+	unsigned char pidVelAltKi;
+	unsigned char pidVelAltKd;
+	short pidVelAltOutput;
+	short pidVelAltPresult;
+	short pidVelAltIresult;
+	short pidVelAltDresult;
 
-	//unsigned char pidAccAltKp;
-	//unsigned char pidAccAltKi;
-	//unsigned char pidAccAltKd;
-	//short pidAccAltOutput;
-	//short pidAccAltPresult;
-	//short pidAccAltIresult;
-	//short pidAccAltDresult;
+	unsigned char pidAccAltKp;
+	unsigned char pidAccAltKi;
+	unsigned char pidAccAltKd;
+	short pidAccAltOutput;
+	short pidAccAltPresult;
+	short pidAccAltIresult;
+	short pidAccAltDresult;
 
 };
 #pragma pack(pop)
