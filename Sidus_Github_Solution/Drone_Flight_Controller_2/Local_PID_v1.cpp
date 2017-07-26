@@ -105,25 +105,13 @@ bool PID::Compute()
 	  //Calculate Integral Term
 	  if (inFlight)
 	  {
-		  //Decide whether the state is transient
-		  if (abs(*mySetpoint - lastSetpoint) > transientSetpointThreshold)
-		  {
-			  transientInterval = true;
-			  transientStartTime = now;
-		  }
-		  else if ((now - transientStartTime) > transientDuration)
-		  {
-			  transientInterval = false;
-		  }
 
-		  if (!transientInterval)
-		  {
-			  I_Result += (Ki * dTimeInSec * error);
+			I_Result += (Ki * dTimeInSec * error);
 
-			  //We may choose to limit the I term one third of maximum PID output
-			  if (I_Result > outMax) I_Result = outMax;
-			  else if (I_Result < outMin) I_Result = outMin;
-		  }
+			//We may choose to limit the I term one third of maximum PID output
+			if (I_Result > outMax) I_Result = outMax;
+			else if (I_Result < outMin) I_Result = outMin;
+
 	  }
 	  else
 	  {
@@ -234,11 +222,6 @@ void PID::Initialize()
    lastTime = millis();
    lastError = 0;
 
-   inFlight = false;
-   transientInterval = true;
-   transientSetpointThreshold = 5;
-   transientStartTime = millis();
-   transientDuration = 500; //in milliseconds
 }
 
 /* Status Funcions*************************************************************

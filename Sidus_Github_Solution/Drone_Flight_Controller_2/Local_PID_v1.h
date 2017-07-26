@@ -96,10 +96,6 @@ class PID
 	bool diff_setpoint_available;
 
 	bool inFlight;
-	bool transientInterval;
-	int transientSetpointThreshold;
-	unsigned long transientStartTime;
-	unsigned int transientDuration;
 
 	
 };
