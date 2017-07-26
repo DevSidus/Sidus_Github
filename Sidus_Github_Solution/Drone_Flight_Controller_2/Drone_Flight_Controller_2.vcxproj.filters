@@ -63,9 +63,6 @@
     <ClInclude Include="kalmanFilter_initialize.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kalmanFilter_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="rt_nonfinite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
