@@ -94,7 +94,7 @@ This header file define all the configurable variables including constants, pin 
 #define		DC_THR_MIN		1100.0
 #define		DC_THR_MAX		1900.0
 
-#define		CMD_THR_TAKEOFF 1380.0
+#define		CMD_THR_TAKEOFF 1300.0
 
 #define		CMD_YAW_MIN		-45.0
 #define		CMD_YAW_MAX		+45.0
@@ -116,9 +116,9 @@ This header file define all the configurable variables including constants, pin 
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
 
-#define		PID_RATE_PITCH_KP			1.6
+#define		PID_RATE_PITCH_KP			1.4
 #define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.13
+#define		PID_RATE_PITCH_KD			0.11
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
 
@@ -128,9 +128,9 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_PITCH_OUTMIN		-250
 #define		PID_ANGLE_PITCH_OUTMAX		250
 
-#define		PID_RATE_ROLL_KP			1.6
+#define		PID_RATE_ROLL_KP			1.4
 #define		PID_RATE_ROLL_KI			0.0
-#define		PID_RATE_ROLL_KD			0.13
+#define		PID_RATE_ROLL_KD			0.11
 #define		PID_RATE_ROLL_OUTMIN		-250
 #define		PID_RATE_ROLL_OUTMAX		250
 
@@ -160,9 +160,9 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_VEL_ALT_OUTMIN		-500
 #define		PID_VEL_ALT_OUTMAX		500
 
-#define		PID_ACC_ALT_KP			0.2
+#define		PID_ACC_ALT_KP			0.4
 #define		PID_ACC_ALT_KI			0.0
-#define		PID_ACC_ALT_KD			0.0
+#define		PID_ACC_ALT_KD			0.02
 
 
 

@@ -596,7 +596,7 @@ void task_UDP(void * parameter)
 						if (udp.endPacket() != 1)
 						{
 							//Serial.println("UDP Packet could not send");
-							connectUdp();
+							//connectUdp();
 						}
 						else
 						{
@@ -895,10 +895,10 @@ void processTest() {
 	delay(750);
 
 
-	if (WiFi.status() != WL_CONNECTED)
-	{
-		Serial.println("wifi connection lost");
-	}
+	//if (WiFi.status() != WL_CONNECTED)
+	//{
+	//	Serial.println("wifi connection lost");
+	//}
 	
 /*
 	Serial.print("Temp");
@@ -1389,7 +1389,7 @@ void initPIDvariables()
 	pidVars.accAlt.Kp = PID_ACC_ALT_KP;
 	pidVars.accAlt.Ki = PID_ACC_ALT_KI;
 	pidVars.accAlt.Kd = PID_ACC_ALT_KD;
-	pidVars.accAlt.outputLimitMin = CMD_THR_ARM_START;
+	pidVars.accAlt.outputLimitMin = CMD_THR_MIN;
 	pidVars.accAlt.outputLimitMax = CMD_THR_MAX;
 	pidVars.accAlt.output = 0;
 	pidVars.accAlt.outputCompensated = 0;
@@ -1581,6 +1581,9 @@ void processRunMotors()
 			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output*PID_THR_BATT_SCALE_FACTOR;
 			pidVars.velAlt.outputCompensated = pidVars.velAlt.output*PID_THR_BATT_SCALE_FACTOR;
 			
+
+			//Serial.print("");
+			//Serial.println(pidVars.rateYaw.outputCompensated);
 			
 
 			pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated - pidVars.rateYaw.outputCompensated);
@@ -1590,10 +1593,10 @@ void processRunMotors()
 
 
 
-			//pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated);
-			//pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr + pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated);
-			//pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated - pidVars.rateRoll.outputCompensated);
-			//pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr - pidVars.ratePitch.outputCompensated + pidVars.rateRoll.outputCompensated);
+			//pwmMicroSeconds(M_FL_CHANNEL, cmdMotorThr);
+			//pwmMicroSeconds(M_FR_CHANNEL, cmdMotorThr);
+			//pwmMicroSeconds(M_BR_CHANNEL, cmdMotorThr);
+			//pwmMicroSeconds(M_BL_CHANNEL, cmdMotorThr);
 
 		}
 		else
@@ -2093,7 +2096,7 @@ void WiFiEvent(WiFiEvent_t event) {
 		break;
 	case SYSTEM_EVENT_STA_DISCONNECTED:
 		Serial.println("Event Handler: WiFi lost connection");
-		connectToWiFi();
+		//connectToWiFi();
 		break;
 	}
 }
