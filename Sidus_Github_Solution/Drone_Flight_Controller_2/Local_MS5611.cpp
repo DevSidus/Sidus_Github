@@ -54,12 +54,12 @@ void MS5611::reset(void)
 {
 	Wire.beginTransmission(MS5611_ADDRESS);
 	Wire.write(MS5611_CMD_RESET);
-	Wire.endTransmission(MS5611_ADDRESS);
+	Wire.endTransmission();
 }
 
 void MS5611::readPROM(void)
 {
-	for (uint8_t offset = 0; offset < 7; offset++)
+	for (uint8_t offset = 0; offset < 6; offset++)
 	{
 		fc[offset] = readRegister16(MS5611_CMD_READ_PROM + (offset * 2));
 	}
@@ -101,7 +101,7 @@ void MS5611::cmdRawTemperature(void)
 {
 	Wire.beginTransmission(MS5611_ADDRESS);
 	Wire.write(MS5611_CMD_CONV_D2 + uosr);
-	Wire.endTransmission(MS5611_ADDRESS);
+	Wire.endTransmission();
 }
 
 
@@ -109,7 +109,7 @@ void MS5611::cmdRawPressure(void)
 {
 	Wire.beginTransmission(MS5611_ADDRESS);
 	Wire.write(MS5611_CMD_CONV_D1 + uosr);
-	Wire.endTransmission(MS5611_ADDRESS);
+	Wire.endTransmission();
 }
 
 int32_t MS5611::readPressure(bool compensation)
@@ -190,7 +190,7 @@ uint16_t MS5611::readRegister16(uint8_t reg)
 	uint16_t value;
 	Wire.beginTransmission(MS5611_ADDRESS);
 	Wire.write(reg);
-	Wire.endTransmission(MS5611_ADDRESS);
+	Wire.endTransmission();
 
 	Wire.beginTransmission(MS5611_ADDRESS);
 	Wire.requestFrom(MS5611_ADDRESS, 2);
@@ -210,10 +210,10 @@ uint32_t MS5611::readRegister24(uint8_t reg)
 	uint32_t value;
 	Wire.beginTransmission(MS5611_ADDRESS);
 	Wire.write(reg);
-	Wire.endTransmission(MS5611_ADDRESS);
+	Wire.endTransmission();
 
 	Wire.beginTransmission(MS5611_ADDRESS);
-	Wire.requestFrom(MS5611_ADDRESS, 2);
+	Wire.requestFrom(MS5611_ADDRESS, 3);
 	while (!Wire.available()) {};
 	uint8_t vxa = Wire.read();
 	uint8_t vha = Wire.read();

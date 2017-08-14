@@ -50,7 +50,7 @@ private:
 	void cmdRawTemperature(void);
 	void cmdRawPressure(void);
 
-	uint16_t fc[7];
+	uint16_t fc[6];
 	uint8_t ct;
 	uint8_t uosr;
 	int32_t TEMP2;

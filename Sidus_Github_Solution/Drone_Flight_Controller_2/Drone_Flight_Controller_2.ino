@@ -132,7 +132,7 @@ void setup() {
 	//Processor 1 Tasks
 	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_compass, "task_compass", 2048, NULL, 10, NULL, 1);
-	xTaskCreatePinnedToCore(task_PID, "task_PID", 8192, NULL, 20, NULL, 1);
+	xTaskCreatePinnedToCore(task_PID, "task_PID", 4096, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 10, NULL, 1);
 
@@ -189,6 +189,11 @@ void task_mpu(void * parameter)
 
 void task_baro(void * parameter)
 {
+	while (statusMpu != statusType_Normal)
+	{
+		delay(500);
+	}
+
 	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
 	{
 		initBarometer();
@@ -201,6 +206,8 @@ void task_baro(void * parameter)
 			processBarometer();
 			xSemaphoreGive(xI2CSemaphore);
 		}
+
+		//Serial.println(qc.posWorldEstimated.z);
 
 		delay(10);
 	}
@@ -608,7 +615,7 @@ void task_UDP(void * parameter)
 				}
 				else
 				{
-					connectUdp();
+					//connectUdp();
 				}
 			}			
 		}
@@ -1689,8 +1696,8 @@ void processBarometer()
 {
 	//Barometer Data Processing
 	barometer.runProcess();
-	barometerTemp = barometer.readTemperature(false);
-	barometerPress = barometer.readPressure(false);
+	barometerTemp = barometer.readTemperature(true);
+	barometerPress = barometer.readPressure(true);
 	float tempVal = barometer.getAltitude(barometerPress);
 
 	if (!isnan(tempVal))
