@@ -23,7 +23,11 @@ struct structMsgUdpT01
 	unsigned char pidAngleYawKp;
 	unsigned char pidAngleYawKi;
 	unsigned char pidAngleYawKd;
-	
+
+	unsigned char pidPosAltKp;
+	unsigned char pidPosAltKi;
+	unsigned char pidPosAltKd;
+
 	unsigned char pidVelAltKp;
 	unsigned char pidVelAltKi;
 	unsigned char pidVelAltKd;

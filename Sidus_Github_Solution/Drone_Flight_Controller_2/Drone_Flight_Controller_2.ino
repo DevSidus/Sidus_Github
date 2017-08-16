@@ -47,6 +47,9 @@ PID pidAngleRoll(&pidVars.angleRoll.sensedVal, &pidVars.angleRoll.output, &pidVa
 PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rateYaw.setpoint, &pidVars.rateYaw.sensedValDiff, &pidVars.rateYaw.setpointDiff);
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.sensedValDiff);
 
+
+
+PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.sensedValDiff);
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff);
 PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
 
@@ -1240,6 +1243,7 @@ void processCheckMode()
 		pidAnglePitch.SetFlightMode(true);
 		pidAngleRoll.SetFlightMode(true);
 		pidAngleYaw.SetFlightMode(true);
+		pidPosAlt.SetFlightMode(true);
 		pidVelAlt.SetFlightMode(true);
 		pidAccAlt.SetFlightMode(true);   //this will be discussed later
 	}
@@ -1251,6 +1255,7 @@ void processCheckMode()
 		pidAnglePitch.SetFlightMode(false);
 		pidAngleRoll.SetFlightMode(false);
 		pidAngleYaw.SetFlightMode(false);
+		pidPosAlt.SetFlightMode(false);
 		pidVelAlt.SetFlightMode(false);
 		//pidAccAlt.SetFlightMode(false);   //this will be discussed later
 	}
@@ -1318,10 +1323,19 @@ void processPID()
 	pidRateYaw.Compute();
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	//Position Altitude PID
+	pidVars.posAlt.setpoint = double(cmdRx6thCh)/10.0 + autoModeStartAltitude; //meters
+	pidVars.posAlt.sensedVal = qc.posWorldEstimated.z;  // meters
+	pidVars.posAlt.sensedValDiff = qc.velWorldEstimated.z;  // m/s
+	pidVelAlt.Compute();
+
+	filterPosPIDoutputs();
+	// Velocity Commands
+	velCmd.z = pidVars.posAlt.outputFiltered;
 	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Velocity Altitude PID
-	pidVars.velAlt.setpoint = cmdRx6thCh;
+	pidVars.velAlt.setpoint = velCmd.z;//cmdRx6thCh;
 	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z * 100;  // cm/second
 	pidVars.velAlt.sensedValDiff = qc.accelWorldEstimated.z * 100;  // cm/second^2
 	pidVelAlt.Compute();
@@ -1409,7 +1423,14 @@ void initPIDvariables()
 	pidVars.angleYaw.output = 0;
 	pidVars.angleYaw.outputCompensated = 0;
 
-
+	pidVars.posAlt.Kp = PID_POS_ALT_KP;
+	pidVars.posAlt.Ki = PID_POS_ALT_KI;
+	pidVars.posAlt.Kd = PID_POS_ALT_KD;
+	pidVars.posAlt.outputLimitMin = PID_POS_ALT_OUTMIN;
+	pidVars.posAlt.outputLimitMax = PID_POS_ALT_OUTMAX;
+	pidVars.posAlt.output = 0;
+	pidVars.posAlt.outputCompensated = 0;
+	
 	pidVars.velAlt.Kp = PID_VEL_ALT_KP;
 	pidVars.velAlt.Ki = PID_VEL_ALT_KI;
 	pidVars.velAlt.Kd = PID_VEL_ALT_KD;
@@ -1431,6 +1452,7 @@ void initPIDvariables()
 	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.yVector.push_back(0.0);
 	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.zVector.push_back(0.0);
 
+	for (int i = 0; i < lpfLength; i++) posPIDoutputLowpassBuffer.zVector.push_back(0.0);
 	for (int i = 0; i < lpfLength; i++) velPIDoutputLowpassBuffer.zVector.push_back(0.0);
 
 	// Initialize Rate Command Buffer for Diff Filtering
@@ -1466,6 +1488,8 @@ void initPIDtuning()
 	pidAngleYaw.SetOutputLimits(pidVars.angleYaw.outputLimitMin, pidVars.angleYaw.outputLimitMax);
 	pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
 
+	pidPosAlt.SetOutputLimits(pidVars.posAlt.outputLimitMin, pidVars.posAlt.outputLimitMax);
+	pidPosAlt.SetTunings(pidVars.posAlt.Kp, pidVars.posAlt.Ki, pidVars.posAlt.Kd);
 
 	pidVelAlt.SetOutputLimits(pidVars.velAlt.outputLimitMin, pidVars.velAlt.outputLimitMax);
 	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
@@ -1522,6 +1546,7 @@ void postPIDprocesses()
 	}
 	else
 	{
+		autoModeStartAltitude = qc.posWorldEstimated.z;
 		cmdMotorThr = cmdRxThr;
 		pidAccAlt.Set_I_Result(cmdMotorThr);
 	}
@@ -1846,6 +1871,7 @@ void updateUdpMsgVars()
 		applyPidCommandAnglePitchRoll();
 		applyPidCommandRateYaw();
 		applyPidCommandAngleYaw();
+		applyPidCommandPosAlt();
 		applyPidCommandVelAlt();
 		applyPidCommandAccAlt();
 		break;
@@ -1856,6 +1882,10 @@ void updateUdpMsgVars()
 
 	case pidCommandApplyAccAlt:
 		applyPidCommandAccAlt();
+		break;
+
+	case pidCommandApplyPosAlt:
+		applyPidCommandPosAlt();
 		break;
 	default:break;
 	}
@@ -1905,6 +1935,15 @@ void applyPidCommandAngleYaw()
 	pidVars.angleYaw.Ki = MsgUdpT01.message.pidAngleYawKi * RESOLUTION_PID_ANGLE_KI;
 	pidVars.angleYaw.Kd = MsgUdpT01.message.pidAngleYawKd * RESOLUTION_PID_ANGLE_YAW_KD;
 	pidAngleYaw.SetTunings(pidVars.angleYaw.Kp, pidVars.angleYaw.Ki, pidVars.angleYaw.Kd);
+}
+
+void applyPidCommandPosAlt()
+{
+	//Set Altitude Posocity PID parameters
+	pidVars.posAlt.Kp = MsgUdpT01.message.pidPosAltKp * RESOLUTION_PID_POS_KP;
+	pidVars.posAlt.Ki = MsgUdpT01.message.pidPosAltKi * RESOLUTION_PID_POS_KI;
+	pidVars.posAlt.Kd = MsgUdpT01.message.pidPosAltKd * RESOLUTION_PID_POS_KD;
+	pidPosAlt.SetTunings(pidVars.posAlt.Kp, pidVars.posAlt.Ki, pidVars.posAlt.Kd);
 }
 
 void applyPidCommandVelAlt()
@@ -2014,6 +2053,15 @@ void prepareUDPmessages()
 	//MsgUdpR01.message.pidAngleYawF2			= pidVars.angleYaw.f2 / RESOLUTION_PID_F;
 	//MsgUdpR01.message.pidAngleYawOutFilter	= pidVars.angleYaw.outputFilterConstant / RESOLUTION_PID_F;
 	//MsgUdpR01.message.commandedYawAngle		= cmdMotorYaw;
+
+	MsgUdpR01.message.pidPosAltKp			= pidVars.posAlt.Kp / RESOLUTION_PID_POS_KP;
+	MsgUdpR01.message.pidPosAltKi			= pidVars.posAlt.Ki / RESOLUTION_PID_POS_KI;
+	MsgUdpR01.message.pidPosAltKd			= pidVars.posAlt.Kd / RESOLUTION_PID_POS_KD;
+	MsgUdpR01.message.pidPosAltOutput		= pidVars.posAlt.output;
+	MsgUdpR01.message.pidPosAltPresult		= pidPosAlt.Get_P_Result();
+	MsgUdpR01.message.pidPosAltIresult		= pidPosAlt.Get_I_Result();
+	MsgUdpR01.message.pidPosAltDresult		= pidPosAlt.Get_D_Result();
+
 	MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
 	MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
 	MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
@@ -2167,6 +2215,17 @@ void calculateRateCmdDifferentials()
 	rateCmdDiff.z = diffFilter(rateCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+}
+
+void filterPosPIDoutputs()
+{
+
+	// Filtering Pos Altitude PID Outputs by LPF
+	// Update Buffer
+	posPIDoutputLowpassBuffer.zVector.erase(posPIDoutputLowpassBuffer.zVector.begin());
+	posPIDoutputLowpassBuffer.zVector.push_back(pidVars.posAlt.output);
+	// Calculate Filter Output
+	pidVars.posAlt.outputFiltered = dataFilter(posPIDoutputLowpassBuffer.zVector, lpfCoefficient);
 }
 
 void filterVelocityPIDoutputs()

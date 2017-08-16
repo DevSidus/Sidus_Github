@@ -157,6 +157,13 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_YAW_OUTMAX		150
 
 
+#define		PID_POS_ALT_KP			40
+#define		PID_POS_ALT_KI			0.0
+#define		PID_POS_ALT_KD			4.0
+#define		PID_POS_ALT_OUTMIN		-250
+#define		PID_POS_ALT_OUTMAX		250
+
+
 #define		PID_VEL_ALT_KP			0.4 // Will be tested
 #define		PID_VEL_ALT_KI			0.0
 #define		PID_VEL_ALT_KD			0.0
@@ -213,6 +220,7 @@ double		PID_BATT_VOLTAGE_SLOPE = -0.15;
 double		PID_BATT_MIDDLE_VOLTAGE = 11.5;
 float		batteryVoltageInVolts;
 double		commandedAltitude = 0;
+double		autoModeStartAltitude = 0;
 
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -282,6 +290,7 @@ struct structSuperPID
 	structPID angleRoll;
 	structPID angleYaw;	
 	structPID accAlt;
+	structPID posAlt;
 }pidVars;
 
 struct structEuler
@@ -314,6 +323,8 @@ struct structIMU
 
 struct3Daxis rateCmd;
 struct3Daxis rateCmdDiff;
+struct3Daxis velCmd;
+struct3Daxis velCmdDiff;
 struct3Daxis accelCmd;
 struct3Daxis accelCmdDiff;
 
@@ -353,6 +364,7 @@ typedef enum
 	pidCommandApplyAll = 5,
 	pidCommandApplyVelAlt = 6,
 	pidCommandApplyAccAlt = 7,
+	pidCommandApplyPosAlt = 8,
 }pidCommandType;
 
 typedef enum
@@ -421,6 +433,7 @@ struct struct3Dvector
 struct3Dvector gyroDiffBuffer;
 struct3Dvector anglePIDoutputLowpassBuffer;
 struct3Dvector rateCmdDiffBuffer;
+struct3Dvector posPIDoutputLowpassBuffer;
 struct3Dvector velPIDoutputLowpassBuffer;
 struct3Dvector accelDiffBuffer;
 struct3Dvector accelCmdDiffBuffer;

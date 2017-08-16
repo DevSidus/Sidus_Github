@@ -106,6 +106,14 @@ struct structMsgUdpR01
 
 	//short commandedYawAngle;
 
+	unsigned char pidPosAltKp;
+	unsigned char pidPosAltKi;
+	unsigned char pidPosAltKd;
+	short pidPosAltOutput;
+	short pidPosAltPresult;
+	short pidPosAltIresult;
+	short pidPosAltDresult;
+
 	unsigned char pidVelAltKp;
 	unsigned char pidVelAltKi;
 	unsigned char pidVelAltKd;
