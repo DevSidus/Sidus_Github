@@ -480,6 +480,7 @@ namespace Ground_Station
             tb_pid_rate_yaw_kp_Scroll(this, e);
             tb_pid_vel_alt_kp_Scroll(this, e);
             tb_pid_acc_alt_kp_Scroll(this, e);
+            tb_pid_pos_alt_kp_Scroll(this, e);
             MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAll);
         }        
 
@@ -526,7 +527,37 @@ namespace Ground_Station
             }
             return output;
         }
-        
+
+        private void tb_pid_pos_alt_kp_Scroll(object sender, EventArgs e)
+        {
+
+            toolTip1.SetToolTip(tb_pid_pos_alt_kp, tb_pid_pos_alt_kp.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+
+            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
+            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
+            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
+        }
+
+        private void tb_pid_pos_alt_ki_Scroll(object sender, EventArgs e)
+        {
+            toolTip1.SetToolTip(tb_pid_pos_alt_ki, tb_pid_pos_alt_ki.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+
+            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
+            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
+            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
+        }
+
+        private void tb_pid_pos_alt_kd_Scroll(object sender, EventArgs e)
+        {
+            toolTip1.SetToolTip(tb_pid_pos_alt_kd, tb_pid_pos_alt_kd.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyPosAlt);
+
+            MsgUdpT01.message.pidPosAltKp = Convert.ToByte(tb_pid_pos_alt_kp.Value);
+            MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
+            MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
+        }
     }
 }
 

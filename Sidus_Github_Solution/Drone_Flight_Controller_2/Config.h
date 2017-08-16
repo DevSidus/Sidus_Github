@@ -159,7 +159,7 @@ This header file define all the configurable variables including constants, pin 
 
 #define		PID_POS_ALT_KP			40
 #define		PID_POS_ALT_KI			0.0
-#define		PID_POS_ALT_KD			4.0
+#define		PID_POS_ALT_KD			0.0
 #define		PID_POS_ALT_OUTMIN		-250
 #define		PID_POS_ALT_OUTMAX		250
 

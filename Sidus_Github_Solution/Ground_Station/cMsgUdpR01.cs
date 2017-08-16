@@ -110,6 +110,14 @@ namespace Ground_Station
 
         //public short commandedYawAngle { get; set; }
 
+        public byte pidPosAltKp { get; set; }
+        public byte pidPosAltKi { get; set; }
+        public byte pidPosAltKd { get; set; }
+        public short pidPosAltOutput { get; set; }
+        public short pidPosAltPresult { get; set; }
+        public short pidPosAltIresult { get; set; }
+        public short pidPosAltDresult { get; set; }
+
         public byte pidVelAltKp { get; set; }
         public byte pidVelAltKi { get; set; }
         public byte pidVelAltKd { get; set; }

@@ -27,7 +27,11 @@ namespace Ground_Station
         public byte pidAngleYawKp { get; set; }
         public byte pidAngleYawKi { get; set; }
         public byte pidAngleYawKd { get; set; }
-        
+
+        public byte pidPosAltKp { get; set; }
+        public byte pidPosAltKi { get; set; }
+        public byte pidPosAltKd { get; set; }
+
         public byte pidVelAltKp { get; set; }
         public byte pidVelAltKi { get; set; }
         public byte pidVelAltKd { get; set; }

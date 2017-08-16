@@ -25,6 +25,7 @@ namespace Ground_Station
                             pidCommandApplyAll = 5,
                             pidCommandApplyVelAlt = 6,
                             pidCommandApplyAccAlt = 7,
+                            pidCommandApplyPosAlt = 8,
     }
 
 
