@@ -188,12 +188,17 @@ This header file define all the configurable variables including constants, pin 
 #define		RESOLUTION_PID_ANGLE_KD			0.001
 #define		RESOLUTION_PID_ANGLE_YAW_KD     0.01
 
+#define		RESOLUTION_PID_POS_KP			1
+#define		RESOLUTION_PID_POS_KI			1
+#define		RESOLUTION_PID_POS_KD			1
+
 #define		RESOLUTION_PID_VEL_KP			0.1
 #define		RESOLUTION_PID_VEL_KI			0.01
 #define		RESOLUTION_PID_VEL_KD			0.01
-#define		RESOLUTION_PID_POS_KP			0.01
-#define		RESOLUTION_PID_POS_KI			0.001
-#define		RESOLUTION_PID_POS_KD			0.001
+
+#define		RESOLUTION_PID_ACC_KP			0.01
+#define		RESOLUTION_PID_ACC_KI			0.001
+#define		RESOLUTION_PID_ACC_KD			0.001
 
 
 #define		SERIAL_COM_SPEED			921600

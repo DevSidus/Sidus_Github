@@ -1958,9 +1958,9 @@ void applyPidCommandVelAlt()
 void applyPidCommandAccAlt()
 {
 	//Set Altitude Position PID parameters
-	pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_POS_KP;
-	pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_POS_KI;
-	pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_POS_KD;
+	pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
+	pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
+	pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
 	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
 }
 
@@ -2069,9 +2069,9 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
 	MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
 	MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
-	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_POS_KP;
-	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_POS_KI;
-	MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_POS_KD;
+	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_ACC_KP;
+	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_ACC_KI;
+	MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_ACC_KD;
 	MsgUdpR01.message.pidAccAltOutput		= pidVars.accAlt.output;
 	MsgUdpR01.message.pidAccAltPresult		= pidAccAlt.Get_P_Result();
 	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
