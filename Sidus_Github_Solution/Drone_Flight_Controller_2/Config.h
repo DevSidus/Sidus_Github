@@ -62,6 +62,9 @@ This header file define all the configurable variables including constants, pin 
 #define		PIN_MCU_SDA			21
 #define		PIN_MCU_SCL			22
 
+#define		PIN_ULTSENS_ECHO	15
+#define		PIN_ULTSENS_TRIG	2
+
 #define		PWM_FREQ		100
 #define		PWM_DEPTH		16
 
@@ -154,15 +157,15 @@ This header file define all the configurable variables including constants, pin 
 #define		PID_ANGLE_YAW_OUTMAX		150
 
 
-#define		PID_VEL_ALT_KP			2.0
+#define		PID_VEL_ALT_KP			0.4 // Will be tested
 #define		PID_VEL_ALT_KI			0.0
 #define		PID_VEL_ALT_KD			0.0
-#define		PID_VEL_ALT_OUTMIN		-500
-#define		PID_VEL_ALT_OUTMAX		500
+#define		PID_VEL_ALT_OUTMIN		-250
+#define		PID_VEL_ALT_OUTMAX		250
 
-#define		PID_ACC_ALT_KP			0.4
-#define		PID_ACC_ALT_KI			0.0
-#define		PID_ACC_ALT_KD			0.02
+#define		PID_ACC_ALT_KP			0.6  // It should be between 0.7 and 0.8, Shouldn't be increased that 0.8
+#define		PID_ACC_ALT_KI			0.2 // Helpful range is between 0.2 and 0.5
+#define		PID_ACC_ALT_KD			0.001 // It shouldn't ne greater than 0.02
 
 
 
@@ -188,6 +191,8 @@ This header file define all the configurable variables including constants, pin 
 
 #define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
+
+#define		SERIAL_GPS_SPEED			9600
 
 #define     BAT_VOLT_DIV_R1				51.0
 #define		BAT_VOLT_DIV_R2				10.0
@@ -232,6 +237,8 @@ float barometerTemp = 0.0;
 double barometerAlt = 0.0;
 int32_t barometerPress;
 bool baroReady = false;
+
+double ultrasonicDistance = 0.0;
 
 float compassHdg;
 

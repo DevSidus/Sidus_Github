@@ -57,6 +57,7 @@ cRxFilter filterRxThr(RX_MAX_PULSE_WIDTH), filterRxPitch(RX_MAX_PULSE_WIDTH), fi
 
 cRxFilter filterRx5thCh(RX_MAX_PULSE_WIDTH), filterRx6thCh(RX_MAX_PULSE_WIDTH);
 
+HardwareSerial SerialGps(2);
 
 SemaphoreHandle_t xI2CSemaphore;
 SemaphoreHandle_t xUdpSemaphore;
@@ -67,6 +68,7 @@ void setup() {
 	Serial.println("");
 	Serial.println("Serial started");
 
+	SerialGps.begin(SERIAL_GPS_SPEED);
 
 	connectToWiFi();
 
@@ -82,6 +84,8 @@ void setup() {
 	pinMode(PIN_RX_6TH_CHAN, INPUT);
 	pinMode(PIN_BUZZER, OUTPUT);
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
+	pinMode(PIN_ULTSENS_TRIG, OUTPUT);
+	pinMode(PIN_ULTSENS_ECHO, INPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
 	delay(100);
 	
@@ -135,7 +139,8 @@ void setup() {
 	xTaskCreatePinnedToCore(task_PID, "task_PID", 4096, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 10, NULL, 1);
-
+	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 2048, NULL, 10, NULL, 1);
+	xTaskCreatePinnedToCore(task_gps, "task_gps", 2048, NULL, 10, NULL, 1);
 
 
 	//esp_event_loop_init((system_event_cb_t*)&task_UDPhandle, NULL);
@@ -210,6 +215,54 @@ void task_baro(void * parameter)
 		//Serial.println(qc.posWorldEstimated.z);
 
 		delay(10);
+	}
+	vTaskDelete(NULL);
+	return;
+}
+
+void task_ultrasonic(void * parameter)
+{
+	double pulseDuration = 0.0;
+
+	while (true)
+	{
+		// Clears the trigPin
+		digitalWrite(PIN_ULTSENS_TRIG, LOW);
+		delayMicroseconds(2);
+		// Sets the trigPin on HIGH state for 10 micro seconds
+		digitalWrite(PIN_ULTSENS_TRIG, HIGH);
+		delayMicroseconds(10);
+		digitalWrite(PIN_ULTSENS_TRIG, LOW);
+
+		// Reads the echoPin, returns the sound wave travel time in microseconds
+		pulseDuration = pulseIn(PIN_ULTSENS_ECHO, HIGH);
+		
+		// Calculating the distance
+		ultrasonicDistance = pulseDuration * 0.034 / 2;
+
+		// Serial.println(ultrasonicDistance);
+
+		delay(50);
+	}
+	vTaskDelete(NULL);
+	return;
+}
+
+void task_gps(void * parameter)
+{
+	String gpsData;
+
+	while (true)
+	{
+
+		if (SerialGps.available() > 0)
+		{
+			gpsData = SerialGps.readStringUntil('\n');
+		}
+
+		// Serial.println(gpsData);
+
+		delay(100);
 	}
 	vTaskDelete(NULL);
 	return;
@@ -1324,7 +1377,7 @@ void processPID()
 	//Serial.println(qc.accelDiff.z * 100);
 
 	// Acceleration Altitude PID
-	pidVars.accAlt.setpoint = accelCmd.z;   // cmd/second^2
+	pidVars.accAlt.setpoint = accelCmd.z;   // cm/second^2
 	pidVars.accAlt.sensedVal = qc.accelWorldEstimated.z * 100;  // cm/second^2
 	pidVars.accAlt.setpointDiff = accelCmdDiff.z;          // cm/second^3
 	pidVars.accAlt.sensedValDiff = qc.accelDiff.z * 100;  // cm/second^3
@@ -1555,10 +1608,9 @@ void handleAutoModeCommands()
 	{
 		autoModeStatus = autoModeAltitude;
 	}
-	else if (autoModeStatus != autoModeOFF)
+	else
 	{
-		//If previous autoModeStatus is Altitude, then change to transition state
-		autoModeStatus = autoModeAltToOFF;
+		autoModeStatus = autoModeOFF;
 	}
 #else	
 	if (modeQuad == modeQuadARMED && MsgT01.message.coWorkerTxPacket.statusGS == statusType_Normal)
@@ -1923,6 +1975,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.mpuRoll				= qc.euler.phi * 180 / M_PI;
 	MsgUdpR01.message.baroTemp				= barometerTemp;
 	MsgUdpR01.message.baroAlt				= barometerAlt;
+	MsgUdpR01.message.ultrasonicDist		= ultrasonicDistance;
 	MsgUdpR01.message.compassHdg			= compassHdg;
 	MsgUdpR01.message.batteryVoltage    	= batteryVoltageInVolts;
 	MsgUdpR01.message.quadAccelerationWorldZ = qc.accelWorldEstimated.z;
@@ -1935,6 +1988,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.rxPitch				= cmdRxPitchCalibrated;
 	MsgUdpR01.message.rxRoll				= cmdRxRollCalibrated;
 	MsgUdpR01.message.rxYaw					= cmdRxYaw;
+	MsgUdpR01.message.rx6thCh				= cmdRx6thCh;
 	MsgUdpR01.message.pidRatePitchKp		= pidVars.ratePitch.Kp / RESOLUTION_PID_RATE_KP;
 	MsgUdpR01.message.pidRatePitchKi		= pidVars.ratePitch.Ki / RESOLUTION_PID_RATE_KI;
 	MsgUdpR01.message.pidRatePitchKd		= pidVars.ratePitch.Kd / RESOLUTION_PID_RATE_KD;
