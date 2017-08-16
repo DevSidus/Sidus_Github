@@ -40,6 +40,8 @@ struct structMsgUdpR01
 
 	float batteryVoltage;
 
+	float ultrasonicDist;
+
 	// Altitude Parameter Estimation with Kalman Filter
 	float quadAccelerationWorldZ; // kalman filtered output
 	float quadVelocityWorldZ;   // kalman filtered output
@@ -52,6 +54,7 @@ struct structMsgUdpR01
 	short rxPitch;
 	short rxRoll;
 	short rxYaw;
+	short rx6thCh;
 
 	unsigned char pidRatePitchKp;
 	unsigned char pidRatePitchKi;

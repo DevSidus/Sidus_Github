@@ -40,6 +40,8 @@ namespace Ground_Station
         public float baroTemp { get; set; }
         public float baroAlt { get; set; }
 
+        public float ultrasonicDist { get; set; }
+
         public float compassHdg { get; set; }
 
         public float batteryVoltage { get; set; }
@@ -56,6 +58,7 @@ namespace Ground_Station
         public short rxPitch { get; set; }
         public short rxRoll { get; set; }
         public short rxYaw { get; set; }
+        public short rx6thCh { get; set; }
 
         public byte pidRatePitchKp { get; set; }
         public byte pidRatePitchKi { get; set; }
