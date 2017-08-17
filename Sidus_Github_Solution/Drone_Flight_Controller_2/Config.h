@@ -27,6 +27,18 @@ This header file define all the configurable variables including constants, pin 
 //Comment out below line if you have 6 CH RX_TX
 #define		MY_RX_TX_IS_6_CHANNEL
 
+//Comment out one of the following barometer hardware selections
+#define		BAROMETER_MS5611
+//#define		BAROMETER_BMP180
+
+#ifdef BAROMETER_BMP180
+#define		EXISTING_ALTITUDE			950    //in meters from sea-level
+double sealevelPress = 1000;
+double computedAlt=0;
+bool barometer_initial_measurement = true;
+#endif // BAROMETER_BMP180
+
+
 
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
@@ -201,7 +213,7 @@ This header file define all the configurable variables including constants, pin 
 #define		RESOLUTION_PID_ACC_KD			0.001
 
 
-#define		SERIAL_COM_SPEED			921600
+#define		SERIAL_COM_SPEED			115200
 #define		SERIAL_PARSE_OVF_MULT		3
 
 #define		SERIAL_GPS_SPEED			9600
@@ -246,9 +258,9 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 
 
 
-float barometerTemp = 0.0;
+double barometerTemp = 0.0;
 double barometerAlt = 0.0;
-int32_t barometerPress;
+double barometerPress;
 bool baroReady = false;
 
 double ultrasonicDistance = 0.0;

@@ -19,11 +19,18 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include "cBuzzerMelody.h"
 #include "Local_I2Cdev.h"
 #include "Local_MPU6050_6Axis_MotionApps20.h"
-#include "Local_MS5611.h"
 #include "Local_HMC5883L.h"
 #include "Local_PID_v1.h"
 #include "PID_YawAngle.h"
 #include "Config.h"
+
+#ifdef BAROMETER_MS5611
+#include "Local_MS5611.h"
+#else
+#include "Local_SFE_BMP180.h"
+#endif
+
+
 #include "cMsgUdpR01.h"
 #include "cMsgUdpT01.h"
 #include "cRxFilter.h"
@@ -31,7 +38,14 @@ Description: This is the main code for Drone_Flight_Controller Project
 
 //Global Class Definitions
 MPU6050 mpu;
+
+
+#ifdef BAROMETER_MS5611
 MS5611 barometer;
+#else
+SFE_BMP180 barometer;
+#endif
+
 HMC5883L compass;
 
 //The udp library class
@@ -73,9 +87,8 @@ void setup() {
 
 	SerialGps.begin(SERIAL_GPS_SPEED);
 
-	connectToWiFi();
+	//connectToWiFi();
 
-	analogRead(4);
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
 	//pinMode(PIN_BATTERY, INPUT);
@@ -125,8 +138,8 @@ void setup() {
 	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 8192, NULL, 20, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 8192, NULL, 5, NULL, 0);
+	//xTaskCreatePinnedToCore(task_UDP, "task_UDP", 8192, NULL, 20, NULL, 0);
+	//xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 8192, NULL, 5, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 4096, NULL, 10, NULL, 0);
@@ -204,20 +217,19 @@ void task_baro(void * parameter)
 
 	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
 	{
+
 		initBarometer();
 		xSemaphoreGive(xI2CSemaphore);
 	}
 	while (true)
 	{
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)2) == pdTRUE)
-		{
+
 			processBarometer();
-			xSemaphoreGive(xI2CSemaphore);
-		}
 
-		//Serial.println(qc.posWorldEstimated.z);
 
-		delay(10);
+#ifdef BAROMETER_MS5611
+		delay(9);
+#endif
 	}
 	vTaskDelete(NULL);
 	return;
@@ -1717,13 +1729,12 @@ void pwmMicroSeconds(int _pwm_channel, int _microseconds)
 bool initBarometer()
 {
 	uint32_t initTime = millis();
-	// Initialize MS5611 sensor
-	// Ultra high resolution: MS5611_ULTRA_HIGH_RES
-	// (default) High resolution: MS5611_HIGH_RES
-	// Standard: MS5611_STANDARD
-	// Low power: MS5611_LOW_POWER
-	// Ultra low power: MS5611_ULTRA_LOW_POWER
-	while (!barometer.begin(MS5611_ULTRA_HIGH_RES))
+	
+#ifdef BAROMETER_MS5611
+	while (!barometer.begin(MS5611_HIGH_RES))
+#else
+	while (!barometer.begin())
+#endif	
 	{
 		if (millis() - initTime > BAROMETER_INIT_THRESHOLD)
 		{
@@ -1737,25 +1748,111 @@ bool initBarometer()
 
 	Serial.println("Baro init success");
 
+	// The pressure sensor returns abolute pressure, which varies with altitude.
+	// To remove the effects of altitude, use the sealevel function and your current altitude.
+	// This number is commonly used in weather reports.
+	// Parameters: P = absolute pressure in mb, ALTITUDE = current altitude in m.
+	// Result: p0 = sea-level compensated pressure in mb
+
+
+
 	delay(100);
 	return true;
 }
 
 void processBarometer()
 {
+#ifdef BAROMETER_MS5611
 	//Barometer Data Processing
-	barometer.runProcess();
+
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
+	{
+		barometer.runProcess();
+		xSemaphoreGive(xI2CSemaphore);
+	}
 	barometerTemp = barometer.readTemperature(true);
 	barometerPress = barometer.readPressure(true);
-	float tempVal = barometer.getAltitude(barometerPress);
+	double value = barometer.getAltitude(barometerPress);
+#else
 
-	if (!isnan(tempVal))
+	char status = 0;
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
 	{
-		barometerAlt = tempVal;
+		status = barometer.startTemperature();
+		xSemaphoreGive(xI2CSemaphore);
+	}
+
+	if (status != 0)
+	{
+		// Wait for the measurement to complete:
+		delay(status);
+
+		status = 0;
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
+		{
+			status = barometer.getTemperature(barometerTemp);
+			xSemaphoreGive(xI2CSemaphore);
+		}
+
+		if (status != 0)
+		{
+			status = 0;
+			if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
+			{
+				status = barometer.startPressure(2);
+				xSemaphoreGive(xI2CSemaphore);
+			}
+			
+			if (status != 0)
+			{
+				// Wait for the measurement to complete:
+				delay(status);
+
+				// Retrieve the completed pressure measurement:
+				// Note that the measurement is stored in the variable P.
+				// Note also that the function requires the previous temperature measurement (T).
+				// (If temperature is stable, you can do one temperature measurement for a number of pressure measurements.)
+				// Function returns 1 if successful, 0 if failure.
+				status = 0;
+				if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
+				{
+					status = barometer.getPressure(barometerPress, barometerTemp);
+					xSemaphoreGive(xI2CSemaphore);
+				}
+				
+				if (status != 0)
+				{
+
+
+					if (barometer_initial_measurement)
+					{
+						sealevelPress = barometer.sealevel(barometerPress, EXISTING_ALTITUDE); // we're at 1655 meters (Boulder, CO)
+						barometer_initial_measurement = false;
+					}
+
+					computedAlt = barometer.altitude(barometerPress, sealevelPress);
+					statusBaro = statusType_Normal;
+				}
+				else statusBaro = statusType_Fail;
+			}
+			else statusBaro = statusType_Fail;
+		}
+		else statusBaro = statusType_Fail;
+	}
+	else statusBaro = statusType_Fail;
+
+	double value = computedAlt;
+#endif	
+
+
+	if (!isnan(value))
+	{
+		barometerAlt = value;
 		baroReady = true;
 	}
 
 
+	//Serial.println(qc.posWorldEstimated.z);
 
 }
 
