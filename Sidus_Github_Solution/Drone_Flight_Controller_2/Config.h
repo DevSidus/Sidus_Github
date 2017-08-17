@@ -213,7 +213,7 @@ bool barometer_initial_measurement = true;
 #define		RESOLUTION_PID_ACC_KD			0.001
 
 
-#define		SERIAL_COM_SPEED			115200
+#define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
 
 #define		SERIAL_GPS_SPEED			9600

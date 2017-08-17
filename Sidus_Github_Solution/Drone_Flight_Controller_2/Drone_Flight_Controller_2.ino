@@ -87,7 +87,7 @@ void setup() {
 
 	SerialGps.begin(SERIAL_GPS_SPEED);
 
-	//connectToWiFi();
+	connectToWiFi();
 
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
@@ -138,8 +138,8 @@ void setup() {
 	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 2048, NULL, 10, NULL, 0);
-	//xTaskCreatePinnedToCore(task_UDP, "task_UDP", 8192, NULL, 20, NULL, 0);
-	//xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 8192, NULL, 5, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 8192, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 8192, NULL, 5, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 4096, NULL, 10, NULL, 0);
