@@ -1347,7 +1347,7 @@ void processPID()
 	velCmd.z = pidVars.posAlt.outputFiltered;
 	
 	// Velocity Altitude PID
-	pidVars.velAlt.setpoint = velCmd.z;//cmdRx6thCh;
+	pidVars.velAlt.setpoint = velCmd.z;  // cm/second
 	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z * 100;  // cm/second
 	pidVars.velAlt.sensedValDiff = qc.accelWorldEstimated.z * 100;  // cm/second^2
 	pidVelAlt.Compute();

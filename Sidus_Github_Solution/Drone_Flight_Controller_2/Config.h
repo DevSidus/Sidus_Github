@@ -169,22 +169,22 @@ bool barometer_initial_measurement = true;
 #define		PID_ANGLE_YAW_OUTMAX		150
 
 
-#define		PID_POS_ALT_KP			40
+#define		PID_POS_ALT_KP			80
 #define		PID_POS_ALT_KI			0.0
 #define		PID_POS_ALT_KD			0.0
 #define		PID_POS_ALT_OUTMIN		-250
 #define		PID_POS_ALT_OUTMAX		250
 
 
-#define		PID_VEL_ALT_KP			0.4 // Will be tested
+#define		PID_VEL_ALT_KP			4.0
 #define		PID_VEL_ALT_KI			0.0
-#define		PID_VEL_ALT_KD			0.0
+#define		PID_VEL_ALT_KD			0.1 // May be increased
 #define		PID_VEL_ALT_OUTMIN		-250
 #define		PID_VEL_ALT_OUTMAX		250
 
-#define		PID_ACC_ALT_KP			0.6  // It should be between 0.7 and 0.8, Shouldn't be increased that 0.8
-#define		PID_ACC_ALT_KI			0.2 // Helpful range is between 0.2 and 0.5
-#define		PID_ACC_ALT_KD			0.001 // It shouldn't ne greater than 0.02
+#define		PID_ACC_ALT_KP			0.5  // Shouldn't be increased than 0.8
+#define		PID_ACC_ALT_KI			0.08 // Helpful range is between 0.02 and 0.1
+#define		PID_ACC_ALT_KD			0.01 // It shouldn't be greater than 0.02
 
 
 
