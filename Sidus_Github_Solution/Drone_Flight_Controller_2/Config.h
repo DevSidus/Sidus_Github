@@ -169,16 +169,16 @@ bool barometer_initial_measurement = true;
 #define		PID_ANGLE_YAW_OUTMAX		150
 
 
-#define		PID_POS_ALT_KP			80
+#define		PID_POS_ALT_KP			60 // May be tuned better
 #define		PID_POS_ALT_KI			0.0
-#define		PID_POS_ALT_KD			0.0
+#define		PID_POS_ALT_KD			0.0 // May be tuned better
 #define		PID_POS_ALT_OUTMIN		-250
 #define		PID_POS_ALT_OUTMAX		250
 
 
-#define		PID_VEL_ALT_KP			4.0
+#define		PID_VEL_ALT_KP			5.0 // May be tuned better
 #define		PID_VEL_ALT_KI			0.0
-#define		PID_VEL_ALT_KD			0.1 // May be increased
+#define		PID_VEL_ALT_KD			0.1 // May be tuned better
 #define		PID_VEL_ALT_OUTMIN		-250
 #define		PID_VEL_ALT_OUTMAX		250
 
@@ -264,6 +264,7 @@ double barometerPress;
 bool baroReady = false;
 
 double ultrasonicDistance = 0.0;
+double ultrasonicDistanceFiltered = 0.0;
 
 float compassHdg;
 
@@ -455,6 +456,7 @@ struct3Dvector velPIDoutputLowpassBuffer;
 struct3Dvector accelDiffBuffer;
 struct3Dvector accelCmdDiffBuffer;
 
+vector<double> ultrasonicDistanceLowpassBuffer;
 
 double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering
