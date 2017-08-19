@@ -238,6 +238,14 @@ void task_baro(void * parameter)
 void task_ultrasonic(void * parameter)
 {
 	double pulseDuration = 0.0;
+	double speedOfSound = 340.29; // m/s
+	double maxRange = 4.0; // m
+	double ultrasonicDistanceOld = 0.0; // old sensor measurement, to deal with burst values
+
+	// If there is an offset between ground and sensor, substract this offset
+	double ultrasonicDistanceOffset = 0.0; // m
+
+	for (int i = 0; i < lpfLength; i++) ultrasonicDistanceLowpassBuffer.push_back(0.0);
 
 	while (true)
 	{
@@ -253,9 +261,19 @@ void task_ultrasonic(void * parameter)
 		pulseDuration = pulseIn(PIN_ULTSENS_ECHO, HIGH);
 		
 		// Calculating the distance
-		ultrasonicDistance = pulseDuration * 0.034 / 2;
+		ultrasonicDistance = pulseDuration * speedOfSound * 1e-6 / 2 - ultrasonicDistanceOffset; // in m
 
-		// Serial.println(ultrasonicDistance);
+		if (ultrasonicDistance > maxRange) {
+			ultrasonicDistance = ultrasonicDistanceOld;
+		}
+
+		// Low Pass filter
+		ultrasonicDistanceLowpassBuffer.erase(ultrasonicDistanceLowpassBuffer.begin());
+		ultrasonicDistanceLowpassBuffer.push_back(ultrasonicDistance);
+		// Calculate Filter Output
+		ultrasonicDistanceFiltered = dataFilter(ultrasonicDistanceLowpassBuffer, lpfCoefficient);
+		
+		ultrasonicDistanceOld = ultrasonicDistance;
 
 		delay(50);
 	}
@@ -794,6 +812,11 @@ void task_altitude_kalman(void * parameter)
 		delay(500);
 	}
 
+	double barometerAltReference = barometerAlt; // first baro altitude value is stored as a reference
+	double barometerAltLocal = 0.0; // barometerAlt - barometerAltReference;
+
+	double referenceAltitude = 0.0; // This variable is switched between ultrasonic sensor and barometer for Kalman implementation
+
 	double T = 0.010; // Sampling Period
 
 	//***********************************************************************************
@@ -807,7 +830,7 @@ void task_altitude_kalman(void * parameter)
 	double R_Alt = pow(sigmaRowAlt,2); // Measurement noise covariance matrix
 
 	// Initialization
-	double m_Alt_n1 = barometerAlt;
+	double m_Alt_n1 = referenceAltitude;
 	double P_Alt_n1 = pow(sigmaRowAlt, 2);
 
 	double m_Alt_n = 0.0;
@@ -830,7 +853,7 @@ void task_altitude_kalman(void * parameter)
 	double R_AltVelAcc[4] = { pow(sigmaAlt,2), 0, 0, pow(sigmaAccelZ,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_AltVelAcc_n1[3] = { barometerAlt, 0, qc.accelWorld.z / 8300 * 9.80665 };
+	double m_AltVelAcc_n1[3] = { referenceAltitude, 0, qc.accelWorld.z / 8300 * 9.80665 };
 	double P_AltVelAcc_n1[9] = { pow(sigmaAlt,2), 0, 0, 0, pow(sigmaAccelZ,2), 0, 0, 0, pow(sigmaAccelZ,2) };
 
 	double m_AltVelAcc_n[3] = { 0, 0, 0 };
@@ -854,15 +877,25 @@ void task_altitude_kalman(void * parameter)
 
 		//***********************************************************************************
 		// Kalman Filter for Single Altitude Estimation
-		kalmanFilterOneParameter(m_Alt_n1, P_Alt_n1, barometerAlt, 1.0, Q_Alt, 1.0, R_Alt, &m_Alt_n, &P_Alt_n);
+		barometerAltLocal = barometerAlt - barometerAltReference;
+		kalmanFilterOneParameter(m_Alt_n1, P_Alt_n1, barometerAltLocal, 1.0, Q_Alt, 1.0, R_Alt, &m_Alt_n, &P_Alt_n);
 
 		m_Alt_n1 = m_Alt_n;
 		P_Alt_n1 = P_Alt_n;
 		//***********************************************************************************
 
+		if (ultrasonicDistanceFiltered < 3.8) {
+			referenceAltitude = ultrasonicDistanceFiltered;
+		}
+		else
+		{
+			referenceAltitude = m_Alt_n; // If cascaded Kalman is not used: barometerAltLocal;
+		}
+
+
 		//***********************************************************************************
 		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
-		y_AltVelAcc_n[0] = m_Alt_n; // If cascaded Kalman is not used: barometerAlt;
+		y_AltVelAcc_n[0] = referenceAltitude;
 		y_AltVelAcc_n[1] = qc.accelWorld.z / 8300 * 9.80665;
 
 		kalmanFilter(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
@@ -1340,14 +1373,14 @@ void processPID()
 	pidVars.posAlt.setpoint = double(cmdRx6thCh)/10.0 + autoModeStartAltitude; //meters
 	pidVars.posAlt.sensedVal = qc.posWorldEstimated.z;  // meters
 	pidVars.posAlt.sensedValDiff = qc.velWorldEstimated.z;  // m/s
-	pidVelAlt.Compute();
+	pidPosAlt.Compute();
 
 	filterPosPIDoutputs();
 	// Velocity Commands
 	velCmd.z = pidVars.posAlt.outputFiltered;
 	
 	// Velocity Altitude PID
-	pidVars.velAlt.setpoint = velCmd.z;//cmdRx6thCh;
+	pidVars.velAlt.setpoint = velCmd.z;  // cm/second
 	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z * 100;  // cm/second
 	pidVars.velAlt.sensedValDiff = qc.accelWorldEstimated.z * 100;  // cm/second^2
 	pidVelAlt.Compute();
@@ -2083,7 +2116,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.mpuRoll				= qc.euler.phi * 180 / M_PI;
 	MsgUdpR01.message.baroTemp				= barometerTemp;
 	MsgUdpR01.message.baroAlt				= barometerAlt;
-	MsgUdpR01.message.ultrasonicDist		= ultrasonicDistance;
+	MsgUdpR01.message.ultrasonicDist		= ultrasonicDistanceFiltered;
 	MsgUdpR01.message.compassHdg			= compassHdg;
 	MsgUdpR01.message.batteryVoltage    	= batteryVoltageInVolts;
 	MsgUdpR01.message.quadAccelerationWorldZ = qc.accelWorldEstimated.z;
