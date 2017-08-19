@@ -40,11 +40,11 @@ namespace Ground_Station
         public float baroTemp { get; set; }
         public float baroAlt { get; set; }
 
-        public float ultrasonicDist { get; set; }
-
         public float compassHdg { get; set; }
 
         public float batteryVoltage { get; set; }
+
+        public float ultrasonicDist { get; set; }
 
         // Altitude Parameter Estimation with Kalman Filter
         public float quadAccelerationWorldZ { get; set; }
