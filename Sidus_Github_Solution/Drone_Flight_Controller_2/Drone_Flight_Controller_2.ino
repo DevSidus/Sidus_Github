@@ -884,7 +884,7 @@ void task_altitude_kalman(void * parameter)
 		P_Alt_n1 = P_Alt_n;
 		//***********************************************************************************
 
-		if (ultrasonicDistanceFiltered < 3.8) {
+		if (ultrasonicDistanceFiltered > 0.01 && ultrasonicDistanceFiltered < 3.8) {  //ultrasonic sensor output equals to 0 if it is not connected
 			referenceAltitude = ultrasonicDistanceFiltered;
 		}
 		else
