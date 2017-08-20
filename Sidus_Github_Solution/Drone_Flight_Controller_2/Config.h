@@ -2,6 +2,7 @@
 /*
 This header file define all the configurable variables including constants, pin mapping, etc.
 */
+#include "cDataFilter.h"
 
 //Wifi, UDP Definitions
 //#define			WIFI_SSID						"SUPERONLINE_WiFi_4661"
@@ -441,22 +442,55 @@ unsigned char statusCompass;
 unsigned char statusUdp;
 unsigned char statusGS;
 
-struct struct3Dvector
+//struct struct3Dvector
+//{
+//	vector<double> xVector;
+//	vector<double> yVector;
+//	vector<double> zVector;
+//};
+
+
+typedef enum
 {
-	vector<double> xVector;
-	vector<double> yVector;
-	vector<double> zVector;
-};
+	filterType_Diff100Hz = 0,
+	filterType_Diff200Hz = 1,
+	filterType_LPF = 2,
+}filterType;
 
-struct3Dvector gyroDiffBuffer;
-struct3Dvector anglePIDoutputLowpassBuffer;
-struct3Dvector rateCmdDiffBuffer;
-struct3Dvector posPIDoutputLowpassBuffer;
-struct3Dvector velPIDoutputLowpassBuffer;
-struct3Dvector accelDiffBuffer;
-struct3Dvector accelCmdDiffBuffer;
+cDataFilter filtObjGyroDiffX(filterType_Diff200Hz);
+cDataFilter filtObjGyroDiffY(filterType_Diff200Hz);
+cDataFilter filtObjGyroDiffZ(filterType_Diff200Hz);
 
-vector<double> ultrasonicDistanceLowpassBuffer;
+cDataFilter filtObjAnglePIDoutX(filterType_LPF);
+cDataFilter filtObjAnglePIDoutY(filterType_LPF);
+cDataFilter filtObjAnglePIDoutZ(filterType_LPF);
+
+cDataFilter filtObjRateCmdDiffX(filterType_Diff100Hz);
+cDataFilter filtObjRateCmdDiffY(filterType_Diff100Hz);
+cDataFilter filtObjRateCmdDiffZ(filterType_Diff100Hz);
+
+cDataFilter filtObjPosPIDoutX(filterType_LPF);
+cDataFilter filtObjPosPIDoutY(filterType_LPF);
+cDataFilter filtObjPosPIDoutZ(filterType_LPF);
+
+cDataFilter filtObjVelPIDoutX(filterType_LPF);
+cDataFilter filtObjVelPIDoutY(filterType_LPF);
+cDataFilter filtObjVelPIDoutZ(filterType_LPF);
+
+cDataFilter filtObjAccelDiffZ(filterType_Diff100Hz);
+
+cDataFilter filtObjAccelCmdDiffZ(filterType_Diff100Hz);
+
+cDataFilter filtObjUltrasonicDist(filterType_LPF);
+
+//struct3Dvector gyroDiffBuffer;
+//struct3Dvector anglePIDoutputLowpassBuffer;
+//struct3Dvector rateCmdDiffBuffer;
+//struct3Dvector posPIDoutputLowpassBuffer;
+//struct3Dvector velPIDoutputLowpassBuffer;
+//struct3Dvector accelDiffBuffer;
+//struct3Dvector accelCmdDiffBuffer;
+//vector<double> ultrasonicDistanceLowpassBuffer;
 
 double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering

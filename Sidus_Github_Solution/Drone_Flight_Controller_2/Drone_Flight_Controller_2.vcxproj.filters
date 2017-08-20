@@ -75,13 +75,13 @@
     <ClInclude Include="rtwtypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dataFilter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cRxFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Local_SFE_BMP180.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cDataFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -132,6 +132,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Local_SFE_BMP180.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cDataFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

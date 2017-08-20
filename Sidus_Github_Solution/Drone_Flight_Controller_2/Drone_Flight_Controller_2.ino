@@ -12,10 +12,12 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include <ArduinoOTA.h>
 #include <../../tools/sdk/include/driver/driver/rmt.h>
 
+using namespace std;
 //Local Include Files
 #include "kalmanFilter.h"
 #include "kalmanFilter_initialize.h"
-#include "dataFilter.h"
+//#include "dataFilter.h"
+#include "cDataFilter.h"
 #include "cBuzzerMelody.h"
 #include "Local_I2Cdev.h"
 #include "Local_MPU6050_6Axis_MotionApps20.h"
@@ -186,12 +188,8 @@ void task_mpu(void * parameter)
 		xSemaphoreGive(xI2CSemaphore);
 	}
 
-	// Initialize Buffer
-	for (int i = 0; i < diffFilter200HzLength; i++) gyroDiffBuffer.xVector.push_back(0.0);
-	for (int i = 0; i < diffFilter200HzLength; i++) gyroDiffBuffer.yVector.push_back(0.0);
-	for (int i = 0; i < diffFilter200HzLength; i++) gyroDiffBuffer.zVector.push_back(0.0);
 	deltaTimeGyroDiff = 0.005;
-
+	
 	while (true)
 	{
 		//mpuProcessStartTime = micros();
@@ -245,8 +243,6 @@ void task_ultrasonic(void * parameter)
 	// If there is an offset between ground and sensor, substract this offset
 	double ultrasonicDistanceOffset = 0.0; // m
 
-	for (int i = 0; i < lpfLength; i++) ultrasonicDistanceLowpassBuffer.push_back(0.0);
-
 	while (true)
 	{
 		// Clears the trigPin
@@ -268,11 +264,9 @@ void task_ultrasonic(void * parameter)
 		}
 
 		// Low Pass filter
-		ultrasonicDistanceLowpassBuffer.erase(ultrasonicDistanceLowpassBuffer.begin());
-		ultrasonicDistanceLowpassBuffer.push_back(ultrasonicDistance);
-		// Calculate Filter Output
-		ultrasonicDistanceFiltered = dataFilter(ultrasonicDistanceLowpassBuffer, lpfCoefficient);
-		
+		// Calculate Filter Output		
+		ultrasonicDistanceFiltered = filtObjUltrasonicDist.filter(ultrasonicDistance, 0);
+
 		ultrasonicDistanceOld = ultrasonicDistance;
 
 		delay(50);
@@ -863,7 +857,6 @@ void task_altitude_kalman(void * parameter)
 
 
 	// Initialize Buffer
-	for (int i = 0; i < diffFilter100HzLength; i++) accelDiffBuffer.zVector.push_back(0.0);
 	deltaTimeAccelDiff = 0.01;
 
 	// Initialize Kalman Filtering
@@ -913,10 +906,8 @@ void task_altitude_kalman(void * parameter)
 
 
 		//Acceleration Derivative
-		accelDiffBuffer.zVector.erase(accelDiffBuffer.zVector.begin());
-		accelDiffBuffer.zVector.push_back(qc.accelWorldEstimated.z);
 		// Calculate Filter Output
-		qc.accelDiff.z = diffFilter(accelDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeAccelDiff);
+		qc.accelDiff.z = filtObjAccelDiffZ.filter(qc.accelWorldEstimated.z, deltaTimeAccelDiff);
 
 		delay(9);
 	}
@@ -1144,16 +1135,10 @@ void processMpu()
 
 			// Differantiate Gyro Values for PID Kd branch
 			// Update Buffer
-			gyroDiffBuffer.xVector.erase(gyroDiffBuffer.xVector.begin());
-			gyroDiffBuffer.xVector.push_back(qc.gyro.x);
-			gyroDiffBuffer.yVector.erase(gyroDiffBuffer.yVector.begin());
-			gyroDiffBuffer.yVector.push_back(qc.gyro.y);
-			gyroDiffBuffer.zVector.erase(gyroDiffBuffer.zVector.begin());
-			gyroDiffBuffer.zVector.push_back(qc.gyro.z);
 			// Calculate Filter Output
-			qc.gyroDiff.x = diffFilter(gyroDiffBuffer.xVector, diffFilter200HzCoefficient, deltaTimeGyroDiff);
-			qc.gyroDiff.y = diffFilter(gyroDiffBuffer.yVector, diffFilter200HzCoefficient, deltaTimeGyroDiff);
-			qc.gyroDiff.z = diffFilter(gyroDiffBuffer.zVector, diffFilter200HzCoefficient, deltaTimeGyroDiff);
+			qc.gyroDiff.x = filtObjGyroDiffX.filter(qc.gyro.x, deltaTimeGyroDiff);
+			qc.gyroDiff.y = filtObjGyroDiffY.filter(qc.gyro.y, deltaTimeGyroDiff);
+			qc.gyroDiff.z = filtObjGyroDiffZ.filter(qc.gyro.z, deltaTimeGyroDiff);
 
 		}
 
@@ -1492,22 +1477,6 @@ void initPIDvariables()
 	pidVars.accAlt.output = 0;
 	pidVars.accAlt.outputCompensated = 0;
 
-	// Initialize PID Output Buffer for Low Pass Filtering
-	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.xVector.push_back(0.0);
-	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.yVector.push_back(0.0);
-	for (int i = 0; i < lpfLength; i++) anglePIDoutputLowpassBuffer.zVector.push_back(0.0);
-
-	for (int i = 0; i < lpfLength; i++) posPIDoutputLowpassBuffer.zVector.push_back(0.0);
-	for (int i = 0; i < lpfLength; i++) velPIDoutputLowpassBuffer.zVector.push_back(0.0);
-
-	// Initialize Rate Command Buffer for Diff Filtering
-	// Initialize Buffer
-	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.xVector.push_back(0.0);
-	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.yVector.push_back(0.0);
-	for (int i = 0; i < diffFilter100HzLength; i++) rateCmdDiffBuffer.zVector.push_back(0.0);
-
-	for (int i = 0; i < diffFilter100HzLength; i++) accelCmdDiffBuffer.zVector.push_back(0.0);
-	
 	deltaTimeRateCmdDiff = 0.01;
 	deltaTimeAccelCmdDiff = 0.01;
 
@@ -2316,16 +2285,11 @@ void filterAnglePIDoutputs()
 {
 	// Filtering Angle PID Outputs by LPF
 	// Update Buffer
-	anglePIDoutputLowpassBuffer.xVector.erase(anglePIDoutputLowpassBuffer.xVector.begin());
-	anglePIDoutputLowpassBuffer.xVector.push_back(pidVars.angleRoll.output);
-	anglePIDoutputLowpassBuffer.yVector.erase(anglePIDoutputLowpassBuffer.yVector.begin());
-	anglePIDoutputLowpassBuffer.yVector.push_back(pidVars.anglePitch.output);
-	anglePIDoutputLowpassBuffer.zVector.erase(anglePIDoutputLowpassBuffer.zVector.begin());
-	anglePIDoutputLowpassBuffer.zVector.push_back(pidVars.angleYaw.output);
 	// Calculate Filter Output
-	pidVars.angleRoll.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.xVector, lpfCoefficient);
-	pidVars.anglePitch.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.yVector, lpfCoefficient);
-	pidVars.angleYaw.outputFiltered = dataFilter(anglePIDoutputLowpassBuffer.zVector, lpfCoefficient);
+	pidVars.angleRoll.outputFiltered = filtObjAnglePIDoutX.filter(pidVars.angleRoll.output, 0);
+	pidVars.anglePitch.outputFiltered = filtObjAnglePIDoutY.filter(pidVars.anglePitch.output, 0);
+	pidVars.angleYaw.outputFiltered = filtObjAnglePIDoutZ.filter(pidVars.angleYaw.output, 0);
+
 }
 
 void calculateRateCmdDifferentials()
@@ -2333,16 +2297,10 @@ void calculateRateCmdDifferentials()
 
 	// Differantiate Rate Commands for Rate PID Kd branch
 	// Update Buffer
-	rateCmdDiffBuffer.xVector.erase(rateCmdDiffBuffer.xVector.begin());
-	rateCmdDiffBuffer.xVector.push_back(rateCmd.x);
-	rateCmdDiffBuffer.yVector.erase(rateCmdDiffBuffer.yVector.begin());
-	rateCmdDiffBuffer.yVector.push_back(rateCmd.y);
-	rateCmdDiffBuffer.zVector.erase(rateCmdDiffBuffer.zVector.begin());
-	rateCmdDiffBuffer.zVector.push_back(rateCmd.z);
 	// Calculate Filter Output
-	rateCmdDiff.x = diffFilter(rateCmdDiffBuffer.xVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
-	rateCmdDiff.y = diffFilter(rateCmdDiffBuffer.yVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
-	rateCmdDiff.z = diffFilter(rateCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeRateCmdDiff);
+	rateCmdDiff.x = filtObjRateCmdDiffX.filter(rateCmd.x, deltaTimeRateCmdDiff);
+	rateCmdDiff.y = filtObjRateCmdDiffY.filter(rateCmd.y, deltaTimeRateCmdDiff);
+	rateCmdDiff.z = filtObjRateCmdDiffZ.filter(rateCmd.z, deltaTimeRateCmdDiff);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -2352,29 +2310,23 @@ void filterPosPIDoutputs()
 
 	// Filtering Pos Altitude PID Outputs by LPF
 	// Update Buffer
-	posPIDoutputLowpassBuffer.zVector.erase(posPIDoutputLowpassBuffer.zVector.begin());
-	posPIDoutputLowpassBuffer.zVector.push_back(pidVars.posAlt.output);
 	// Calculate Filter Output
-	pidVars.posAlt.outputFiltered = dataFilter(posPIDoutputLowpassBuffer.zVector, lpfCoefficient);
+
+	pidVars.posAlt.outputFiltered = filtObjPosPIDoutZ.filter(pidVars.posAlt.output, 0);
 }
 
 void filterVelocityPIDoutputs()
 {
-
 	// Filtering Velocity Altitude PID Outputs by LPF
 	// Update Buffer
-	velPIDoutputLowpassBuffer.zVector.erase(velPIDoutputLowpassBuffer.zVector.begin());
-	velPIDoutputLowpassBuffer.zVector.push_back(pidVars.velAlt.output);
 	// Calculate Filter Output
-	pidVars.velAlt.outputFiltered = dataFilter(velPIDoutputLowpassBuffer.zVector, lpfCoefficient);
+	pidVars.velAlt.outputFiltered = filtObjVelPIDoutZ.filter(pidVars.velAlt.output, 0);
 }
 
 void calculateAccelCmdDifferentials()
 {
 	//// Differantiate Acceleration Commands for Acceleration PID Kd branch ////
 	// Update Buffer
-	accelCmdDiffBuffer.zVector.erase(accelCmdDiffBuffer.zVector.begin());
-	accelCmdDiffBuffer.zVector.push_back(accelCmd.z);
 	// Calculate Filter Output
-	accelCmdDiff.z = diffFilter(accelCmdDiffBuffer.zVector, diffFilter100HzCoefficient, deltaTimeAccelCmdDiff);
+	accelCmdDiff.z = filtObjAccelCmdDiffZ.filter(accelCmd.z, deltaTimeAccelCmdDiff);
 }
