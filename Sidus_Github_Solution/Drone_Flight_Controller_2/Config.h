@@ -178,9 +178,9 @@ bool barometer_initial_measurement = true;
 #define		PID_POS_ALT_OUTMAX		250
 
 
-#define		PID_VEL_ALT_KP			5.0 // May be tuned better
+#define		PID_VEL_ALT_KP			3.57 // May be tuned better
 #define		PID_VEL_ALT_KI			0.0
-#define		PID_VEL_ALT_KD			0.1 // May be tuned better
+#define		PID_VEL_ALT_KD			0.071 // May be tuned better
 #define		PID_VEL_ALT_OUTMIN		-250
 #define		PID_VEL_ALT_OUTMAX		250
 

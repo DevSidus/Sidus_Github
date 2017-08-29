@@ -88,23 +88,23 @@ struct structMsgUdpR01
 	//short pidAngleRollIresult;
 	//short pidAngleRollDresult;
 
-	//unsigned char pidRateYawKp;
-	//unsigned char pidRateYawKi;
-	//unsigned char pidRateYawKd;
-	//short pidRateYawOutput;
-	//short pidRateYawPresult;
-	//short pidRateYawIresult;
-	//short pidRateYawDresult;
+	unsigned char pidRateYawKp;
+	unsigned char pidRateYawKi;
+	unsigned char pidRateYawKd;
+	short pidRateYawOutput;
+	short pidRateYawPresult;
+	short pidRateYawIresult;
+	short pidRateYawDresult;
 
-	//unsigned char pidAngleYawKp;
-	//unsigned char pidAngleYawKi;
-	//unsigned char pidAngleYawKd;
-	//short pidAngleYawOutput;
-	//short pidAngleYawPresult;
-	//short pidAngleYawIresult;
-	//short pidAngleYawDresult;
+	unsigned char pidAngleYawKp;
+	unsigned char pidAngleYawKi;
+	unsigned char pidAngleYawKd;
+	short pidAngleYawOutput;
+	short pidAngleYawPresult;
+	short pidAngleYawIresult;
+	short pidAngleYawDresult;
 
-	//short commandedYawAngle;
+	short commandedYawAngle;
 
 	unsigned char pidPosAltKp;
 	unsigned char pidPosAltKi;

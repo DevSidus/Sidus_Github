@@ -92,23 +92,23 @@ namespace Ground_Station
         //public short pidAngleRollIresult { get; set; }
         //public short pidAngleRollDresult { get; set; }
 
-        //public byte pidRateYawKp { get; set; }
-        //public byte pidRateYawKi { get; set; }
-        //public byte pidRateYawKd { get; set; }
-        //public short pidRateYawOutput { get; set; }
-        //public short pidRateYawPresult { get; set; }
-        //public short pidRateYawIresult { get; set; }
-        //public short pidRateYawDresult { get; set; }
+        public byte pidRateYawKp { get; set; }
+        public byte pidRateYawKi { get; set; }
+        public byte pidRateYawKd { get; set; }
+        public short pidRateYawOutput { get; set; }
+        public short pidRateYawPresult { get; set; }
+        public short pidRateYawIresult { get; set; }
+        public short pidRateYawDresult { get; set; }
 
-        //public byte pidAngleYawKp { get; set; }
-        //public byte pidAngleYawKi { get; set; }
-        //public byte pidAngleYawKd { get; set; }
-        //public short pidAngleYawOutput { get; set; }
-        //public short pidAngleYawPresult { get; set; }
-        //public short pidAngleYawIresult { get; set; }
-        //public short pidAngleYawDresult { get; set; }
+        public byte pidAngleYawKp { get; set; }
+        public byte pidAngleYawKi { get; set; }
+        public byte pidAngleYawKd { get; set; }
+        public short pidAngleYawOutput { get; set; }
+        public short pidAngleYawPresult { get; set; }
+        public short pidAngleYawIresult { get; set; }
+        public short pidAngleYawDresult { get; set; }
 
-        //public short commandedYawAngle { get; set; }
+        public short commandedYawAngle { get; set; }
 
         public byte pidPosAltKp { get; set; }
         public byte pidPosAltKi { get; set; }
