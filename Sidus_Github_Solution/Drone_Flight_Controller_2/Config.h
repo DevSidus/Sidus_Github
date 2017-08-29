@@ -11,7 +11,7 @@ This header file define all the configurable variables including constants, pin 
 
 #define		WIFI_SSID						"khorfo_net"
 #define		WIFI_PASS						"ahmet_ipek_12082004"
-#define		DEFAULT_GROUND_STATION_IP		"192.168.1.6"
+#define		DEFAULT_GROUND_STATION_IP		"192.168.1.5"
 
 //#define		WIFI_SSID						"AAGCA"
 //#define		WIFI_PASS						"ahmet(12082004)"
@@ -217,7 +217,7 @@ bool barometer_initial_measurement = true;
 #define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
 
-#define		SERIAL_GPS_SPEED			9600
+#define		SERIAL_GPS_SPEED			115200
 
 #define     BAT_VOLT_DIV_R1				51.0
 #define		BAT_VOLT_DIV_R2				10.0

@@ -24,6 +24,7 @@ using namespace std;
 #include "Local_HMC5883L.h"
 #include "Local_PID_v1.h"
 #include "PID_YawAngle.h"
+#include "LocalTinyGPS++.h"
 #include "Config.h"
 
 #ifdef BAROMETER_MS5611
@@ -81,14 +82,23 @@ HardwareSerial SerialGps(2);
 SemaphoreHandle_t xI2CSemaphore;
 SemaphoreHandle_t xUdpSemaphore;
 
+const char *gpsStream =
+"$GPRMC,045103.000,A,3014.1984,N,09749.2872,W,0.67,161.46,030913,,,A*7C\r\n"
+"$GPGGA,045104.000,3014.1985,N,09749.2873,W,1,09,1.2,211.6,M,-22.5,M,,0000*62\r\n"
+"$GPRMC,045200.000,A,3014.3820,N,09748.9514,W,36.88,65.02,030913,,,A*77\r\n"
+"$GPGGA,045201.000,3014.3864,N,09748.9411,W,1,10,1.2,200.8,M,-22.5,M,,0000*6C\r\n"
+"$GPRMC,045251.000,A,3014.4275,N,09749.0626,W,0.51,217.94,030913,,,A*7D\r\n"
+"$GPGGA,045252.000,3014.4273,N,09749.0628,W,1,09,1.3,206.9,M,-22.5,M,,0000*6F\r\n";
+
+// The TinyGPS++ object
+TinyGPSPlus gps;
+
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(SERIAL_COM_SPEED);
 	Serial.println("");
 	Serial.println("Serial started");
-
-	SerialGps.begin(SERIAL_GPS_SPEED);
-
+	
 	connectToWiFi();
 
 	//Configure all PINs
@@ -150,6 +160,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
 	//xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_gps, "task_gps", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
 	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 1);
@@ -158,7 +169,6 @@ void setup() {
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 10, NULL, 1);
 	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 2048, NULL, 10, NULL, 1);
-	xTaskCreatePinnedToCore(task_gps, "task_gps", 2048, NULL, 10, NULL, 1);
 
 
 	//esp_event_loop_init((system_event_cb_t*)&task_UDPhandle, NULL);
@@ -277,22 +287,83 @@ void task_ultrasonic(void * parameter)
 
 void task_gps(void * parameter)
 {
-	String gpsData;
 
+	SerialGps.begin(SERIAL_GPS_SPEED);	
 	while (true)
 	{
 
-		if (SerialGps.available() > 0)
+		while(SerialGps.available() > 0)
 		{
-			gpsData = SerialGps.readStringUntil('\n');
+			int val = SerialGps.read();
+
+
+			gps.encode(val);
+
+			
+			if (gps.altitude.isUpdated())
+			{
+				Serial.print("Sat=");  Serial.print(gps.satellites.value());
+				Serial.print("  N");  Serial.print(gps.location.lat(), 6);
+				Serial.print("E"); Serial.print(gps.location.lng(), 6);
+				Serial.print("  ALT=");  Serial.println(gps.altitude.meters());
+			}
 		}
 
-		// Serial.println(gpsData);
-
-		delay(100);
+		delay(20);
 	}
 	vTaskDelete(NULL);
 	return;
+}
+
+void displayInfo()
+{
+	Serial.print(F("Location: "));
+	if (gps.location.isValid())
+	{
+		Serial.print(gps.location.lat(), 6);
+		Serial.print(F(","));
+		Serial.print(gps.location.lng(), 6);
+	}
+	else
+	{
+		Serial.print(F("INVALID"));
+	}
+
+	Serial.print(F("  Date/Time: "));
+	if (gps.date.isValid())
+	{
+		Serial.print(gps.date.month());
+		Serial.print(F("/"));
+		Serial.print(gps.date.day());
+		Serial.print(F("/"));
+		Serial.print(gps.date.year());
+	}
+	else
+	{
+		Serial.print(F("INVALID"));
+	}
+
+	Serial.print(F(" "));
+	if (gps.time.isValid())
+	{
+		if (gps.time.hour() < 10) Serial.print(F("0"));
+		Serial.print(gps.time.hour());
+		Serial.print(F(":"));
+		if (gps.time.minute() < 10) Serial.print(F("0"));
+		Serial.print(gps.time.minute());
+		Serial.print(F(":"));
+		if (gps.time.second() < 10) Serial.print(F("0"));
+		Serial.print(gps.time.second());
+		Serial.print(F("."));
+		if (gps.time.centisecond() < 10) Serial.print(F("0"));
+		Serial.print(gps.time.centisecond());
+	}
+	else
+	{
+		Serial.print(F("INVALID"));
+	}
+
+	Serial.println();
 }
 
 void task_compass(void * parameter)
@@ -1002,6 +1073,7 @@ bool initMPU()
 
 	// supply your own gyro offsets here, scaled for min sensitivity
 	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
+	// SN: 031001
 	//mpu.setXAccelOffset(-2553);
 	//mpu.setYAccelOffset(-989);
 	//mpu.setZAccelOffset(1689);
@@ -1009,12 +1081,22 @@ bool initMPU()
 	//mpu.setYGyroOffset(-26);
 	//mpu.setZGyroOffset(-5);
 	//
+
+	// SN: 031002
 	mpu.setXAccelOffset(-195);
 	mpu.setYAccelOffset(-669);
 	mpu.setZAccelOffset(1631);
 	mpu.setXGyroOffset(59);
 	mpu.setYGyroOffset(-22);
 	mpu.setZGyroOffset(-12);
+
+	//SN:031003
+	//mpu.setXAccelOffset(-4528);
+	//mpu.setYAccelOffset(-4577);
+	//mpu.setZAccelOffset(1523);
+	//mpu.setXGyroOffset(74);
+	//mpu.setYGyroOffset(-16);
+	//mpu.setZGyroOffset(-22);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
@@ -2290,6 +2372,7 @@ void filterAnglePIDoutputs()
 	pidVars.anglePitch.outputFiltered = filtObjAnglePIDoutY.filter(pidVars.anglePitch.output, 0);
 	pidVars.angleYaw.outputFiltered = filtObjAnglePIDoutZ.filter(pidVars.angleYaw.output, 0);
 
+	Serial.println(pidVars.angleYaw.output);
 }
 
 void calculateRateCmdDifferentials()

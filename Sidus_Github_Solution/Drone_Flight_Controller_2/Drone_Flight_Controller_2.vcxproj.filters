@@ -84,6 +84,9 @@
     <ClInclude Include="cDataFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LocalTinyGPS++.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp">
@@ -135,6 +138,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cDataFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalTinyGPS++.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -94,6 +94,7 @@
     <ClInclude Include="cRxFilter.h" />
     <ClInclude Include="kalmanFilter.h" />
     <ClInclude Include="kalmanFilter_initialize.h" />
+    <ClInclude Include="LocalTinyGPS++.h" />
     <ClInclude Include="Local_helper_3dmath.h" />
     <ClInclude Include="Local_HMC5883L.h" />
     <ClInclude Include="Local_I2Cdev.h" />
@@ -117,6 +118,7 @@
     <ClCompile Include="cRxFilter.cpp" />
     <ClCompile Include="kalmanFilter.cpp" />
     <ClCompile Include="kalmanFilter_initialize.cpp" />
+    <ClCompile Include="LocalTinyGPS++.cpp" />
     <ClCompile Include="Local_HMC5883L.cpp" />
     <ClCompile Include="Local_I2Cdev.cpp" />
     <ClCompile Include="Local_MPU6050.cpp" />
