@@ -1404,9 +1404,9 @@ void processPID()
 	filterAnglePIDoutputs();
 
 	// Rate Commands
-	rateCmd.x = pidVars.angleRoll.outputFiltered;
-	rateCmd.y = pidVars.anglePitch.outputFiltered;
-	rateCmd.z = pidVars.angleYaw.outputFiltered;
+	rateCmd.x = pidVars.angleRoll.output;
+	rateCmd.y = pidVars.anglePitch.output;
+	rateCmd.z = pidVars.angleYaw.output;
 
 	calculateRateCmdDifferentials();
 	
