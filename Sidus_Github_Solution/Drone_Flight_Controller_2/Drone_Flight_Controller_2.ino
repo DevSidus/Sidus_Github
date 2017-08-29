@@ -831,11 +831,11 @@ void task_ADC(void * parameter)
 	while (true)
 	{
 		//adcEnd(PIN_BATTERY);
-		batteryVoltageInBits=analogRead(PIN_BATTERY);
-		batteryVoltageInVolts = float(batteryVoltageInBits) * ((BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2) * 3.3 / 4095 * ADC_ERROR_FACTOR;
+		batteryVoltageInBits = basicFilter(analogRead(PIN_BATTERY), 0.95, batteryVoltageInBits);   // take smoothed adc value
+		batteryVoltageInVolts = double(batteryVoltageInBits) * ((BAT_VOLT_DIV_R1 + BAT_VOLT_DIV_R2) / BAT_VOLT_DIV_R2) * 3.3 / 4095 * ADC_ERROR_FACTOR;
 		//adcStart(PIN_BATTERY);
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
-		delay(100);
+		delay(50);
 	}
 	vTaskDelete(NULL);
 }
@@ -1661,7 +1661,7 @@ void getBodyToEulerAngularRates()
 
 }
 
-float basicFilter(float data, float filterConstant, float filteredData)
+double basicFilter(double data, double filterConstant, double filteredData)
 {
 	if (filterConstant > 1) {      // check to make sure param's are within range
 		filterConstant = .99;
@@ -2372,7 +2372,7 @@ void filterAnglePIDoutputs()
 	pidVars.anglePitch.outputFiltered = filtObjAnglePIDoutY.filter(pidVars.anglePitch.output, 0);
 	pidVars.angleYaw.outputFiltered = filtObjAnglePIDoutZ.filter(pidVars.angleYaw.output, 0);
 
-	Serial.println(pidVars.angleYaw.output);
+	//Serial.println(pidVars.angleYaw.output);
 }
 
 void calculateRateCmdDifferentials()
