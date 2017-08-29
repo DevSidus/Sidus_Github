@@ -1791,6 +1791,9 @@ void calculate_pid_thr_batt_scale_factor()
 	{		
 		PID_THR_BATT_SCALE_FACTOR = PID_THR_BATT_SCALE_FACTOR * (1.0 + (batteryVoltageInVolts - PID_BATT_MIDDLE_VOLTAGE)*PID_BATT_VOLTAGE_SLOPE);
 	}
+
+	//implement mass compensation
+	PID_THR_BATT_SCALE_FACTOR = (DRONE_WEIGHT / 1000.0) * PID_THR_BATT_SCALE_FACTOR;
 }
 
 void setupMotorPins()

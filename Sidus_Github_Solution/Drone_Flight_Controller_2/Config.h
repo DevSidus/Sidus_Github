@@ -17,6 +17,8 @@ This header file define all the configurable variables including constants, pin 
 //#define		WIFI_PASS						"ahmet(12082004)"
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2"
 
+#define		DRONE_WEIGHT					1080.0     //in grams
+
 #define		UDP_PORT						8080
 
 #define		WIFI_CONNECTION_THRESHOLD	 10000
@@ -131,10 +133,9 @@ bool barometer_initial_measurement = true;
 #define		CMD_MODE_CHANGE_THR_GAP		50
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
-
-#define		PID_RATE_PITCH_KP			1.4
+#define		PID_RATE_PITCH_KP			1.0
 #define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.11
+#define		PID_RATE_PITCH_KD			0.08
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
 
@@ -144,9 +145,9 @@ bool barometer_initial_measurement = true;
 #define		PID_ANGLE_PITCH_OUTMIN		-250
 #define		PID_ANGLE_PITCH_OUTMAX		250
 
-#define		PID_RATE_ROLL_KP			1.4
+#define		PID_RATE_ROLL_KP			1.0
 #define		PID_RATE_ROLL_KI			0.0
-#define		PID_RATE_ROLL_KD			0.11
+#define		PID_RATE_ROLL_KD			0.08
 #define		PID_RATE_ROLL_OUTMIN		-250
 #define		PID_RATE_ROLL_OUTMAX		250
 
