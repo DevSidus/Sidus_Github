@@ -1591,7 +1591,7 @@ void initPIDtuning()
 	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
 
 	pidAccAlt.SetOutputLimits(pidVars.accAlt.outputLimitMin, pidVars.accAlt.outputLimitMax);
-	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
+	pidAccAlt.SetTunings(pidVars.accAlt.Kp * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Ki * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Kd * DRONE_WEIGHT / 1000.0);
 }
 
 void prePIDprocesses()
@@ -1731,7 +1731,6 @@ void processRunMotors()
 			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output* PID_THR_BATT_SCALE_FACTOR;
 			pidVars.rateRoll.outputCompensated = pidVars.rateRoll.output*PID_THR_BATT_SCALE_FACTOR;
 			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output*PID_THR_BATT_SCALE_FACTOR;
-			pidVars.velAlt.outputCompensated = pidVars.velAlt.output*PID_THR_BATT_SCALE_FACTOR;
 			
 
 			//Serial.print("");
@@ -2145,7 +2144,7 @@ void applyPidCommandAccAlt()
 	pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
 	pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
 	pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
-	pidAccAlt.SetTunings(pidVars.accAlt.Kp, pidVars.accAlt.Ki, pidVars.accAlt.Kd);
+	pidAccAlt.SetTunings(pidVars.accAlt.Kp * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Ki * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Kd * DRONE_WEIGHT / 1000.0);
 }
 
 void prepareUDPmessages()
