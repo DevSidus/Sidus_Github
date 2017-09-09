@@ -16,7 +16,6 @@ using namespace std;
 //Local Include Files
 #include "kalmanFilter.h"
 #include "kalmanFilter_initialize.h"
-//#include "dataFilter.h"
 #include "cDataFilter.h"
 #include "cBuzzerMelody.h"
 #include "Local_I2Cdev.h"
@@ -158,6 +157,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_melody, "task_melody", 2048, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_compass_kalman, "task_compass_kalman", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
 	//xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_gps, "task_gps", 2048, NULL, 10, NULL, 0);
@@ -979,6 +979,68 @@ void task_altitude_kalman(void * parameter)
 		//Acceleration Derivative
 		// Calculate Filter Output
 		qc.accelDiff.z = filtObjAccelDiffZ.filter(qc.accelWorldEstimated.z, deltaTimeAccelDiff);
+
+		delay(9);
+	}
+	vTaskDelete(NULL);
+}
+
+void task_compass_kalman(void * parameter)
+{
+
+	while (statusCompass != statusType_Normal)
+	{
+		delay(100);
+	}
+
+
+	double T = 0.010; // Sampling Period
+
+
+	//***********************************************************************************
+	// Kalman Parameters for Compass Heading Estimation
+	double F_AngleRate[4] = { 1, 0, T, 1}; // State-transition matrix
+	double H_AngleRate[4] = { 1, 0, 0, 1 }; // Measurement matrix
+
+	double deltaRate = 1;
+	double sigmaQ_AngleRate = deltaRate; // % max(diff(angleRate)) or histogram(diff(angleRate));
+	double Q_AngleRate[4] = { 1 / 4 * pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,3), pow(T,2) };
+	for (int i = 0; i < 4; i++) Q_AngleRate[i] *= pow(sigmaQ_AngleRate, 2); // Process noise covariance matrix
+
+	double sigmaAngle = 15; // histogram(diff(Angle));
+	double sigmaRate = 0.5; // histogram(diff(angleRate));
+	double R_AngleRate[4] = { pow(sigmaAngle,2), 0, 0, pow(sigmaRate,2) }; // Measurement noise covariance matrix
+
+	// Initialization
+	double m_AngleRate_n1[2] = { compassHdg, qc.eulerRate.psi };
+	double P_AngleRate_n1[4] = { pow(sigmaAngle,2), 0, 0, pow(sigmaRate,2) };
+
+	double m_AngleRate_n[2] = { 0, 0 };
+	double P_AngleRate_n[4] = { 0, 0, 0, 0 };
+	double y_AngleRate_n[2] = { 0, 0 };
+	//***********************************************************************************
+
+
+	// Initialize Kalman Filtering
+	kalmanFilter_initialize();
+
+
+	while (true)
+	{
+
+		//***********************************************************************************
+		// Kalman Filter for Compass Heading Estimation
+		y_AngleRate_n[0] = compassHdg;
+		y_AngleRate_n[1] = qc.eulerRate.psi;
+
+		kalmanFilterAngleEstimation(m_AngleRate_n1, P_AngleRate_n1, y_AngleRate_n, F_AngleRate, Q_AngleRate, H_AngleRate, R_AngleRate, m_AngleRate_n, P_AngleRate_n);
+
+		compassHdgEstimated = m_AngleRate_n[0];
+
+		memcpy(m_AngleRate_n1, m_AngleRate_n, sizeof(m_AngleRate_n));
+		memcpy(P_AngleRate_n1, P_AngleRate_n, sizeof(P_AngleRate_n));
+		//***********************************************************************************
+
 
 		delay(9);
 	}
@@ -2170,7 +2232,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.baroTemp				= barometerTemp;
 	MsgUdpR01.message.baroAlt				= barometerAlt;
 	MsgUdpR01.message.ultrasonicDist		= ultrasonicDistanceFiltered;
-	MsgUdpR01.message.compassHdg			= compassHdg;
+	MsgUdpR01.message.compassHdg			= compassHdgEstimated;
 	MsgUdpR01.message.batteryVoltage    	= batteryVoltageInVolts;
 	MsgUdpR01.message.quadAccelerationWorldZ = qc.accelWorldEstimated.z;
 	MsgUdpR01.message.quadVelocityWorldZ	= qc.velWorldEstimated.z;

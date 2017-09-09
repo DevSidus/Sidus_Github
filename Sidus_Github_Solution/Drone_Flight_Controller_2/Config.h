@@ -268,7 +268,8 @@ bool baroReady = false;
 double ultrasonicDistance = 0.0;
 double ultrasonicDistanceFiltered = 0.0;
 
-float compassHdg;
+double compassHdg;
+double compassHdgEstimated;
 
 short batteryVoltageInBits;
 uint32_t udpLastMessageTime;
