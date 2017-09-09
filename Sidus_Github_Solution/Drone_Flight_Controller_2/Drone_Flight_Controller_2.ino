@@ -1447,19 +1447,19 @@ void processPID()
 	// Roll PID
 	pidVars.angleRoll.setpoint = cmdMotorRoll;
 	pidVars.angleRoll.sensedVal = qc.euler.phi * 180 / M_PI;
-	pidVars.angleRoll.sensedValDiff = qc.eulerRate.phi;
+	pidVars.angleRoll.sensedValDiff = qc.gyro.x;
 	pidAngleRoll.Compute();
 	
 	// Pitch PID
 	pidVars.anglePitch.setpoint = cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = qc.euler.theta * 180 / M_PI;
-	pidVars.anglePitch.sensedValDiff = qc.eulerRate.theta;
+	pidVars.anglePitch.sensedValDiff = qc.gyro.y;
 	pidAnglePitch.Compute();
 
 	// Yaw PID
 	pidVars.angleYaw.setpoint = cmdMotorYaw;
 	pidVars.angleYaw.sensedVal = qc.euler.psi * 180 / M_PI;
-	pidVars.angleYaw.sensedValDiff = qc.eulerRate.psi;
+	pidVars.angleYaw.sensedValDiff = qc.gyro.z;
 	pidAngleYaw.Compute();
 
 
