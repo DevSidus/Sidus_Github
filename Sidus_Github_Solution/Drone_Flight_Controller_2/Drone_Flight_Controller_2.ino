@@ -2037,7 +2037,7 @@ void processCompass()
 {
 	Vector compassNorm = compass.readNormalize();
 	// To calculate heading in degrees. 0 degree indicates North
-	compassHdg = atan2(compassNorm.YAxis, compassNorm.XAxis);
+	compassHdg = atan2(compassNorm.YAxis, compassNorm.XAxis) * 180 / M_PI;
 }
 
 void initOTA()
