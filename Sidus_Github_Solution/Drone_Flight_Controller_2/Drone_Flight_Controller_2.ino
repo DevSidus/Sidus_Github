@@ -69,6 +69,8 @@ PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff);
 PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
 
+PID pidAccX(&pidVars.accX.sensedVal, &pidVars.accX.output, &pidVars.accX.setpoint, &pidVars.accX.sensedValDiff);
+
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
 
@@ -80,14 +82,6 @@ HardwareSerial SerialGps(2);
 
 SemaphoreHandle_t xI2CSemaphore;
 SemaphoreHandle_t xUdpSemaphore;
-
-const char *gpsStream =
-"$GPRMC,045103.000,A,3014.1984,N,09749.2872,W,0.67,161.46,030913,,,A*7C\r\n"
-"$GPGGA,045104.000,3014.1985,N,09749.2873,W,1,09,1.2,211.6,M,-22.5,M,,0000*62\r\n"
-"$GPRMC,045200.000,A,3014.3820,N,09748.9514,W,36.88,65.02,030913,,,A*77\r\n"
-"$GPGGA,045201.000,3014.3864,N,09748.9411,W,1,10,1.2,200.8,M,-22.5,M,,0000*6C\r\n"
-"$GPRMC,045251.000,A,3014.4275,N,09749.0626,W,0.51,217.94,030913,,,A*7D\r\n"
-"$GPGGA,045252.000,3014.4273,N,09749.0628,W,1,09,1.3,206.9,M,-22.5,M,,0000*6F\r\n";
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -918,7 +912,7 @@ void task_altitude_kalman(void * parameter)
 	double R_AltVelAcc[4] = { pow(sigmaAlt,2), 0, 0, pow(sigmaAccelZ,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_AltVelAcc_n1[3] = { referenceAltitude, 0, qc.accelWorld.z / 8300 * 9.80665 };
+	double m_AltVelAcc_n1[3] = { referenceAltitude, 0, -qc.accelWorld.z / 8300 * 9.80665 };  // negative added since altitude vector is opposite of z-axis
 	double P_AltVelAcc_n1[9] = { pow(sigmaAlt,2), 0, 0, 0, pow(sigmaAccelZ,2), 0, 0, 0, pow(sigmaAccelZ,2) };
 
 	double m_AltVelAcc_n[3] = { 0, 0, 0 };
@@ -960,13 +954,13 @@ void task_altitude_kalman(void * parameter)
 		//***********************************************************************************
 		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
 		y_AltVelAcc_n[0] = referenceAltitude;
-		y_AltVelAcc_n[1] = qc.accelWorld.z / 8300 * 9.80665;
+		y_AltVelAcc_n[1] = -qc.accelWorld.z / 8300 * 9.80665;  // negative added since altitude vector is opposite of z-axis
 
 		kalmanFilter(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
 		
-		qc.posWorldEstimated.z = m_AltVelAcc_n[0];
-		qc.velWorldEstimated.z = m_AltVelAcc_n[1];
-		qc.accelWorldEstimated.z = m_AltVelAcc_n[2];
+		qc.posWorldEstimated.z = -m_AltVelAcc_n[0];     // negative added since altitude vector is opposite of z-axis
+		qc.velWorldEstimated.z = -m_AltVelAcc_n[1];     // negative added since altitude vector is opposite of z-axis
+		qc.accelWorldEstimated.z = -m_AltVelAcc_n[2];   // negative added since altitude vector is opposite of z-axis
 
 		memcpy(m_AltVelAcc_n1, m_AltVelAcc_n, sizeof(m_AltVelAcc_n));
 		memcpy(P_AltVelAcc_n1, P_AltVelAcc_n, sizeof(P_AltVelAcc_n));
@@ -1262,16 +1256,16 @@ void processMpu()
 			qc.gyro.z = -gg[2];
 
 			qc.accel.x = aa.x;
-			qc.accel.y = aa.y;
-			qc.accel.z = aa.z;
+			qc.accel.y = -aa.y;  // changed to negative to be consistent with standard a/c coordinate axis convention
+			qc.accel.z = -aa.z;  // changed to negative to be consistent with standard a/c coordinate axis convention
 
 			qc.accelBody.x = aaReal.x;
-			qc.accelBody.y = aaReal.y;
-			qc.accelBody.z = aaReal.z;
+			qc.accelBody.y = -aaReal.y;  // changed to negative to be consistent with standard a/c coordinate axis convention
+			qc.accelBody.z = -aaReal.z;	 // changed to negative to be consistent with standard a/c coordinate axis convention
 
 			qc.accelWorld.x = aaWorld.x;
-			qc.accelWorld.y = aaWorld.y;
-			qc.accelWorld.z = aaWorld.z;
+			qc.accelWorld.y = -aaWorld.y; // changed to negative to be consistent with standard a/c coordinate axis convention
+			qc.accelWorld.z = -aaWorld.z; // changed to negative to be consistent with standard a/c coordinate axis convention
 
 			qc.euler.psi = -euler[0];  
 			qc.euler.theta = -euler[1]; 
@@ -1420,6 +1414,7 @@ void processCheckMode()
 		pidPosAlt.SetFlightMode(true);
 		pidVelAlt.SetFlightMode(true);
 		pidAccAlt.SetFlightMode(true);   //this will be discussed later
+		pidAccX.SetFlightMode(true); 
 	}
 	else
 	{
@@ -1432,6 +1427,7 @@ void processCheckMode()
 		pidPosAlt.SetFlightMode(false);
 		pidVelAlt.SetFlightMode(false);
 		//pidAccAlt.SetFlightMode(false);   //this will be discussed later
+		pidAccAlt.SetFlightMode(false); 
 	}
 }
 
@@ -1440,6 +1436,14 @@ void processPID()
 	prePIDprocesses();
 
 	getBodyToEulerAngularRates();
+
+	// Acc X PID
+	pidVars.accX.setpoint = cmdMotorPitch;
+	pidVars.accX.sensedVal = qc.accelWorld.x;  // will be changed to transformed variable
+	pidVars.accX.sensedValDiff = 0;
+	pidAccX.Compute();
+
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Pitch Roll Yaw Angle PID
@@ -1500,8 +1504,8 @@ void processPID()
 
 	//Position Altitude PID
 	pidVars.posAlt.setpoint = double(cmdRx6thCh)/10.0 + autoModeStartAltitude; //meters
-	pidVars.posAlt.sensedVal = qc.posWorldEstimated.z;  // meters
-	pidVars.posAlt.sensedValDiff = qc.velWorldEstimated.z;  // m/s
+	pidVars.posAlt.sensedVal = -qc.posWorldEstimated.z;  // meters                  // negative added since altitude vector is opposite of z-axis
+	pidVars.posAlt.sensedValDiff = -qc.velWorldEstimated.z;  // m/s                 // negative added since altitude vector is opposite of z-axis
 	pidPosAlt.Compute();
 
 	filterPosPIDoutputs();
@@ -1510,8 +1514,8 @@ void processPID()
 	
 	// Velocity Altitude PID
 	pidVars.velAlt.setpoint = velCmd.z;  // cm/second
-	pidVars.velAlt.sensedVal = qc.velWorldEstimated.z * 100;  // cm/second
-	pidVars.velAlt.sensedValDiff = qc.accelWorldEstimated.z * 100;  // cm/second^2
+	pidVars.velAlt.sensedVal = -qc.velWorldEstimated.z * 100;  // cm/second           // negative added since altitude vector is opposite of z-axis
+	pidVars.velAlt.sensedValDiff = -qc.accelWorldEstimated.z * 100;  // cm/second^2   // negative added since altitude vector is opposite of z-axis
 	pidVelAlt.Compute();
 
 	filterVelocityPIDoutputs();
@@ -1538,9 +1542,9 @@ void processPID()
 
 	// Acceleration Altitude PID
 	pidVars.accAlt.setpoint = accelCmd.z;   // cm/second^2
-	pidVars.accAlt.sensedVal = qc.accelWorldEstimated.z * 100;  // cm/second^2
+	pidVars.accAlt.sensedVal = -qc.accelWorldEstimated.z * 100;  // cm/second^2   // negative added since altitude vector is opposite of z-axis
 	pidVars.accAlt.setpointDiff = accelCmdDiff.z;          // cm/second^3
-	pidVars.accAlt.sensedValDiff = qc.accelDiff.z * 100;  // cm/second^3
+	pidVars.accAlt.sensedValDiff = -qc.accelDiff.z * 100;  // cm/second^3         // negative added since altitude vector is opposite of z-axis
 	pidAccAlt.Compute();
 
 	postPIDprocesses();
@@ -1620,6 +1624,15 @@ void initPIDvariables()
 	pidVars.accAlt.outputLimitMax = CMD_THR_MAX;
 	pidVars.accAlt.output = 0;
 	pidVars.accAlt.outputCompensated = 0;
+	
+	pidVars.accX.Kp = PID_ACC_X_KP;
+	pidVars.accX.Ki = PID_ACC_X_KI;
+	pidVars.accX.Kd = PID_ACC_X_KD;
+	pidVars.accX.outputLimitMin = PID_ACC_X_OUTMIN;
+	pidVars.accX.outputLimitMax = PID_ACC_X_OUTMAX;
+	pidVars.accX.output = 0;
+	pidVars.accX.outputCompensated = 0;
+
 
 	deltaTimeRateCmdDiff = 0.01;
 	deltaTimeAccelCmdDiff = 0.01;
@@ -1654,6 +1667,9 @@ void initPIDtuning()
 
 	pidAccAlt.SetOutputLimits(pidVars.accAlt.outputLimitMin, pidVars.accAlt.outputLimitMax);
 	pidAccAlt.SetTunings(pidVars.accAlt.Kp * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Ki * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Kd * DRONE_WEIGHT / 1000.0);
+
+	pidAccX.SetOutputLimits(pidVars.accX.outputLimitMin, pidVars.accX.outputLimitMax);
+	pidAccX.SetTunings(pidVars.accX.Kp, pidVars.accX.Ki, pidVars.accX.Kd);
 }
 
 void prePIDprocesses()
@@ -1704,7 +1720,7 @@ void postPIDprocesses()
 	}
 	else
 	{
-		autoModeStartAltitude = qc.posWorldEstimated.z;
+		autoModeStartAltitude = -qc.posWorldEstimated.z;   // negative added since altitude vector is opposite of z-axis
 		cmdMotorThr = cmdRxThr;
 		pidAccAlt.Set_I_Result(cmdMotorThr);
 	}

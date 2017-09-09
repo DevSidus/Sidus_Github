@@ -188,7 +188,11 @@ bool barometer_initial_measurement = true;
 #define		PID_ACC_ALT_KI			0.057 // Helpful range is between 0.02 and 0.1
 #define		PID_ACC_ALT_KD			0.0071 // It shouldn't be greater than 0.02
 
-
+#define		PID_ACC_X_KP			0.1  
+#define		PID_ACC_X_KI			0.0    
+#define		PID_ACC_X_KD			0.001 
+#define		PID_ACC_X_OUTMIN		-CMD_RX_PITCH_ROLL_MAX
+#define		PID_ACC_X_OUTMAX		CMD_RX_PITCH_ROLL_MAX
 
 #define		RX_MAX_PULSE_WIDTH			2075	//in microseconds
 
@@ -312,6 +316,7 @@ struct structSuperPID
 	structPID angleYaw;	
 	structPID accAlt;
 	structPID posAlt;
+	structPID accX;
 }pidVars;
 
 struct structEuler
