@@ -86,6 +86,15 @@ SemaphoreHandle_t xUdpSemaphore;
 // The TinyGPS++ object
 TinyGPSPlus gps;
 
+double xmax = 0;
+double ymax = 0;
+double zmax = 0;
+double xmin = 0;
+double ymin = 0;
+double zmin = 0;
+
+double x_offset, y_offset, z_offset;
+double x_range, y_range, z_range;
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(SERIAL_COM_SPEED);
@@ -2034,7 +2043,8 @@ bool initCompass()
 		// Set number of samples averaged
 		compass.setSamples(HMC5883L_SAMPLES_1);
 		// Check settings
-		compass.setOffset(COMPASS_OFFSET_X_DEFAULT, COMPASS_OFFSET_Y_DEFAULT);
+		compass.setOffset(0, 0);
+
 		statusCompass = statusType_Normal;
 		Serial.println("Compass Init Success!");
 		return true;
@@ -2051,9 +2061,66 @@ bool initCompass()
 
 void processCompass()
 {
-	Vector compassNorm = compass.readNormalize();
+
+	Vector compassRaw = compass.readRaw();
 	// To calculate heading in degrees. 0 degree indicates North
-	compassHdg = atan2(compassNorm.YAxis, compassNorm.XAxis) * 180 / M_PI;
+
+	//if (compassRaw.XAxis > xmax) xmax = compassRaw.XAxis;
+	//if (compassRaw.XAxis < xmin) xmin = compassRaw.XAxis;
+
+	//if (compassRaw.YAxis > ymax) ymax = compassRaw.YAxis;
+	//if (compassRaw.YAxis < ymin) ymin = compassRaw.YAxis;
+
+	//if (compassRaw.ZAxis > zmax) zmax = compassRaw.ZAxis;
+	//if (compassRaw.ZAxis < zmin) zmin = compassRaw.ZAxis;
+
+	//Serial.print("  x_o:");
+	//Serial.print((xmax + xmin) / 2);
+	//Serial.print("  x_r:");
+	//Serial.print((xmax - xmin));
+	//Serial.print("  y_o:");
+	//Serial.print((ymax + ymin) / 2);
+	//Serial.print("  y_r:");
+	//Serial.print((ymax - ymin));
+	//Serial.print("  z_o:");
+	//Serial.print((zmax + zmin) / 2);
+	//Serial.print("  z_r:");
+	//Serial.println((zmax - zmin));
+
+	//x_offset = (xmax + xmin) / 2;
+	//y_offset = (ymax + ymin) / 2;
+	//z_offset = (zmax + zmin) / 2;
+
+	//x_range = (xmax - xmin);
+	//y_range = (ymax - ymin);
+	//z_range = (zmax - zmin);
+
+	x_offset = -36;
+	y_offset = -200;
+	z_offset = 82;
+
+	x_range = 1340;
+	y_range = 1337;
+	z_range = 1168;
+
+	Vector compassNorm;
+
+	compassNorm.XAxis = (compassRaw.XAxis - x_offset) * (y_range/1000.0) * (z_range/1000.0);
+	compassNorm.YAxis = (compassRaw.YAxis - y_offset) * (x_range / 1000.0) * (z_range / 1000.0);
+	compassNorm.ZAxis = (compassRaw.ZAxis - z_offset) * (x_range / 1000.0) * (y_range / 1000.0);
+
+
+	Vector compassRotated;
+
+	compassRotated.XAxis = compassNorm.XAxis*cos(qc.euler.theta) + compassNorm.ZAxis*cos(qc.euler.phi)*sin(qc.euler.theta) + compassNorm.YAxis*sin(qc.euler.theta)*sin(qc.euler.phi);
+	compassRotated.YAxis = compassNorm.YAxis*cos(qc.euler.phi) - compassNorm.ZAxis*sin(qc.euler.phi);
+	//compassRotated.ZAxis = compassNorm.ZAxis*cos(qc.euler.theta)*cos(qc.euler.phi) - compassNorm.XAxis*sin(qc.euler.theta) + compassNorm.YAxis*cos(qc.euler.theta)*sin(qc.euler.phi);
+
+	compassHdg = atan2((compassNorm.YAxis), (compassNorm.XAxis)) * 180 / M_PI;
+
+	Serial.print("hdg");
+	Serial.println(compassHdg);
+
 }
 
 void initOTA()
