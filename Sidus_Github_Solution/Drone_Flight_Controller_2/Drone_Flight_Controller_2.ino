@@ -2226,7 +2226,11 @@ void initOTA()
 	ArduinoOTA.begin();
 	Serial.print("OTA Ready,");
 	Serial.print("  IP address: ");
+#ifdef DRONE_AP
+	Serial.println(WiFi.softAPIP());
+#else
 	Serial.println(WiFi.localIP());
+#endif //DRONE_AP
 }
 
 void updateUdpMsgVars()
@@ -2487,6 +2491,21 @@ void checkMpuGSHealth()
 void connectToWiFi()
 {
 
+#ifdef DRONE_AP
+
+	Serial.println();
+	Serial.print("WiFi starting as access point:");
+	Serial.println(DRONE_AP_NAME);
+	WiFi.softAP(DRONE_AP_NAME, DRONE_AP_PASS);
+
+	Serial.println("IP address: ");
+	Serial.println(WiFi.softAPIP());
+
+
+	wifi_connected = true;
+	connectUdp();
+
+#else
 	// delete old config
 	WiFi.disconnect(true);
 	//register event handler
@@ -2523,14 +2542,28 @@ void connectToWiFi()
 		wifi_connected = false;
 		Serial.println("Wifi could not be connected!");
 	}
-
-
-
+#endif // DRONE_AP
 }
 
 void connectUdp()
 {
 
+#ifdef DRONE_AP
+	if (udp.begin(WiFi.softAPIP(), UDP_PORT) == 1)
+	{
+		udp.clearWriteError();
+		udp_connected = true;
+		Serial.print("UDP Started on IP:");
+		Serial.print(WiFi.softAPIP());
+		Serial.print("@");
+		Serial.println(UDP_PORT);
+	}
+	else
+	{
+		udp_connected = false;
+		Serial.println("UDP could not be started!");
+	}
+#else
 	if (udp.begin(WiFi.localIP(), UDP_PORT) == 1)
 	{
 		udp.clearWriteError();
@@ -2545,6 +2578,7 @@ void connectUdp()
 		udp_connected = false;
 		Serial.println("UDP could not be started!");
 	}
+#endif // DRONE_AP
 }
 
 void WiFiEvent(WiFiEvent_t event) {

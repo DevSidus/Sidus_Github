@@ -30,9 +30,8 @@ THE SOFTWARE.
 ===============================================
 */
 
-#ifndef MPU_GRAVITY_MEASUREMENT_IN_BITS
-#include "Config.h"
-#endif
+
+#define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8400.0
 
 #ifndef _MPU6050_6AXIS_MOTIONAPPS20_H_
 #define _MPU6050_6AXIS_MOTIONAPPS20_H_
