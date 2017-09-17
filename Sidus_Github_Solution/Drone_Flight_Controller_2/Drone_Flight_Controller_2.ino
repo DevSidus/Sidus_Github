@@ -2150,13 +2150,25 @@ void processCompass()
 	/// Code part that will be used for normal operation
 	//--------------------------------------------------------------------------------
 	/// Offset and scale values should be defined after the calibration process
-	compassHdgXoffset = -36;
-	compassHdgYoffset = -200;
-	compassHdgZoffset = 82;
 
-	compassHdgXrange = 1340;
-	compassHdgYrange = 1337;
-	compassHdgZrange = 1168;
+	//spare gy-86 module data
+#pragma region spare gy-86 compass values
+	//compassHdgXoffset = -36;
+	//compassHdgYoffset = -200;
+	//compassHdgZoffset = 82;
+	//compassHdgXrange = 1340;
+	//compassHdgYrange = 1337;
+	//compassHdgZrange = 1168;
+#pragma endregion
+	
+#pragma region FCB SN: 031002 compass values
+	compassHdgXoffset = 92;
+	compassHdgYoffset = 134;
+	compassHdgZoffset = -191;
+	compassHdgXrange = 1000;
+	compassHdgYrange = 1006;
+	compassHdgZrange = 907;
+#pragma endregion
 
 	Vector compassNorm;
 
@@ -2173,6 +2185,7 @@ void processCompass()
 
 	// To calculate heading in degrees. 0 degree indicates North
 	compassHdg = -1 * atan2((compassRotated.YAxis), (compassRotated.XAxis)) * 180 / M_PI;
+
 
 	// If Compass Angle is requested in 0-360 Range 
 	// if (compassHdg < 0) compassHdg += 360;
