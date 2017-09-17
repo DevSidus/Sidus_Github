@@ -33,6 +33,8 @@ This header file define all the configurable variables including constants, pin 
 //Comment out below line if you have 6 CH RX_TX
 #define		MY_RX_TX_IS_6_CHANNEL
 
+#define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8400.0
+
 //Comment out one of the following barometer hardware selections
 #define		BAROMETER_MS5611
 //#define		BAROMETER_BMP180

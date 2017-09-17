@@ -954,7 +954,7 @@ void task_altitude_kalman(void * parameter)
 	double R_AltVelAcc[4] = { pow(sigmaAlt,2), 0, 0, pow(sigmaAccelZ,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_AltVelAcc_n1[3] = { -referenceAltitude, 0, qc.accelWorld.z / 8300 * 9.80665 };  // negative added since altitude vector is opposite of z-axis
+	double m_AltVelAcc_n1[3] = { -referenceAltitude, 0, qc.accelWorld.z / MPU_GRAVITY_MEASUREMENT_IN_BITS * 9.80665 };  // negative added since altitude vector is opposite of z-axis
 	double P_AltVelAcc_n1[9] = { pow(sigmaAlt,2), 0, 0, 0, pow(sigmaAccelZ,2), 0, 0, 0, pow(sigmaAccelZ,2) };
 
 	double m_AltVelAcc_n[3] = { 0, 0, 0 };
@@ -996,7 +996,7 @@ void task_altitude_kalman(void * parameter)
 		//***********************************************************************************
 		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
 		y_AltVelAcc_n[0] = -referenceAltitude; // negative added since altitude vector is opposite of z-axis
-		y_AltVelAcc_n[1] = qc.accelWorld.z / 8300 * 9.80665;  // negative added since altitude vector is opposite of z-axis
+		y_AltVelAcc_n[1] = qc.accelWorld.z / MPU_GRAVITY_MEASUREMENT_IN_BITS * 9.80665;  // negative added since altitude vector is opposite of z-axis
 
 		kalmanFilter(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
 		
