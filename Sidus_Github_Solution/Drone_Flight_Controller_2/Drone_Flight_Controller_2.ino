@@ -11,6 +11,7 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include <Wire.h>
 #include <ArduinoOTA.h>
 #include <../../tools/sdk/include/driver/driver/rmt.h>
+#include <../../c_library_v2/common/mavlink.h>
 
 using namespace std;
 //Local Include Files
@@ -86,21 +87,22 @@ SemaphoreHandle_t xUdpSemaphore;
 // The TinyGPS++ object
 TinyGPSPlus gps;
 
-double xmax = 0;
-double ymax = 0;
-double zmax = 0;
-double xmin = 0;
-double ymin = 0;
-double zmin = 0;
+// Mavlink Definitions
+mavlink_system_t mavlink_system;
+mavlink_message_t mavlinkMessage;
+uint8_t mavlinkBuffer[MAVLINK_MAX_PACKET_LEN];
+uint16_t mavlinkMessageLength;
 
-double x_offset, y_offset, z_offset;
-double x_range, y_range, z_range;
+
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(SERIAL_COM_SPEED);
 	Serial.println("");
 	Serial.println("Serial started");
 	
+	mavlink_system.sysid = 255;                   ///< ID 255 for this airplane
+	mavlink_system.compid = MAV_COMP_ID_IMU;     ///< The component sending the message is the IMU, it could be also a Linux process
+
 	connectToWiFi();
 
 	//Configure all PINs
@@ -305,10 +307,15 @@ void task_gps(void * parameter)
 			
 			if (gps.altitude.isUpdated())
 			{
-				Serial.print("Sat=");  Serial.print(gps.satellites.value());
+				qcGPS.lat = gps.location.lat();
+				qcGPS.lon = gps.location.lng();
+				qcGPS.alt = gps.altitude.meters();
+				qcGPS.satellites_visible = gps.satellites.value();
+
+				/*Serial.print("Sat=");  Serial.print(gps.satellites.value());
 				Serial.print("  N");  Serial.print(gps.location.lat(), 6);
 				Serial.print("E"); Serial.print(gps.location.lng(), 6);
-				Serial.print("  ALT=");  Serial.println(gps.altitude.meters());
+				Serial.print("  ALT=");  Serial.println(gps.altitude.meters());*/
 			}
 		}
 
@@ -384,7 +391,7 @@ void task_compass(void * parameter)
 			processCompass();
 			xSemaphoreGive(xI2CSemaphore);
 		}
-		delay(35);
+		delay(30);
 	}
 	vTaskDelete(NULL);
 	return;
@@ -738,6 +745,15 @@ void task_Motor(void * parameter)
 
 void task_UDP(void * parameter)
 {
+	#ifdef MAVLINK_PROTOCOL
+		uint8_t mavlinkType = MAV_TYPE_QUADROTOR;
+		uint8_t mavlinkAutopilot = MAV_AUTOPILOT_GENERIC;
+
+		qcMavlink.base_mode = MAV_MODE_FLAG_AUTO_ENABLED;
+		qcMavlink.custom_mode = 0; ///< Custom mode, can be defined by user/adopter
+		qcMavlink.system_status = MAV_STATE_STANDBY;  ///< System ready for flight
+	#endif // MAVLINK_PROTOCOL
+
 	while (true)
 	{
 		if (wifi_connected)
@@ -752,8 +768,25 @@ void task_UDP(void * parameter)
 					}
 					else
 					{
-						prepareUDPmessages();
-						udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+
+						#ifdef SIDUS_PROTOCOL
+							prepareUDPmessages();
+							udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+						#else	
+							mavlink_msg_heartbeat_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage, mavlinkType, mavlinkAutopilot, qcMavlink.base_mode, qcMavlink.custom_mode, qcMavlink.system_status);
+							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+							udp.write(mavlinkBuffer, mavlinkMessageLength);
+
+							mavlink_msg_attitude_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage, millis(), qc.euler.phi, qc.euler.theta, compassHdgEstimated, qc.eulerRate.phi, qc.eulerRate.theta, qc.eulerRate.psi);
+							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+							udp.write(mavlinkBuffer, mavlinkMessageLength);
+
+							mavlink_msg_gps_raw_int_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage, micros(), 3, qcGPS.lat*1e7, qcGPS.lon*1e7, qcGPS.alt*1e3, 0, 0, 0, 0, qcGPS.satellites_visible);
+							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+							udp.write(mavlinkBuffer, mavlinkMessageLength);
+
+						#endif // SIDUS_PROTOCOL
+
 						if (udp.endPacket() != 1)
 						{
 							//Serial.println("UDP Packet could not send");
@@ -921,7 +954,7 @@ void task_altitude_kalman(void * parameter)
 	double R_AltVelAcc[4] = { pow(sigmaAlt,2), 0, 0, pow(sigmaAccelZ,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_AltVelAcc_n1[3] = { referenceAltitude, 0, -qc.accelWorld.z / 8300 * 9.80665 };  // negative added since altitude vector is opposite of z-axis
+	double m_AltVelAcc_n1[3] = { -referenceAltitude, 0, qc.accelWorld.z / 8300 * 9.80665 };  // negative added since altitude vector is opposite of z-axis
 	double P_AltVelAcc_n1[9] = { pow(sigmaAlt,2), 0, 0, 0, pow(sigmaAccelZ,2), 0, 0, 0, pow(sigmaAccelZ,2) };
 
 	double m_AltVelAcc_n[3] = { 0, 0, 0 };
@@ -962,14 +995,14 @@ void task_altitude_kalman(void * parameter)
 
 		//***********************************************************************************
 		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
-		y_AltVelAcc_n[0] = referenceAltitude;
-		y_AltVelAcc_n[1] = -qc.accelWorld.z / 8300 * 9.80665;  // negative added since altitude vector is opposite of z-axis
+		y_AltVelAcc_n[0] = -referenceAltitude; // negative added since altitude vector is opposite of z-axis
+		y_AltVelAcc_n[1] = qc.accelWorld.z / 8300 * 9.80665;  // negative added since altitude vector is opposite of z-axis
 
 		kalmanFilter(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
 		
-		qc.posWorldEstimated.z = -m_AltVelAcc_n[0];     // negative added since altitude vector is opposite of z-axis
-		qc.velWorldEstimated.z = -m_AltVelAcc_n[1];     // negative added since altitude vector is opposite of z-axis
-		qc.accelWorldEstimated.z = -m_AltVelAcc_n[2];   // negative added since altitude vector is opposite of z-axis
+		qc.posWorldEstimated.z = m_AltVelAcc_n[0];     
+		qc.velWorldEstimated.z = m_AltVelAcc_n[1];
+		qc.accelWorldEstimated.z = m_AltVelAcc_n[2];
 
 		memcpy(m_AltVelAcc_n1, m_AltVelAcc_n, sizeof(m_AltVelAcc_n));
 		memcpy(P_AltVelAcc_n1, P_AltVelAcc_n, sizeof(P_AltVelAcc_n));
@@ -1002,25 +1035,26 @@ void task_compass_kalman(void * parameter)
 
 	//***********************************************************************************
 	// Kalman Parameters for Compass Heading Estimation
-	double F_AngleRate[4] = { 1, 0, T, 1}; // State-transition matrix
-	double H_AngleRate[4] = { 1, 0, 0, 1 }; // Measurement matrix
+	double H_Heading[3] = { 1, 0, 0 }; // Measurement matrix
 
-	double deltaRate = 1;
-	double sigmaQ_AngleRate = deltaRate; // % max(diff(angleRate)) or histogram(diff(angleRate));
-	double Q_AngleRate[4] = { 1 / 4 * pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,3), pow(T,2) };
-	for (int i = 0; i < 4; i++) Q_AngleRate[i] *= pow(sigmaQ_AngleRate, 2); // Process noise covariance matrix
+	double psdYaw = pow(0.015, 2); // Power Spectral Density (Variance) of Yaw Measurement
+	double psdScale = pow(0.015, 2); // Power Spectral Density (Variance) of Scale Error
+	double psdBias = pow(0.015, 2); // Power Spectral Density (Variance) of Bias Error
 
-	double sigmaAngle = 15; // histogram(diff(Angle));
-	double sigmaRate = 0.5; // histogram(diff(angleRate));
-	double R_AngleRate[4] = { pow(sigmaAngle,2), 0, 0, pow(sigmaRate,2) }; // Measurement noise covariance matrix
+	double sigmaCompass = 0.75; // Standard Deviation of Compass Measurement;
+	double R_Heading = pow(sigmaCompass, 2); // Measurement noise covariance matrix
 
-	// Initialization
-	double m_AngleRate_n1[2] = { compassHdg, qc.eulerRate.psi };
-	double P_AngleRate_n1[4] = { pow(sigmaAngle,2), 0, 0, pow(sigmaRate,2) };
+											 // Initialization
+	double m_Heading_n1[3] = { 0, 0, 0 };
+	double P_Heading_n1[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
 
-	double m_AngleRate_n[2] = { 0, 0 };
-	double P_AngleRate_n[4] = { 0, 0, 0, 0 };
-	double y_AngleRate_n[2] = { 0, 0 };
+	double m_Heading_n[3] = { 0, 0, 0 };
+	double P_Heading_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	double y_Heading_n;
+
+	double yawAngleOld = qc.euler.psi * 180 / M_PI;
+	double yawAngleCurrent;
+	double deltaYaw;
 	//***********************************************************************************
 
 
@@ -1033,19 +1067,28 @@ void task_compass_kalman(void * parameter)
 
 		//***********************************************************************************
 		// Kalman Filter for Compass Heading Estimation
-		y_AngleRate_n[0] = compassHdg;
-		y_AngleRate_n[1] = qc.eulerRate.psi;
+		yawAngleCurrent = qc.euler.psi * 180 / M_PI;
+		deltaYaw = yawAngleCurrent - yawAngleOld;
+		y_Heading_n = yawAngleCurrent - compassHdg;
 
-		kalmanFilterAngleEstimation(m_AngleRate_n1, P_AngleRate_n1, y_AngleRate_n, F_AngleRate, Q_AngleRate, H_AngleRate, R_AngleRate, m_AngleRate_n, P_AngleRate_n);
+		// State-transition matrix
+		double F_Heading[9] = { 1, 0, 0, deltaYaw, 1, 0, T, 0, 1 };
 
-		compassHdgEstimated = m_AngleRate_n[0];
+		// Process noise covariance matrix
+		double Q_Heading[9] = { psdBias*pow(T, 3) / 3 + psdScale*pow(deltaYaw, 2)*T / 3 + psdYaw*T, deltaYaw*psdScale*T / 2, psdBias*pow(T, 2) / 2, deltaYaw*psdScale*T / 2, psdScale*T, 0, psdBias*pow(T, 2) / 2, 0, psdBias*T };
 
-		memcpy(m_AngleRate_n1, m_AngleRate_n, sizeof(m_AngleRate_n));
-		memcpy(P_AngleRate_n1, P_AngleRate_n, sizeof(P_AngleRate_n));
+		kalmanFilter3State1Measurement(m_Heading_n1, P_Heading_n1, y_Heading_n, F_Heading, Q_Heading, H_Heading, R_Heading, m_Heading_n, P_Heading_n);
+
+		compassHdgEstimated = yawAngleCurrent - m_Heading_n[0];
+
+		memcpy(m_Heading_n1, m_Heading_n, sizeof(m_Heading_n));
+		memcpy(P_Heading_n1, P_Heading_n, sizeof(P_Heading_n));
+
+		yawAngleOld = yawAngleCurrent;
 		//***********************************************************************************
 
 
-		delay(9);
+		delay(10);
 	}
 	vTaskDelete(NULL);
 }
@@ -2039,7 +2082,7 @@ bool initCompass()
 		// Set measurement mode
 		compass.setMeasurementMode(HMC5883L_CONTINOUS);
 		// Set data rate
-		compass.setDataRate(HMC5883L_DATARATE_15HZ);
+		compass.setDataRate(HMC5883L_DATARATE_30HZ);
 		// Set number of samples averaged
 		compass.setSamples(HMC5883L_SAMPLES_1);
 		// Check settings
@@ -2063,51 +2106,63 @@ void processCompass()
 {
 
 	Vector compassRaw = compass.readRaw();
-	// To calculate heading in degrees. 0 degree indicates North
+	compassRaw.YAxis = -1 * compassRaw.YAxis;
+	compassRaw.ZAxis = -1 * compassRaw.ZAxis;
 
-	//if (compassRaw.XAxis > xmax) xmax = compassRaw.XAxis;
-	//if (compassRaw.XAxis < xmin) xmin = compassRaw.XAxis;
+	//--------------------------------------------------------------------------------
+	/// Code part that will be used for calibration operation
 
-	//if (compassRaw.YAxis > ymax) ymax = compassRaw.YAxis;
-	//if (compassRaw.YAxis < ymin) ymin = compassRaw.YAxis;
+	//if (compassRaw.XAxis > compassHdgXmax) compassHdgXmax = compassRaw.XAxis;
+	//if (compassRaw.XAxis < compassHdgXmin) compassHdgXmin = compassRaw.XAxis;
 
-	//if (compassRaw.ZAxis > zmax) zmax = compassRaw.ZAxis;
-	//if (compassRaw.ZAxis < zmin) zmin = compassRaw.ZAxis;
+	//if (compassRaw.YAxis > compassHdgYmax) compassHdgYmax = compassRaw.YAxis;
+	//if (compassRaw.YAxis < compassHdgYmin) compassHdgYmin = compassRaw.YAxis;
 
-	//Serial.print("  x_o:");
-	//Serial.print((xmax + xmin) / 2);
-	//Serial.print("  x_r:");
-	//Serial.print((xmax - xmin));
-	//Serial.print("  y_o:");
-	//Serial.print((ymax + ymin) / 2);
-	//Serial.print("  y_r:");
-	//Serial.print((ymax - ymin));
-	//Serial.print("  z_o:");
-	//Serial.print((zmax + zmin) / 2);
-	//Serial.print("  z_r:");
-	//Serial.println((zmax - zmin));
+	//if (compassRaw.ZAxis > compassHdgZmax) compassHdgZmax = compassRaw.ZAxis;
+	//if (compassRaw.ZAxis < compassHdgZmin) compassHdgZmin = compassRaw.ZAxis;
 
-	//x_offset = (xmax + xmin) / 2;
-	//y_offset = (ymax + ymin) / 2;
-	//z_offset = (zmax + zmin) / 2;
+	//compassHdgXoffset = (compassHdgXmax + compassHdgXmin) / 2;
+	//compassHdgYoffset = (compassHdgYmax + compassHdgYmin) / 2;
+	//compassHdgZoffset = (compassHdgZmax + compassHdgZmin) / 2;
 
-	//x_range = (xmax - xmin);
-	//y_range = (ymax - ymin);
-	//z_range = (zmax - zmin);
+	//compassHdgXrange = (compassHdgXmax - compassHdgXmin);
+	//compassHdgYrange = (compassHdgYmax - compassHdgYmin);
+	//compassHdgZrange = (compassHdgZmax - compassHdgZmin);
 
-	x_offset = -36;
-	y_offset = -200;
-	z_offset = 82;
+	//Serial.print("xOffset:");
+	//Serial.print(compassHdgXoffset);
+	//Serial.print("  xRange:");
+	//Serial.print(compassHdgXrange);
+	//Serial.print("  yOffset:");
+	//Serial.print(compassHdgYoffset);
+	//Serial.print("  yRange:");
+	//Serial.print(compassHdgYrange);
+	//Serial.print("  zOffset:");
+	//Serial.print(compassHdgZoffset);
+	//Serial.print("  zRange:");
+	//Serial.println(compassHdgZrange);
 
-	x_range = 1340;
-	y_range = 1337;
-	z_range = 1168;
+	// End of Calibration Part
+	//--------------------------------------------------------------------------------
+
+
+	//--------------------------------------------------------------------------------
+	/// Code part that will be used for normal operation
+	//--------------------------------------------------------------------------------
+	/// Offset and scale values should be defined after the calibration process
+	compassHdgXoffset = -36;
+	compassHdgYoffset = -200;
+	compassHdgZoffset = 82;
+
+	compassHdgXrange = 1340;
+	compassHdgYrange = 1337;
+	compassHdgZrange = 1168;
 
 	Vector compassNorm;
 
-	compassNorm.XAxis = (compassRaw.XAxis - x_offset) * (y_range/1000.0) * (z_range/1000.0);
-	compassNorm.YAxis = (compassRaw.YAxis - y_offset) * (x_range / 1000.0) * (z_range / 1000.0);
-	compassNorm.ZAxis = (compassRaw.ZAxis - z_offset) * (x_range / 1000.0) * (y_range / 1000.0);
+	compassNorm.XAxis = (compassRaw.XAxis - compassHdgXoffset) * (compassHdgYrange/1000.0) * (compassHdgZrange/1000.0);
+	compassNorm.YAxis = (compassRaw.YAxis - compassHdgYoffset) * (compassHdgXrange / 1000.0) * (compassHdgZrange / 1000.0);
+	compassNorm.ZAxis = (compassRaw.ZAxis - compassHdgZoffset) * (compassHdgXrange / 1000.0) * (compassHdgYrange / 1000.0);
 
 
 	Vector compassRotated;
@@ -2116,10 +2171,11 @@ void processCompass()
 	compassRotated.YAxis = compassNorm.YAxis*cos(qc.euler.phi) - compassNorm.ZAxis*sin(qc.euler.phi);
 	//compassRotated.ZAxis = compassNorm.ZAxis*cos(qc.euler.theta)*cos(qc.euler.phi) - compassNorm.XAxis*sin(qc.euler.theta) + compassNorm.YAxis*cos(qc.euler.theta)*sin(qc.euler.phi);
 
-	compassHdg = atan2((compassNorm.YAxis), (compassNorm.XAxis)) * 180 / M_PI;
+	// To calculate heading in degrees. 0 degree indicates North
+	compassHdg = -1 * atan2((compassRotated.YAxis), (compassRotated.XAxis)) * 180 / M_PI;
 
-	Serial.print("hdg");
-	Serial.println(compassHdg);
+	// If Compass Angle is requested in 0-360 Range 
+	// if (compassHdg < 0) compassHdg += 360;
 
 }
 
