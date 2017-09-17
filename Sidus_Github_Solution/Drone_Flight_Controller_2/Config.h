@@ -21,6 +21,9 @@ This header file define all the configurable variables including constants, pin 
 
 #define		UDP_PORT						8080
 
+// #define		SIDUS_PROTOCOL
+#define		MAVLINK_PROTOCOL
+
 #define		WIFI_CONNECTION_THRESHOLD	 10000
 
 //Comment out below line if you do not want command calibration
@@ -274,6 +277,10 @@ double ultrasonicDistanceFiltered = 0.0;
 
 double compassHdg;
 double compassHdgEstimated;
+double compassHdgXmax, compassHdgYmax, compassHdgZmax;
+double compassHdgXmin, compassHdgYmin, compassHdgZmin;
+double compassHdgXoffset, compassHdgYoffset, compassHdgZoffset;
+double compassHdgXrange, compassHdgYrange, compassHdgZrange;
 
 short batteryVoltageInBits;
 uint32_t udpLastMessageTime;
@@ -346,6 +353,25 @@ struct structIMU
 	struct3Daxis gyroDiff;
 	struct3Daxis accelDiff;
 }qc;
+
+struct structGPS
+{
+	int32_t lat;
+	int32_t lon;
+	int32_t alt;
+	uint16_t hdop;
+	uint16_t vdop;
+	uint16_t vel;
+	uint16_t cog;
+	uint8_t satellites_visible;
+}qcGPS;
+
+struct structMAVLINK
+{
+	uint8_t base_mode;
+	uint32_t custom_mode;
+	uint8_t system_status;
+}qcMavlink;
 
 struct3Daxis rateCmd;
 struct3Daxis rateCmdDiff;
