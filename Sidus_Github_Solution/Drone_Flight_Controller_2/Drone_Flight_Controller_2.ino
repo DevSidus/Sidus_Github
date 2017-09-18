@@ -1069,12 +1069,12 @@ void task_compass_kalman(void * parameter)
 		// Kalman Filter for Compass Heading Estimation
 		yawAngleCurrent = qc.euler.psi * 180 / M_PI;
 		deltaYaw = yawAngleCurrent - yawAngleOld;
-		if (deltaYaw > 180) deltaYaw = deltaYaw - 360;
-		else if (deltaYaw < -180) deltaYaw = deltaYaw + 360;
+		if (deltaYaw > 180) deltaYaw -= 360;
+		else if (deltaYaw <= -180) deltaYaw += 360;
 
 		y_Heading_n = yawAngleCurrent - compassHdg;
-		if (y_Heading_n > 180) y_Heading_n = y_Heading_n - 360;
-		else if (y_Heading_n < -180) y_Heading_n = y_Heading_n + 360;
+		if (y_Heading_n > 180) y_Heading_n -= 360;
+		else if (y_Heading_n <= -180) y_Heading_n += 360;
 
 		// State-transition matrix
 		double F_Heading[9] = { 1, 0, 0, deltaYaw, 1, 0, T, 0, 1 };
@@ -1085,8 +1085,8 @@ void task_compass_kalman(void * parameter)
 		kalmanFilter3State1Measurement(m_Heading_n1, P_Heading_n1, y_Heading_n, F_Heading, Q_Heading, H_Heading, R_Heading, m_Heading_n, P_Heading_n);
 
 		compassHdgEstimated = yawAngleCurrent - m_Heading_n[0];
-		if (compassHdgEstimated > 180) compassHdgEstimated = compassHdgEstimated - 360;
-		else if (compassHdgEstimated < -180) compassHdgEstimated = compassHdgEstimated + 360;
+		if (compassHdgEstimated > 180) compassHdgEstimated -= 360;
+		else if (compassHdgEstimated <= -180) compassHdgEstimated += 360;
 
 		memcpy(m_Heading_n1, m_Heading_n, sizeof(m_Heading_n));
 		memcpy(P_Heading_n1, P_Heading_n, sizeof(P_Heading_n));
