@@ -232,6 +232,7 @@ bool barometer_initial_measurement = true;
 #define		SERIAL_PARSE_OVF_MULT		3
 
 #define		SERIAL_GPS_SPEED			115200
+#define		GPS_UPDATE_THRESHOLD_TIME	2000
 
 #define     BAT_VOLT_DIV_R1				51.0
 #define		BAT_VOLT_DIV_R2				10.0
@@ -362,14 +363,15 @@ struct structIMU
 
 struct structGPS
 {
-	int32_t lat;
-	int32_t lon;
-	int32_t alt;
+	double lat;
+	double lon;
+	double alt;
 	uint16_t hdop;
 	uint16_t vdop;
 	uint16_t vel;
 	uint16_t cog;
 	uint8_t satellites_visible;
+	uint8_t gpsStatus;
 }qcGPS;
 
 struct structMAVLINK

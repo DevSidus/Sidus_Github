@@ -304,19 +304,51 @@ void task_gps(void * parameter)
 
 			gps.encode(val);
 
-			
-			if (gps.altitude.isUpdated())
+			if (gps.location.isUpdated())
 			{
 				qcGPS.lat = gps.location.lat();
-				qcGPS.lon = gps.location.lng();
-				qcGPS.alt = gps.altitude.meters();
-				qcGPS.satellites_visible = gps.satellites.value();
+				qcGPS.lon = gps.location.lng();		
 
 				/*Serial.print("Sat=");  Serial.print(gps.satellites.value());
 				Serial.print("  N");  Serial.print(gps.location.lat(), 6);
 				Serial.print("E"); Serial.print(gps.location.lng(), 6);
 				Serial.print("  ALT=");  Serial.println(gps.altitude.meters());*/
 			}
+			if (gps.altitude.isUpdated())
+			{
+				qcGPS.alt = gps.altitude.meters();
+			}
+			if (gps.hdop.isUpdated())
+			{
+				qcGPS.hdop = gps.hdop.value();
+			}
+		}
+
+		if (gps.location.age() > GPS_UPDATE_THRESHOLD_TIME || !gps.location.isValid())
+		{
+			qcGPS.gpsStatus = qcGPS.gpsStatus | B00000001;
+		}
+		else
+		{
+			qcGPS.gpsStatus = qcGPS.gpsStatus & B11111110;
+		}
+
+		if (gps.altitude.age() > GPS_UPDATE_THRESHOLD_TIME || !gps.altitude.isValid())
+		{
+			qcGPS.gpsStatus = qcGPS.gpsStatus | B00000010;
+		}
+		else
+		{
+			qcGPS.gpsStatus = qcGPS.gpsStatus & B11111101;
+		}
+
+		if (gps.hdop.age() > GPS_UPDATE_THRESHOLD_TIME || !gps.hdop.isValid())
+		{
+			qcGPS.gpsStatus = qcGPS.gpsStatus | B00000100;
+		}
+		else
+		{
+			qcGPS.gpsStatus = qcGPS.gpsStatus & B11111011;
 		}
 
 		delay(20);
@@ -2480,6 +2512,11 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
 	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
 
+	MsgUdpR01.message.gpsStatus				= qcGPS.gpsStatus;
+	MsgUdpR01.message.gpsLat				= qcGPS.lat;
+	MsgUdpR01.message.gpsLon				= qcGPS.lon;
+	MsgUdpR01.message.gpsAlt				= qcGPS.alt;
+	MsgUdpR01.message.gpsHdop				= qcGPS.hdop;
 
 	MsgUdpR01.getPacket();
 }

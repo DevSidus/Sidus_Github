@@ -133,6 +133,12 @@ namespace Ground_Station
         public short pidAccAltPresult { get; set; }
         public short pidAccAltIresult { get; set; }
         public short pidAccAltDresult { get; set; }
+
+        public byte gpsStatus { get; set; }
+        public double gpsLat { get; set; }
+        public double gpsLon { get; set; }
+        public float gpsAlt { get; set; }
+        public short gpsHdop { get; set; }
     }
     class cMsgUdpR01
     {

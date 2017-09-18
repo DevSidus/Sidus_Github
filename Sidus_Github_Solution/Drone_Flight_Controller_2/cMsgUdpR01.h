@@ -130,6 +130,13 @@ struct structMsgUdpR01
 	short pidAccAltIresult;
 	short pidAccAltDresult;
 
+	//GPS DATA
+	unsigned char gpsStatus;
+	double gpsLat;
+	double gpsLon;
+	float gpsAlt;
+	short gpsHdop;
+
 };
 #pragma pack(pop)
 
