@@ -1865,11 +1865,11 @@ void processRunMotors()
 		{
 			calculate_pid_thr_batt_scale_factor();
 
-			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output* PID_THR_BATT_SCALE_FACTOR;
-			pidVars.rateRoll.outputCompensated = pidVars.rateRoll.output*PID_THR_BATT_SCALE_FACTOR;
-			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output*PID_THR_BATT_SCALE_FACTOR;
+			pidVars.ratePitch.outputCompensated = 6*sqrt(pidVars.ratePitch.output)* PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateRoll.outputCompensated = 6*sqrt(pidVars.rateRoll.output)*PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateYaw.outputCompensated = 8*sqrt(pidVars.rateYaw.output)*PID_THR_BATT_SCALE_FACTOR;
 			
-
+			
 			//Serial.print("");
 			//Serial.println(pidVars.rateYaw.outputCompensated);
 			
