@@ -31,8 +31,6 @@ THE SOFTWARE.
 */
 
 
-#define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8350.0
-
 #ifndef _MPU6050_6AXIS_MOTIONAPPS20_H_
 #define _MPU6050_6AXIS_MOTIONAPPS20_H_
 
@@ -663,9 +661,9 @@ uint8_t MPU6050::dmpGetGyro(VectorInt16 *v, const uint8_t* packet) {
 // uint8_t MPU6050::dmpGetLinearAccel(long *data, const uint8_t* packet);
 uint8_t MPU6050::dmpGetLinearAccel(VectorInt16 *v, VectorInt16 *vRaw, VectorFloat *gravity) {
 	// get rid of the gravity component (+1g = +8192 in standard DMP FIFO packet, sensitivity is 2g)
-	v->x = vRaw->x - gravity->x * MPU_GRAVITY_MEASUREMENT_IN_BITS; //modified by aagca analysed with steady acc measurements old val 8192
-	v->y = vRaw->y - gravity->y * MPU_GRAVITY_MEASUREMENT_IN_BITS; //modified by aagca analysed with steady acc measurements old val 8192
-	v->z = vRaw->z - gravity->z * MPU_GRAVITY_MEASUREMENT_IN_BITS; //modified by aagca analysed with steady acc measurements old val 8192
+	v->x = vRaw->x - gravity->x * 8300; //modified by aagca analysed with steady acc measurements old val 8192
+	v->y = vRaw->y - gravity->y * 8300; //modified by aagca analysed with steady acc measurements old val 8192
+	v->z = vRaw->z - gravity->z * 8300; //modified by aagca analysed with steady acc measurements old val 8192
 	return 0;
 }
 // uint8_t MPU6050::dmpGetLinearAccelInWorld(long *data, const uint8_t* packet);

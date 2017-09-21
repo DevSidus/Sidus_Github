@@ -50,6 +50,7 @@ double computedAlt=0;
 bool barometer_initial_measurement = true;
 #endif // BAROMETER_BMP180
 
+#define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8350.0
 
 
 //MS5611 Barometer Definitions
