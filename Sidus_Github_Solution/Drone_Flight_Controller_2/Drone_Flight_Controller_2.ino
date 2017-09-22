@@ -986,7 +986,7 @@ void task_altitude_kalman(void * parameter)
 	double R_AltVelAcc[4] = { pow(sigmaAlt,2), 0, 0, pow(sigmaAccelZ,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_AltVelAcc_n1[3] = { -referenceAltitude, 0, qc.accelWorld.z / MPU_GRAVITY_MEASUREMENT_IN_BITS * 9.80665 };  // negative added since altitude vector is opposite of z-axis
+	double m_AltVelAcc_n1[3] = { -referenceAltitude, 0, qc.accelWorld.z / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2 };  // negative added since altitude vector is opposite of z-axis
 	double P_AltVelAcc_n1[9] = { pow(sigmaAlt,2), 0, 0, 0, pow(sigmaAccelZ,2), 0, 0, 0, pow(sigmaAccelZ,2) };
 
 	double m_AltVelAcc_n[3] = { 0, 0, 0 };
@@ -1028,7 +1028,7 @@ void task_altitude_kalman(void * parameter)
 		//***********************************************************************************
 		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
 		y_AltVelAcc_n[0] = -referenceAltitude; // negative added since altitude vector is opposite of z-axis
-		y_AltVelAcc_n[1] = qc.accelWorld.z / MPU_GRAVITY_MEASUREMENT_IN_BITS * 9.80665;  // negative added since altitude vector is opposite of z-axis
+		y_AltVelAcc_n[1] = qc.accelWorld.z / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2;  // negative added since altitude vector is opposite of z-axis
 
 		kalmanFilter(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
 		
@@ -1891,9 +1891,9 @@ void processRunMotors()
 		{
 			calculate_pid_thr_batt_scale_factor();
 
-			pidVars.ratePitch.outputCompensated = 4 * sign_sqrt(pidVars.ratePitch.output)* PID_THR_BATT_SCALE_FACTOR;
-			pidVars.rateRoll.outputCompensated = 4 * sign_sqrt(pidVars.rateRoll.output)*PID_THR_BATT_SCALE_FACTOR;
-			pidVars.rateYaw.outputCompensated = 5 * sign_sqrt(pidVars.rateYaw.output)*PID_THR_BATT_SCALE_FACTOR;
+			pidVars.ratePitch.outputCompensated = pidVars.ratePitch.output* PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateRoll.outputCompensated = pidVars.rateRoll.output*PID_THR_BATT_SCALE_FACTOR;
+			pidVars.rateYaw.outputCompensated = pidVars.rateYaw.output*PID_THR_BATT_SCALE_FACTOR;
 		   
 			
 			//Serial.print("");
@@ -2507,8 +2507,8 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
 
 	MsgUdpR01.message.gpsStatus				= qcGPS.gpsStatus;
-	MsgUdpR01.message.gpsLat				= qcGPS.lat;
-	MsgUdpR01.message.gpsLon				= qcGPS.lon;
+	MsgUdpR01.message.gpsLat				= qcGPS.lat*1e7;
+	MsgUdpR01.message.gpsLon				= qcGPS.lon*1e7;
 	MsgUdpR01.message.gpsAlt				= qcGPS.alt;
 	MsgUdpR01.message.gpsHdop				= qcGPS.hdop;
 
@@ -2702,9 +2702,4 @@ double sign_sqrt(double _var)
 	if (_var < 0) return -sqrt(-_var);
 	else if (_var > 0) return sqrt(_var);
 	else return 0;
-}
-
-void body2worldAccTransform() {
-	
-
 }
