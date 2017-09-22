@@ -51,7 +51,8 @@ bool barometer_initial_measurement = true;
 #endif // BAROMETER_BMP180
 
 #define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8350.0
-
+#define		MPU_G_MAPPING_IN_BITS				8192.0 // 1 G
+#define		GRAVITY_IN_METER_PER_SECOND2		9.80665
 
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
