@@ -1230,12 +1230,12 @@ bool initMPU()
 	//
 
 	// SN: 031002
-	mpu.setXAccelOffset(-195);
-	mpu.setYAccelOffset(-669);
-	mpu.setZAccelOffset(1631);
-	mpu.setXGyroOffset(59);
-	mpu.setYGyroOffset(-22);
-	mpu.setZGyroOffset(-12);
+	mpu.setXAccelOffset(1701);
+	mpu.setYAccelOffset(-259);
+	mpu.setZAccelOffset(679);
+	mpu.setXGyroOffset(-1);
+	mpu.setYGyroOffset(-70);
+	mpu.setZGyroOffset(-20);
 
 	//SN:031003
 	//mpu.setXAccelOffset(-4528);
@@ -2195,12 +2195,13 @@ void processCompass()
 #pragma endregion
 	
 #pragma region FCB SN: 031002 compass values
-	compassHdgXoffset = 92;
-	compassHdgYoffset = 134;
-	compassHdgZoffset = -191;
-	compassHdgXrange = 1000;
-	compassHdgYrange = 1006;
-	compassHdgZrange = 907;
+	compassHdgXoffset = -47.50;
+	compassHdgYoffset = 196.50;
+	compassHdgZoffset = -124.50;
+
+	compassHdgXrange = 1065.00;
+	compassHdgYrange = 1017.00;
+	compassHdgZrange = 1007.00;
 #pragma endregion
 
 	Vector compassNorm;
