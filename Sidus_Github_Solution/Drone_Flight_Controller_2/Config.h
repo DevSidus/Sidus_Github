@@ -23,7 +23,7 @@ This header file define all the configurable variables including constants, pin 
 //#define		WIFI_PASS						"ahmet(12082004)"
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2"
 
-#define		DRONE_WEIGHT					1080.0     //in grams
+#define		DRONE_WEIGHT					1200.0     //in grams
 
 #define		UDP_PORT						8080
 
@@ -144,9 +144,9 @@ bool barometer_initial_measurement = true;
 #define		CMD_MODE_CHANGE_THR_GAP		50
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
-#define		PID_RATE_PITCH_KP			1.0
+#define		PID_RATE_PITCH_KP			0.75
 #define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.08
+#define		PID_RATE_PITCH_KD			0.055
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
 
@@ -156,9 +156,9 @@ bool barometer_initial_measurement = true;
 #define		PID_ANGLE_PITCH_OUTMIN		-250
 #define		PID_ANGLE_PITCH_OUTMAX		250
 
-#define		PID_RATE_ROLL_KP			1.0
+#define		PID_RATE_ROLL_KP			0.75
 #define		PID_RATE_ROLL_KI			0.0
-#define		PID_RATE_ROLL_KD			0.08
+#define		PID_RATE_ROLL_KD			0.055
 #define		PID_RATE_ROLL_OUTMIN		-250
 #define		PID_RATE_ROLL_OUTMAX		250
 
@@ -175,9 +175,9 @@ bool barometer_initial_measurement = true;
 #define		PID_RATE_YAW_OUTMIN		-300
 #define		PID_RATE_YAW_OUTMAX		300
 
-#define		PID_ANGLE_YAW_KP			3.0
+#define		PID_ANGLE_YAW_KP			6.0
 #define		PID_ANGLE_YAW_KI			0.0
-#define		PID_ANGLE_YAW_KD			0.255
+#define		PID_ANGLE_YAW_KD			0.5
 #define		PID_ANGLE_YAW_OUTMIN		-150
 #define		PID_ANGLE_YAW_OUTMAX		150
 
@@ -251,7 +251,7 @@ bool barometer_initial_measurement = true;
 #define		BATT_LEVEL_EXIST			2.5
 
 double		PID_THR_BATT_SCALE_FACTOR = 1.0;
-double		PID_BATT_VOLTAGE_SLOPE = -0.15;
+double		PID_BATT_VOLTAGE_SLOPE = -0.12;
 double		PID_BATT_MIDDLE_VOLTAGE = 11.5;
 float		batteryVoltageInVolts;
 double		commandedAltitude = 0;
