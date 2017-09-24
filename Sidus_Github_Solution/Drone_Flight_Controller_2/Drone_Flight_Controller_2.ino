@@ -71,6 +71,7 @@ PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt
 PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
 
 PID pidAccX(&pidVars.accX.sensedVal, &pidVars.accX.output, &pidVars.accX.setpoint, &pidVars.accX.sensedValDiff);
+PID pidAccY(&pidVars.accY.sensedVal, &pidVars.accY.output, &pidVars.accY.setpoint, &pidVars.accY.sensedValDiff);
 
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
@@ -1047,6 +1048,7 @@ void task_altitude_kalman(void * parameter)
 		//Acceleration Derivative
 		// Calculate Filter Output
 		qc.accelDiff.z = filtObjAccelDiffZ.filter(qc.accelWorldEstimated.z, deltaTimeAccelDiff);
+ 
 
 		delay(9);
 	}
@@ -1522,25 +1524,32 @@ void processPID()
 
 	getBodyToEulerAngularRates();
 
+	qc.accelDiff.x = filtObjAccelDiffX.filter(qc.accelWorld.x, deltaTimeAccelDiff);  // may be moved to another function
 	// Acc X PID
-	pidVars.accX.setpoint = cmdMotorPitch;
-	pidVars.accX.sensedVal = qc.accelWorld.x;  // will be changed to transformed variable
-	pidVars.accX.sensedValDiff = 0;
+	pidVars.accX.setpoint = -cmdMotorPitch * 20;   // negative added since rx pitch command is in the reverse direction of x-axis
+	pidVars.accX.sensedVal = qc.accelWorld.x * ACC_BITS_TO_CM_SECOND2;  // cm/s^2 will be changed to transformed variable
+	pidVars.accX.sensedValDiff = qc.accelDiff.x * ACC_BITS_TO_CM_SECOND2;   // cm/s^3 
 	pidAccX.Compute();
 
+	qc.accelDiff.y = filtObjAccelDiffY.filter(qc.accelWorld.y, deltaTimeAccelDiff);  // may be moved to another function
+	// Acc Y PID
+	pidVars.accY.setpoint = cmdMotorRoll * 20;
+	pidVars.accY.sensedVal = qc.accelWorld.y * ACC_BITS_TO_CM_SECOND2;  // cm/s^2 will be changed to transformed variable
+	pidVars.accY.sensedValDiff = qc.accelDiff.y * ACC_BITS_TO_CM_SECOND2;   // cm/s^3 
+	pidAccY.Compute();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Pitch Roll Yaw Angle PID
 	
 	// Roll PID
-	pidVars.angleRoll.setpoint = cmdMotorRoll;
+	pidVars.angleRoll.setpoint = atan(pidVars.accY.output / PID_ACC_Y_OUTMAX) * 180 / M_PI;//cmdMotorRoll;
 	pidVars.angleRoll.sensedVal = qc.euler.phi * 180 / M_PI;
 	pidVars.angleRoll.sensedValDiff = qc.gyro.x;
 	pidAngleRoll.Compute();
 	
 	// Pitch PID
-	pidVars.anglePitch.setpoint = cmdMotorPitch;
+	pidVars.anglePitch.setpoint = -atan(pidVars.accX.output / PID_ACC_X_OUTMAX) * 180 / M_PI; //cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = qc.euler.theta * 180 / M_PI;
 	pidVars.anglePitch.sensedValDiff = qc.gyro.y;
 	pidAnglePitch.Compute();
@@ -1718,6 +1727,13 @@ void initPIDvariables()
 	pidVars.accX.output = 0;
 	pidVars.accX.outputCompensated = 0;
 
+	pidVars.accY.Kp = PID_ACC_Y_KP;
+	pidVars.accY.Ki = PID_ACC_Y_KI;
+	pidVars.accY.Kd = PID_ACC_Y_KD;
+	pidVars.accY.outputLimitMin = PID_ACC_Y_OUTMIN;
+	pidVars.accY.outputLimitMax = PID_ACC_Y_OUTMAX;
+	pidVars.accY.output = 0;
+	pidVars.accY.outputCompensated = 0;
 
 	deltaTimeRateCmdDiff = 0.01;
 	deltaTimeAccelCmdDiff = 0.01;
@@ -1755,6 +1771,9 @@ void initPIDtuning()
 
 	pidAccX.SetOutputLimits(pidVars.accX.outputLimitMin, pidVars.accX.outputLimitMax);
 	pidAccX.SetTunings(pidVars.accX.Kp, pidVars.accX.Ki, pidVars.accX.Kd);
+
+	pidAccY.SetOutputLimits(pidVars.accY.outputLimitMin, pidVars.accY.outputLimitMax);
+	pidAccY.SetTunings(pidVars.accY.Kp, pidVars.accY.Ki, pidVars.accY.Kd);
 }
 
 void prePIDprocesses()
@@ -2392,10 +2411,16 @@ void applyPidCommandVelAlt()
 void applyPidCommandAccAlt()
 {
 	//Set Altitude Position PID parameters
-	pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
-	pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
-	pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
-	pidAccAlt.SetTunings(pidVars.accAlt.Kp * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Ki * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Kd * DRONE_WEIGHT / 1000.0);
+	//pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
+	//pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
+	//pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
+	//pidAccAlt.SetTunings(pidVars.accAlt.Kp * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Ki * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Kd * DRONE_WEIGHT / 1000.0);
+
+
+	pidVars.accX.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
+	pidVars.accX.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
+	pidVars.accX.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
+	pidAccX.SetTunings(pidVars.accX.Kp, pidVars.accX.Ki, pidVars.accX.Kd);
 }
 
 void prepareUDPmessages()
@@ -2498,13 +2523,13 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
 	MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
 	MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
-	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_ACC_KP;
-	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_ACC_KI;
-	MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_ACC_KD;
-	MsgUdpR01.message.pidAccAltOutput		= pidVars.accAlt.output;
-	MsgUdpR01.message.pidAccAltPresult		= pidAccAlt.Get_P_Result();
-	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
-	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
+	MsgUdpR01.message.pidAccAltKp			= pidVars.accX.Kp / RESOLUTION_PID_ACC_KP;// pidVars.accAlt.Kp / RESOLUTION_PID_ACC_KP;
+	MsgUdpR01.message.pidAccAltKi			= pidVars.accX.Ki / RESOLUTION_PID_ACC_KI;// pidVars.accAlt.Ki / RESOLUTION_PID_ACC_KI;
+	MsgUdpR01.message.pidAccAltKd			= pidVars.accX.Kd / RESOLUTION_PID_ACC_KD;// pidVars.accAlt.Kd / RESOLUTION_PID_ACC_KD;
+	MsgUdpR01.message.pidAccAltOutput		= pidVars.accX.output;// pidVars.accAlt.output;
+	MsgUdpR01.message.pidAccAltPresult		= pidAccX.Get_P_Result();// pidAccAlt.Get_P_Result();
+	MsgUdpR01.message.pidAccAltIresult		= pidAccX.Get_I_Result();// pidAccAlt.Get_I_Result();
+	MsgUdpR01.message.pidAccAltDresult		= pidAccX.Get_D_Result();// pidAccAlt.Get_D_Result();
 
 	MsgUdpR01.message.gpsStatus				= qcGPS.gpsStatus;
 	MsgUdpR01.message.gpsLat				= qcGPS.lat*1e7;

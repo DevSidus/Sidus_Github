@@ -54,6 +54,8 @@ bool barometer_initial_measurement = true;
 #define		MPU_G_MAPPING_IN_BITS				8192.0 // 1 G
 #define		GRAVITY_IN_METER_PER_SECOND2		9.80665
 
+#define		ACC_BITS_TO_CM_SECOND2				100 * GRAVITY_IN_METER_PER_SECOND2 / MPU_G_MAPPING_IN_BITS
+
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
 #define		BARO_TEMP_MIN				-20
@@ -199,11 +201,17 @@ bool barometer_initial_measurement = true;
 #define		PID_ACC_ALT_KI			0.057 // Helpful range is between 0.02 and 0.1
 #define		PID_ACC_ALT_KD			0.0071 // It shouldn't be greater than 0.02
 
-#define		PID_ACC_X_KP			0.1  
+#define		PID_ACC_X_KP			0.4 
 #define		PID_ACC_X_KI			0.0    
-#define		PID_ACC_X_KD			0.001 
-#define		PID_ACC_X_OUTMIN		-CMD_RX_PITCH_ROLL_MAX
-#define		PID_ACC_X_OUTMAX		CMD_RX_PITCH_ROLL_MAX
+#define		PID_ACC_X_KD			0.0 
+#define		PID_ACC_X_OUTMIN		-500    //need to be revised
+#define		PID_ACC_X_OUTMAX		500     //need to be revised
+
+#define		PID_ACC_Y_KP			0.4  
+#define		PID_ACC_Y_KI			0.0    
+#define		PID_ACC_Y_KD			0.0 
+#define		PID_ACC_Y_OUTMIN		-500    //need to be revised
+#define		PID_ACC_Y_OUTMAX		500     //need to be revised
 
 #define		RX_MAX_PULSE_WIDTH			2075	//in microseconds
 
@@ -333,6 +341,7 @@ struct structSuperPID
 	structPID accAlt;
 	structPID posAlt;
 	structPID accX;
+	structPID accY;
 }pidVars;
 
 struct structEuler
@@ -521,6 +530,8 @@ cDataFilter filtObjVelPIDoutY(filterType_LPF);
 cDataFilter filtObjVelPIDoutZ(filterType_LPF);
 
 cDataFilter filtObjAccelDiffZ(filterType_Diff100Hz);
+cDataFilter filtObjAccelDiffX(filterType_Diff100Hz);
+cDataFilter filtObjAccelDiffY(filterType_Diff100Hz);
 
 cDataFilter filtObjAccelCmdDiffZ(filterType_Diff100Hz);
 
