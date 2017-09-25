@@ -51,9 +51,16 @@ double computedAlt=0;
 bool barometer_initial_measurement = true;
 #endif // BAROMETER_BMP180
 
+// Define gravity parameters
 #define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8250.0
 #define		MPU_G_MAPPING_IN_BITS				8192.0 // 1 G
 #define		GRAVITY_IN_METER_PER_SECOND2		9.80665
+
+// Define Earth Parameters
+#define		REA_SEMI_MAJOR_AXIS					6378137.0 // The semi-major axis
+#define		FLATTENNING							1 / 298.257223563 // The flattening factor
+#define		REB_SEMI_MINOR_AXIS					REA_SEMI_MAJOR_AXIS * (1 - FLATTENNING) // The semi-minor axis
+#define		ECCENTRICITY						sqrt(pow(REA_SEMI_MAJOR_AXIS, 2) - pow(REB_SEMI_MINOR_AXIS, 2)) / REA_SEMI_MAJOR_AXIS // The first eccentricity
 
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
@@ -357,8 +364,9 @@ struct structIMU
 	struct3Daxis accel;
 	struct3Daxis accelWorld;
 	struct3Daxis accelWorldEstimated;
-	struct3Daxis accelBody;
+	struct3Daxis velWorld;
 	struct3Daxis velWorldEstimated;
+	struct3Daxis posWorld;
 	struct3Daxis posWorldEstimated;
 	struct3Daxis gyroDiff;
 	struct3Daxis accelDiff;
@@ -374,8 +382,25 @@ struct structGPS
 	uint16_t vel;
 	uint16_t cog;
 	uint8_t satellites_visible;
-	uint8_t gpsStatus;
+	bool gpsIsFix;
+	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
+	struct3Daxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
+	double nE; // The prime vertical radius of curvature
 }qcGPS;
+
+struct structPOI
+{
+	double lat;
+	double lon;
+	double alt;
+	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
+	double nE; // The prime vertical radius of curvature
+};
+
+structPOI homePoint; // Home Point
+structPOI destinationPoint; // Destination Point
+
+bool homePointSelected = false;
 
 struct structMAVLINK
 {
@@ -486,13 +511,6 @@ unsigned char statusCompass;
 unsigned char statusUdp;
 unsigned char statusGS;
 
-//struct struct3Dvector
-//{
-//	vector<double> xVector;
-//	vector<double> yVector;
-//	vector<double> zVector;
-//};
-
 
 typedef enum
 {
@@ -521,20 +539,13 @@ cDataFilter filtObjVelPIDoutX(filterType_LPF);
 cDataFilter filtObjVelPIDoutY(filterType_LPF);
 cDataFilter filtObjVelPIDoutZ(filterType_LPF);
 
+cDataFilter filtObjAccelDiffX(filterType_Diff100Hz);
+cDataFilter filtObjAccelDiffY(filterType_Diff100Hz);
 cDataFilter filtObjAccelDiffZ(filterType_Diff100Hz);
 
 cDataFilter filtObjAccelCmdDiffZ(filterType_Diff100Hz);
 
 cDataFilter filtObjUltrasonicDist(filterType_LPF);
-
-//struct3Dvector gyroDiffBuffer;
-//struct3Dvector anglePIDoutputLowpassBuffer;
-//struct3Dvector rateCmdDiffBuffer;
-//struct3Dvector posPIDoutputLowpassBuffer;
-//struct3Dvector velPIDoutputLowpassBuffer;
-//struct3Dvector accelDiffBuffer;
-//struct3Dvector accelCmdDiffBuffer;
-//vector<double> ultrasonicDistanceLowpassBuffer;
 
 double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering

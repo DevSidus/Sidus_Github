@@ -46,6 +46,14 @@ namespace Ground_Station
 
         public float ultrasonicDist { get; set; }
 
+        // Position Parameter Estimation with Kalman Filter
+        public float quadAccelerationWorldX { get; set; }
+        public float quadVelocityWorldX { get; set; }
+        public float quadPositionWorldX { get; set; }
+        public float quadAccelerationWorldY { get; set; }
+        public float quadVelocityWorldY { get; set; }
+        public float quadPositionWorldY { get; set; }
+
         // Altitude Parameter Estimation with Kalman Filter
         public float quadAccelerationWorldZ { get; set; }
         public float quadVelocityWorldZ { get; set; }

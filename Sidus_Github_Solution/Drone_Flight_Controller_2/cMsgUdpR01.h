@@ -42,6 +42,14 @@ struct structMsgUdpR01
 
 	float ultrasonicDist;
 
+	// Position Parameter Estimation with Kalman Filter
+	float quadAccelerationWorldX; // kalman filtered output
+	float quadVelocityWorldX;   // kalman filtered output
+	float quadPositionWorldX;   // kalman filtered output
+	float quadAccelerationWorldY; // kalman filtered output
+	float quadVelocityWorldY;   // kalman filtered output
+	float quadPositionWorldY;   // kalman filtered output
+
 	// Altitude Parameter Estimation with Kalman Filter
 	float quadAccelerationWorldZ; // kalman filtered output
 	float quadVelocityWorldZ;   // kalman filtered output
