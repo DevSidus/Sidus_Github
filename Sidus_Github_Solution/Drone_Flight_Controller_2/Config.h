@@ -14,17 +14,16 @@ This header file define all the configurable variables including constants, pin 
 
 #define		DRONE_AP_NAME					"SigmaDrone"
 #define		DRONE_AP_PASS					"sidus12345"
-#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2"
 
-//#define		WIFI_SSID						"YANIKS HOUSE"
-//#define		WIFI_PASS						"YanikTurkiye06"
-//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.11"
+#define		WIFI_SSID						"khorfo_net"
+#define		WIFI_PASS						"ahmet_ipek_12082004"
+#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2"
 
 //#define		WIFI_SSID						"AAGCA"
 //#define		WIFI_PASS						"ahmet(12082004)"
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2"
 
-#define		DRONE_WEIGHT					1000.0     //in grams
+#define		DRONE_WEIGHT					1080.0     //in grams
 
 #define		UDP_PORT						8080
 
@@ -52,7 +51,7 @@ bool barometer_initial_measurement = true;
 #endif // BAROMETER_BMP180
 
 // Define gravity parameters
-#define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8250.0
+#define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8350.0
 #define		MPU_G_MAPPING_IN_BITS				8192.0 // 1 G
 #define		GRAVITY_IN_METER_PER_SECOND2		9.80665
 
@@ -152,27 +151,27 @@ bool barometer_initial_measurement = true;
 #define		CMD_MODE_CHANGE_THR_GAP		50
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
-#define		PID_RATE_PITCH_KP			0.7
+#define		PID_RATE_PITCH_KP			1.0
 #define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.05
+#define		PID_RATE_PITCH_KD			0.08
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
 
-#define		PID_ANGLE_PITCH_KP			3.0
+#define		PID_ANGLE_PITCH_KP			4.0
 #define		PID_ANGLE_PITCH_KI			0.0
-#define		PID_ANGLE_PITCH_KD			0.06
+#define		PID_ANGLE_PITCH_KD			0.0
 #define		PID_ANGLE_PITCH_OUTMIN		-250
 #define		PID_ANGLE_PITCH_OUTMAX		250
 
-#define		PID_RATE_ROLL_KP			0.7
+#define		PID_RATE_ROLL_KP			1.0
 #define		PID_RATE_ROLL_KI			0.0
-#define		PID_RATE_ROLL_KD			0.05
+#define		PID_RATE_ROLL_KD			0.08
 #define		PID_RATE_ROLL_OUTMIN		-250
 #define		PID_RATE_ROLL_OUTMAX		250
 
-#define		PID_ANGLE_ROLL_KP			3.0
+#define		PID_ANGLE_ROLL_KP			4.0
 #define		PID_ANGLE_ROLL_KI			0.0
-#define		PID_ANGLE_ROLL_KD			0.06
+#define		PID_ANGLE_ROLL_KD			0.0
 #define		PID_ANGLE_ROLL_OUTMIN		-250
 #define		PID_ANGLE_ROLL_OUTMAX		250
 
@@ -190,16 +189,16 @@ bool barometer_initial_measurement = true;
 #define		PID_ANGLE_YAW_OUTMAX		150
 
 
-#define		PID_POS_ALT_KP			40 // May be tuned better
+#define		PID_POS_ALT_KP			60 // May be tuned better
 #define		PID_POS_ALT_KI			0.0
 #define		PID_POS_ALT_KD			0.0 // May be tuned better
 #define		PID_POS_ALT_OUTMIN		-250
 #define		PID_POS_ALT_OUTMAX		250
 
 
-#define		PID_VEL_ALT_KP			3.0 // May be tuned better
+#define		PID_VEL_ALT_KP			5.0 // May be tuned better
 #define		PID_VEL_ALT_KI			0.0
-#define		PID_VEL_ALT_KD			0.05 // May be tuned better
+#define		PID_VEL_ALT_KD			0.1 // May be tuned better
 #define		PID_VEL_ALT_OUTMIN		-250
 #define		PID_VEL_ALT_OUTMAX		250
 
