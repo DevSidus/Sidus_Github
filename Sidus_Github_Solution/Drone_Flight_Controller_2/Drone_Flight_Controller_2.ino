@@ -1742,14 +1742,22 @@ void processPID()
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Pitch Roll Yaw Angle PID
 	
-	// Roll PID
-	pidVars.angleRoll.setpoint = atan(pidVars.accY.output / PID_ACC_Y_OUTMAX) * 180 / M_PI;//cmdMotorRoll;
+	// Roll PID	
+	double angleSetpoint = atan(pidVars.accY.output / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z)*100)) * 180 / M_PI;  // division by 0 should be avoided!!!
+	if (angleSetpoint > CMD_AUTO_PITCH_ROLL_MAX) angleSetpoint = CMD_AUTO_PITCH_ROLL_MAX;
+	else if (angleSetpoint < -CMD_AUTO_PITCH_ROLL_MAX) angleSetpoint = -CMD_AUTO_PITCH_ROLL_MAX;
+
+	pidVars.angleRoll.setpoint = angleSetpoint;//cmdMotorRoll;
 	pidVars.angleRoll.sensedVal = qc.euler.phi * 180 / M_PI;
 	pidVars.angleRoll.sensedValDiff = qc.gyro.x;
 	pidAngleRoll.Compute();
 	
 	// Pitch PID
-	pidVars.anglePitch.setpoint = -atan(pidVars.accX.output / PID_ACC_X_OUTMAX) * 180 / M_PI; //cmdMotorPitch;
+	angleSetpoint = -atan(pidVars.accX.output / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;  // division by 0 should be avoided!!!
+	if (angleSetpoint > CMD_AUTO_PITCH_ROLL_MAX) angleSetpoint = CMD_AUTO_PITCH_ROLL_MAX;
+	else if (angleSetpoint < -CMD_AUTO_PITCH_ROLL_MAX) angleSetpoint = -CMD_AUTO_PITCH_ROLL_MAX;
+
+	pidVars.anglePitch.setpoint = angleSetpoint; //cmdMotorPitch;
 	pidVars.anglePitch.sensedVal = qc.euler.theta * 180 / M_PI;
 	pidVars.anglePitch.sensedValDiff = qc.gyro.y;
 	pidAnglePitch.Compute();

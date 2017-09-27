@@ -119,6 +119,7 @@ bool barometer_initial_measurement = true;
 #define		CMD_ATTITUDE_MAX 
 
 #define		CMD_RX_PITCH_ROLL_MAX	+45.0
+#define		CMD_AUTO_PITCH_ROLL_MAX	+30.0
 
 #define		DC_PITCH_MIN	1100.0
 #define		DC_PITCH_MAX	1900.0
@@ -210,14 +211,14 @@ bool barometer_initial_measurement = true;
 #define		PID_ACC_X_KP			0.4 
 #define		PID_ACC_X_KI			0.0    
 #define		PID_ACC_X_KD			0.0 
-#define		PID_ACC_X_OUTMIN		-500    //need to be revised
-#define		PID_ACC_X_OUTMAX		500     //need to be revised
+#define		PID_ACC_X_OUTMIN		-1000    //need to be revised
+#define		PID_ACC_X_OUTMAX		1000     //need to be revised
 
 #define		PID_ACC_Y_KP			0.4  
 #define		PID_ACC_Y_KI			0.0    
 #define		PID_ACC_Y_KD			0.0 
-#define		PID_ACC_Y_OUTMIN		-500    //need to be revised
-#define		PID_ACC_Y_OUTMAX		500     //need to be revised
+#define		PID_ACC_Y_OUTMIN		-1000    //need to be revised
+#define		PID_ACC_Y_OUTMAX		1000     //need to be revised
 
 #define		RX_MAX_PULSE_WIDTH			2075	//in microseconds
 
