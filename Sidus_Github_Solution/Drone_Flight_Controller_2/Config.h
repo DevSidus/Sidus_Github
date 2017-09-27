@@ -61,7 +61,7 @@ bool barometer_initial_measurement = true;
 #define		REB_SEMI_MINOR_AXIS					REA_SEMI_MAJOR_AXIS * (1 - FLATTENNING) // The semi-minor axis
 #define		ECCENTRICITY						sqrt(pow(REA_SEMI_MAJOR_AXIS, 2) - pow(REB_SEMI_MINOR_AXIS, 2)) / REA_SEMI_MAJOR_AXIS // The first eccentricity
 
-#define		ACC_BITS_TO_CM_SECOND2				100 * GRAVITY_IN_METER_PER_SECOND2 / MPU_G_MAPPING_IN_BITS
+#define		ACC_BITS_TO_M_SECOND2				GRAVITY_IN_METER_PER_SECOND2 / MPU_G_MAPPING_IN_BITS
 //MS5611 Barometer Definitions
 #define		BAROMETER_INIT_THRESHOLD	2000
 #define		BARO_TEMP_MIN				-20
@@ -549,8 +549,6 @@ cDataFilter filtObjVelPIDoutZ(filterType_LPF);
 cDataFilter filtObjAccelDiffX(filterType_Diff100Hz);
 cDataFilter filtObjAccelDiffY(filterType_Diff100Hz);
 cDataFilter filtObjAccelDiffZ(filterType_Diff100Hz);
-cDataFilter filtObjAccelDiffX(filterType_Diff100Hz);
-cDataFilter filtObjAccelDiffY(filterType_Diff100Hz);
 
 cDataFilter filtObjAccelCmdDiffZ(filterType_Diff100Hz);
 

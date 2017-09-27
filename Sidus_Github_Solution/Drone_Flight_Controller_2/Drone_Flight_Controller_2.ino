@@ -1022,7 +1022,7 @@ void task_altitude_kalman(void * parameter)
 	double R_AltVelAcc[4] = { pow(sigmaAlt,2), 0, 0, pow(sigmaAccelZ,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_AltVelAcc_n1[3] = { -referenceAltitude, 0, qc.accelWorld.z / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2 };  // negative added since altitude vector is opposite of z-axis
+	double m_AltVelAcc_n1[3] = { -referenceAltitude, 0, qc.accelWorld.z};  // negative added since altitude vector is opposite of z-axis
 	double P_AltVelAcc_n1[9] = { pow(sigmaAlt,2), 0, 0, 0, pow(sigmaAccelZ,2), 0, 0, 0, pow(sigmaAccelZ,2) };
 
 	double m_AltVelAcc_n[3] = { 0, 0, 0 };
@@ -1064,7 +1064,7 @@ void task_altitude_kalman(void * parameter)
 		//***********************************************************************************
 		// Kalman Filter for Altitude, Velocity and Acceleration Estimation
 		y_AltVelAcc_n[0] = -referenceAltitude; // negative added since altitude vector is opposite of z-axis
-		y_AltVelAcc_n[1] = qc.accelWorld.z / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2;
+		y_AltVelAcc_n[1] = qc.accelWorld.z;
 
 		kalmanFilter3State2Measurement(m_AltVelAcc_n1, P_AltVelAcc_n1, y_AltVelAcc_n, F_AltVelAcc, Q_AltVelAcc, H_AltVelAcc, R_AltVelAcc, m_AltVelAcc_n, P_AltVelAcc_n);
 		
@@ -1089,7 +1089,6 @@ void task_altitude_kalman(void * parameter)
 	}
 	vTaskDelete(NULL);
 }
-
 
 void task_position_kalman(void * parameter)
 {
@@ -1158,8 +1157,8 @@ void task_position_kalman(void * parameter)
 	double R_PosVelAcc[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_PosVelAccX_n1[3] = { 0, 0, qc.accelWorld.x / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2 };
-	double m_PosVelAccY_n1[3] = { 0, 0, qc.accelWorld.y / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2 };
+	double m_PosVelAccX_n1[3] = { 0, 0, qc.accelWorld.x};
+	double m_PosVelAccY_n1[3] = { 0, 0, qc.accelWorld.y};
 	double P_PosVelAccX_n1[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) };
 	double P_PosVelAccY_n1[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) };
 
@@ -1212,11 +1211,11 @@ void task_position_kalman(void * parameter)
 		// Kalman Filter for Position, Velocity and Acceleration Estimation
 		y_PosVelAccX_n[0] = m_PosX_n; // qc.posWorld.x; // 
 		y_PosVelAccX_n[1] = m_VelX_n; // qc.velWorld.x; // 
-		y_PosVelAccX_n[2] = qc.accelWorld.x / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2;
+		y_PosVelAccX_n[2] = qc.accelWorld.x;
 		
 		y_PosVelAccY_n[0] = m_PosY_n; // qc.posWorld.y; // 
 		y_PosVelAccY_n[1] = m_VelY_n; // qc.velWorld.y; //
-		y_PosVelAccY_n[2] = qc.accelWorld.y / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2;
+		y_PosVelAccY_n[2] = qc.accelWorld.y;
 
 		kalmanFilter3State3Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
 		kalmanFilter3State3Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
@@ -1238,7 +1237,7 @@ void task_position_kalman(void * parameter)
 
 		Serial.print(qc.posWorld.x); Serial.print(" ");
 		Serial.print(qc.velWorld.x); Serial.print(" ");
-		Serial.print(qc.accelWorld.x / MPU_G_MAPPING_IN_BITS * GRAVITY_IN_METER_PER_SECOND2); Serial.print(" ");
+		Serial.print(qc.accelWorld.x); Serial.print(" ");
 		Serial.print(qc.posWorldEstimated.x); Serial.print(" ");
 		Serial.print(qc.velWorldEstimated.x); Serial.print(" ");
 		Serial.println(qc.accelWorldEstimated.x);
@@ -1257,7 +1256,6 @@ void task_position_kalman(void * parameter)
 	}
 	vTaskDelete(NULL);
 }
-
 
 void task_compass_kalman(void * parameter)
 {
@@ -1558,9 +1556,9 @@ void processMpu()
 			qc.euler.theta = -euler[1];
 			qc.euler.phi = euler[2];
 
-			qc.accelWorld.x = qc.accel.x*cos(qc.euler.theta) + qc.accel.z*cos(qc.euler.phi)*sin(qc.euler.theta) + qc.accel.y*sin(qc.euler.theta)*sin(qc.euler.phi);
-			qc.accelWorld.y = qc.accel.y*cos(qc.euler.phi) - qc.accel.z*sin(qc.euler.phi);
-			qc.accelWorld.z = qc.accel.z*cos(qc.euler.theta)*cos(qc.euler.phi) - qc.accel.x*sin(qc.euler.theta) + qc.accel.y*cos(qc.euler.theta)*sin(qc.euler.phi) + MPU_GRAVITY_MEASUREMENT_IN_BITS;
+			qc.accelWorld.x = (qc.accel.x*cos(qc.euler.theta) + qc.accel.z*cos(qc.euler.phi)*sin(qc.euler.theta) + qc.accel.y*sin(qc.euler.theta)*sin(qc.euler.phi)) * ACC_BITS_TO_M_SECOND2;
+			qc.accelWorld.y = (qc.accel.y*cos(qc.euler.phi) - qc.accel.z*sin(qc.euler.phi)) * ACC_BITS_TO_M_SECOND2;
+			qc.accelWorld.z = (qc.accel.z*cos(qc.euler.theta)*cos(qc.euler.phi) - qc.accel.x*sin(qc.euler.theta) + qc.accel.y*cos(qc.euler.theta)*sin(qc.euler.phi) + MPU_GRAVITY_MEASUREMENT_IN_BITS) * ACC_BITS_TO_M_SECOND2;
 
 			// Differantiate Gyro Values for PID Kd branch
 			// Update Buffer
@@ -1728,18 +1726,16 @@ void processPID()
 
 	getBodyToEulerAngularRates();
 
-	qc.accelDiff.x = filtObjAccelDiffX.filter(qc.accelWorld.x, deltaTimeAccelDiff);  // may be moved to another function
 	// Acc X PID
 	pidVars.accX.setpoint = -cmdMotorPitch * 20;   // negative added since rx pitch command is in the reverse direction of x-axis
-	pidVars.accX.sensedVal = qc.accelWorld.x * ACC_BITS_TO_CM_SECOND2;  // cm/s^2 will be changed to transformed variable
-	pidVars.accX.sensedValDiff = qc.accelDiff.x * ACC_BITS_TO_CM_SECOND2;   // cm/s^3 
+	pidVars.accX.sensedVal = qc.accelWorld.x * 100;  // cm/s^2 will be changed to transformed variable
+	pidVars.accX.sensedValDiff = qc.accelDiff.x * 100;   // cm/s^3 
 	pidAccX.Compute();
 
-	qc.accelDiff.y = filtObjAccelDiffY.filter(qc.accelWorld.y, deltaTimeAccelDiff);  // may be moved to another function
 	// Acc Y PID
 	pidVars.accY.setpoint = cmdMotorRoll * 20;
-	pidVars.accY.sensedVal = qc.accelWorld.y * ACC_BITS_TO_CM_SECOND2;  // cm/s^2 will be changed to transformed variable
-	pidVars.accY.sensedValDiff = qc.accelDiff.y * ACC_BITS_TO_CM_SECOND2;   // cm/s^3 
+	pidVars.accY.sensedVal = qc.accelWorld.y * 100;  // cm/s^2 will be changed to transformed variable
+	pidVars.accY.sensedValDiff = qc.accelDiff.y * 100;   // cm/s^3 
 	pidAccY.Compute();
 
 
