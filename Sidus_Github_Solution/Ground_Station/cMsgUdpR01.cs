@@ -142,6 +142,22 @@ namespace Ground_Station
         public short pidAccAltIresult { get; set; }
         public short pidAccAltDresult { get; set; }
 
+        public byte pidAccPosXKp { get; set; }
+        public byte pidAccPosXKi { get; set; }
+        public byte pidAccPosXKd { get; set; }
+        public short pidAccPosXOutput { get; set; }
+        public short pidAccPosXPresult { get; set; }
+        public short pidAccPosXIresult { get; set; }
+        public short pidAccPosXDresult { get; set; }
+
+        public byte pidAccPosYKp { get; set; }
+        public byte pidAccPosYKi { get; set; }
+        public byte pidAccPosYKd { get; set; }
+        public short pidAccPosYOutput { get; set; }
+        public short pidAccPosYPresult { get; set; }
+        public short pidAccPosYIresult { get; set; }
+        public short pidAccPosYDresult { get; set; }
+
         public byte gpsStatus { get; set; }
         public double gpsLat { get; set; }
         public double gpsLon { get; set; }

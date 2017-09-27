@@ -558,6 +558,47 @@ namespace Ground_Station
             MsgUdpT01.message.pidPosAltKi = Convert.ToByte(tb_pid_pos_alt_ki.Value);
             MsgUdpT01.message.pidPosAltKd = Convert.ToByte(tb_pid_pos_alt_kd.Value);
         }
+
+        private void tb_pid_acc_posxy_kp_Scroll(object sender, EventArgs e)
+        {
+
+            toolTip1.SetToolTip(tb_pid_acc_posxy_kp, tb_pid_acc_posxy_kp.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccPos);
+
+            MsgUdpT01.message.pidAccPosKp = Convert.ToByte(tb_pid_acc_posxy_kp.Value);
+            MsgUdpT01.message.pidAccPosKi = Convert.ToByte(tb_pid_acc_posxy_ki.Value);
+            MsgUdpT01.message.pidAccPosKd = Convert.ToByte(tb_pid_acc_posxy_kd.Value);
+        }
+
+        private void tb_pid_acc_posxy_ki_Scroll(object sender, EventArgs e)
+        {
+
+            toolTip1.SetToolTip(tb_pid_acc_posxy_ki, tb_pid_acc_posxy_ki.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccPos);
+
+            MsgUdpT01.message.pidAccPosKp = Convert.ToByte(tb_pid_acc_posxy_kp.Value);
+            MsgUdpT01.message.pidAccPosKi = Convert.ToByte(tb_pid_acc_posxy_ki.Value);
+            MsgUdpT01.message.pidAccPosKd = Convert.ToByte(tb_pid_acc_posxy_kd.Value);
+        }
+
+        private void tb_pid_acc_posxy_kd_Scroll(object sender, EventArgs e)
+        {
+
+            toolTip1.SetToolTip(tb_pid_acc_posxy_kd, tb_pid_acc_posxy_kd.Value.ToString());
+            MsgUdpT01.message.pidCommandState = Convert.ToByte(pidCommandType.pidCommandApplyAccPos);
+
+            MsgUdpT01.message.pidAccPosKp = Convert.ToByte(tb_pid_acc_posxy_kp.Value);
+            MsgUdpT01.message.pidAccPosKi = Convert.ToByte(tb_pid_acc_posxy_ki.Value);
+            MsgUdpT01.message.pidAccPosKd = Convert.ToByte(tb_pid_acc_posxy_kd.Value);
+        }
+
+        private void cb_saveHome_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cb_saveHome.Checked)
+                MsgUdpT01.message.saveHomePos = 0xAA;  //decimal 170
+            else
+                MsgUdpT01.message.saveHomePos = 0x00; // decimal 0
+        }
     }
 }
 

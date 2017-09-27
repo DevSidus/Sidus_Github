@@ -39,7 +39,13 @@ namespace Ground_Station
         public byte pidAccAltKp { get; set; }
         public byte pidAccAltKi { get; set; }
         public byte pidAccAltKd { get; set; }
+
+        public byte pidAccPosKp { get; set; }
+        public byte pidAccPosKi { get; set; }
+        public byte pidAccPosKd { get; set; }
         
+        public byte saveHomePos { get; set; }
+
     }
     class cMsgUdpT01
     {

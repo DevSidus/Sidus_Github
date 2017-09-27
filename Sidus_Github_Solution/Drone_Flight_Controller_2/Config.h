@@ -461,6 +461,7 @@ typedef enum
 	pidCommandApplyVelAlt = 6,
 	pidCommandApplyAccAlt = 7,
 	pidCommandApplyPosAlt = 8,
+	pidCommandApplyAccPos = 9,
 }pidCommandType;
 
 typedef enum

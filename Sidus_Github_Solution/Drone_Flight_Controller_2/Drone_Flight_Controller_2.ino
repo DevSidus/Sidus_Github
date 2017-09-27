@@ -2535,6 +2535,7 @@ void updateUdpMsgVars()
 		applyPidCommandPosAlt();
 		applyPidCommandVelAlt();
 		applyPidCommandAccAlt();
+		applyPidCommandAccPos();
 		break;
 
 	case pidCommandApplyVelAlt:
@@ -2547,6 +2548,10 @@ void updateUdpMsgVars()
 
 	case pidCommandApplyPosAlt:
 		applyPidCommandPosAlt();
+		break;
+
+	case pidCommandApplyAccPos:
+		applyPidCommandAccPos();
 		break;
 	default:break;
 	}
@@ -2618,17 +2623,25 @@ void applyPidCommandVelAlt()
 
 void applyPidCommandAccAlt()
 {
-	//Set Altitude Position PID parameters
-	//pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
-	//pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
-	//pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
-	//pidAccAlt.SetTunings(pidVars.accAlt.Kp * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Ki * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Kd * DRONE_WEIGHT / 1000.0);
+	//Set Altitude Acc PID parameters
+	pidVars.accAlt.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
+	pidVars.accAlt.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
+	pidVars.accAlt.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
+	pidAccAlt.SetTunings(pidVars.accAlt.Kp * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Ki * DRONE_WEIGHT / 1000.0, pidVars.accAlt.Kd * DRONE_WEIGHT / 1000.0);
+}
 
-
-	pidVars.accX.Kp = MsgUdpT01.message.pidAccAltKp * RESOLUTION_PID_ACC_KP;
-	pidVars.accX.Ki = MsgUdpT01.message.pidAccAltKi * RESOLUTION_PID_ACC_KI;
-	pidVars.accX.Kd = MsgUdpT01.message.pidAccAltKd * RESOLUTION_PID_ACC_KD;
+void applyPidCommandAccPos()
+{
+	//Set Position Acc PID parameters
+	pidVars.accX.Kp = MsgUdpT01.message.pidAccPosKp * RESOLUTION_PID_ACC_KP;
+	pidVars.accX.Ki = MsgUdpT01.message.pidAccPosKi * RESOLUTION_PID_ACC_KI;
+	pidVars.accX.Kd = MsgUdpT01.message.pidAccPosKd * RESOLUTION_PID_ACC_KD;
 	pidAccX.SetTunings(pidVars.accX.Kp, pidVars.accX.Ki, pidVars.accX.Kd);
+
+	pidVars.accY.Kp = MsgUdpT01.message.pidAccPosKp * RESOLUTION_PID_ACC_KP;
+	pidVars.accY.Ki = MsgUdpT01.message.pidAccPosKi * RESOLUTION_PID_ACC_KI;
+	pidVars.accY.Kd = MsgUdpT01.message.pidAccPosKd * RESOLUTION_PID_ACC_KD;
+	pidAccY.SetTunings(pidVars.accY.Kp, pidVars.accY.Ki, pidVars.accY.Kd);
 }
 
 void prepareUDPmessages()
@@ -2737,13 +2750,29 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
 	MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
 	MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
-	MsgUdpR01.message.pidAccAltKp			= pidVars.accX.Kp / RESOLUTION_PID_ACC_KP;// pidVars.accAlt.Kp / RESOLUTION_PID_ACC_KP;
-	MsgUdpR01.message.pidAccAltKi			= pidVars.accX.Ki / RESOLUTION_PID_ACC_KI;// pidVars.accAlt.Ki / RESOLUTION_PID_ACC_KI;
-	MsgUdpR01.message.pidAccAltKd			= pidVars.accX.Kd / RESOLUTION_PID_ACC_KD;// pidVars.accAlt.Kd / RESOLUTION_PID_ACC_KD;
-	MsgUdpR01.message.pidAccAltOutput		= pidVars.accX.output;// pidVars.accAlt.output;
-	MsgUdpR01.message.pidAccAltPresult		= pidAccX.Get_P_Result();// pidAccAlt.Get_P_Result();
-	MsgUdpR01.message.pidAccAltIresult		= pidAccX.Get_I_Result();// pidAccAlt.Get_I_Result();
-	MsgUdpR01.message.pidAccAltDresult		= pidAccX.Get_D_Result();// pidAccAlt.Get_D_Result();
+	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_ACC_KP;
+	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_ACC_KI;
+	MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_ACC_KD;
+	MsgUdpR01.message.pidAccAltOutput		= pidVars.accAlt.output;
+	MsgUdpR01.message.pidAccAltPresult		= pidAccAlt.Get_P_Result();
+	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
+	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
+
+	MsgUdpR01.message.pidAccPosXKp			= pidVars.accX.Kp / RESOLUTION_PID_ACC_KP;
+	MsgUdpR01.message.pidAccPosXKi			= pidVars.accX.Ki / RESOLUTION_PID_ACC_KI;
+	MsgUdpR01.message.pidAccPosXKd			= pidVars.accX.Kd / RESOLUTION_PID_ACC_KD;
+	MsgUdpR01.message.pidAccPosXOutput		= pidVars.accX.output;
+	MsgUdpR01.message.pidAccPosXPresult		= pidAccX.Get_P_Result();
+	MsgUdpR01.message.pidAccPosXIresult		= pidAccX.Get_I_Result();
+	MsgUdpR01.message.pidAccPosXDresult		= pidAccX.Get_D_Result();
+
+	MsgUdpR01.message.pidAccPosYKp			= pidVars.accY.Kp / RESOLUTION_PID_ACC_KP;
+	MsgUdpR01.message.pidAccPosYKi			= pidVars.accY.Ki / RESOLUTION_PID_ACC_KI;
+	MsgUdpR01.message.pidAccPosYKd			= pidVars.accY.Kd / RESOLUTION_PID_ACC_KD;
+	MsgUdpR01.message.pidAccPosYOutput		= pidVars.accY.output;
+	MsgUdpR01.message.pidAccPosYPresult		= pidAccY.Get_P_Result();
+	MsgUdpR01.message.pidAccPosYIresult		= pidAccY.Get_I_Result();
+	MsgUdpR01.message.pidAccPosYDresult		= pidAccY.Get_D_Result();
 
 	MsgUdpR01.message.gpsStatus				= qcGPS.gpsIsFix;
 	MsgUdpR01.message.gpsLat				= qcGPS.lat*1e7;

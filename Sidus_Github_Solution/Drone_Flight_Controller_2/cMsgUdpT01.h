@@ -36,6 +36,13 @@ struct structMsgUdpT01
 	unsigned char pidAccAltKi;
 	unsigned char pidAccAltKd;
 
+	unsigned char pidAccPosKp;
+	unsigned char pidAccPosKi;
+	unsigned char pidAccPosKd;
+
+	unsigned char saveHomePos;
+
+
 };
 #pragma pack(pop)
 

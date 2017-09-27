@@ -138,6 +138,22 @@ struct structMsgUdpR01
 	short pidAccAltIresult;
 	short pidAccAltDresult;
 
+	unsigned char pidAccPosXKp;
+	unsigned char pidAccPosXKi;
+	unsigned char pidAccPosXKd;
+	short pidAccPosXOutput;
+	short pidAccPosXPresult;
+	short pidAccPosXIresult;
+	short pidAccPosXDresult;
+
+	unsigned char pidAccPosYKp;
+	unsigned char pidAccPosYKi;
+	unsigned char pidAccPosYKd;
+	short pidAccPosYOutput;
+	short pidAccPosYPresult;
+	short pidAccPosYIresult;
+	short pidAccPosYDresult;
+
 	//GPS DATA
 	unsigned char gpsStatus;
 	double gpsLat;
