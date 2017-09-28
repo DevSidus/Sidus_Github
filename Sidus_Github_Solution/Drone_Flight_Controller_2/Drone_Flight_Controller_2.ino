@@ -294,15 +294,38 @@ void task_ultrasonic(void * parameter)
 
 void task_gps(void * parameter)
 {
+	uint8_t portConfigSentence1[28] = { 0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00,
+									0xD0, 0x08, 0x00, 0x00, 0x00, 0xC2, 0x01, 0x00, 0x07, 0x00, 
+									0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x7E };
+	uint8_t portConfigSentence2[9] = { 0xB5, 0x62, 0x06, 0x00, 0x01, 0x00, 0x01, 0x08, 0x22};
+	uint8_t rateConfigSentence1[14] = { 0xB5, 0x62, 0x06, 0x08, 0x06, 0x00, 0x64, 0x00, 0x01, 0x00, 0x01, 0x00, 0x7A, 0x12 };
+	uint8_t rateConfigSentence2[8] = { 0xB5, 0x62, 0x06, 0x08, 0x00, 0x00, 0x0E, 0x30 };
+	
+	SerialGps.begin(9600);	
+	//delay(100);
+	delay(400);
+	SerialGps.write(portConfigSentence1, 28);
+	delay(400);
+	SerialGps.write(portConfigSentence2, 9);
+	delay(400);
 
-	SerialGps.begin(SERIAL_GPS_SPEED);	
+	SerialGps.end();
+	delay(400);
+	SerialGps.begin(SERIAL_GPS_SPEED);
+	delay(400);
+	SerialGps.write(rateConfigSentence1, 14);
+	delay(400);
+	SerialGps.write(rateConfigSentence2, 8);
+	delay(400);
+
+
 	while (true)
 	{
 
 		while(SerialGps.available() > 0)
 		{
 			int val = SerialGps.read();
-
+			//Serial.write(val);
 			gps.encode(val);
 
 			if (gps.location.isUpdated())
@@ -1235,12 +1258,12 @@ void task_position_kalman(void * parameter)
 		//***********************************************************************************
 
 
-		Serial.print(qc.posWorld.x); Serial.print(" ");
-		Serial.print(qc.velWorld.x); Serial.print(" ");
-		Serial.print(qc.accelWorld.x); Serial.print(" ");
-		Serial.print(qc.posWorldEstimated.x); Serial.print(" ");
-		Serial.print(qc.velWorldEstimated.x); Serial.print(" ");
-		Serial.println(qc.accelWorldEstimated.x);
+		//Serial.print(qc.posWorld.x); Serial.print(" ");
+		//Serial.print(qc.velWorld.x); Serial.print(" ");
+		//Serial.print(qc.accelWorld.x); Serial.print(" ");
+		//Serial.print(qc.posWorldEstimated.x); Serial.print(" ");
+		//Serial.print(qc.velWorldEstimated.x); Serial.print(" ");
+		//Serial.println(qc.accelWorldEstimated.x);
 
 
 
