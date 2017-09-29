@@ -302,8 +302,16 @@ void task_gps(void * parameter)
 	uint8_t rateConfigSentence2[8] = { 0xB5, 0x62, 0x06, 0x08, 0x00, 0x00, 0x0E, 0x30 };
 	
 	SerialGps.begin(9600);	
-	//delay(100);
-	delay(400);
+	delay(100);
+	SerialGps.write(rateConfigSentence1, 14);
+	delay(200);
+	SerialGps.write(rateConfigSentence2, 8);
+	delay(1000);
+	SerialGps.write(rateConfigSentence1, 14);
+	delay(200);
+	SerialGps.write(rateConfigSentence2, 8);
+
+	delay(1000);
 	SerialGps.write(portConfigSentence1, 28);
 	delay(400);
 	SerialGps.write(portConfigSentence2, 9);
@@ -312,17 +320,16 @@ void task_gps(void * parameter)
 	SerialGps.end();
 	delay(400);
 	SerialGps.begin(SERIAL_GPS_SPEED);
-	delay(400);
+	delay(1000);
 	SerialGps.write(rateConfigSentence1, 14);
-	delay(400);
+	delay(200);
 	SerialGps.write(rateConfigSentence2, 8);
-	delay(400);
 
 
 	while (true)
 	{
 
-		while(SerialGps.available() > 0)
+		while (SerialGps.available() > 0)
 		{
 			int val = SerialGps.read();
 			//Serial.write(val);
@@ -331,7 +338,7 @@ void task_gps(void * parameter)
 			if (gps.location.isUpdated())
 			{
 				qcGPS.lat = gps.location.lat();
-				qcGPS.lon = gps.location.lng();		
+				qcGPS.lon = gps.location.lng();
 			}
 			if (gps.altitude.isUpdated())
 			{
