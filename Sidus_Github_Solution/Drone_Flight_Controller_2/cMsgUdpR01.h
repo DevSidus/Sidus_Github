@@ -24,9 +24,9 @@ struct structMsgUdpR01
 	short mpuAccZ;
 
 	//Accelerometer Measurements without Gravity
-	short mpuAccWorldX;
-	short mpuAccWorldY;
-	short mpuAccWorldZ;
+	float mpuAccWorldX;
+	float mpuAccWorldY;
+	float mpuAccWorldZ;
 
 	//Yaw Pitch Roll Measurements in Radians
 	float mpuYaw;

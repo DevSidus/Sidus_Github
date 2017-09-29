@@ -28,9 +28,9 @@ namespace Ground_Station
         public short mpuAccZ { get; set; }
 
         //Accelerometer Measurements without Gravity
-        public short mpuAccWorldX { get; set; }
-        public short mpuAccWorldY { get; set; }
-        public short mpuAccWorldZ { get; set; }
+        public float mpuAccWorldX { get; set; }
+        public float mpuAccWorldY { get; set; }
+        public float mpuAccWorldZ { get; set; }
 
         //Yaw Pitch Roll Measurements in Radians
         public float mpuYaw { get; set; }
