@@ -153,9 +153,9 @@ bool barometer_initial_measurement = true;
 #define		CMD_MODE_CHANGE_THR_GAP		50
 #define		CMD_MODE_CHANGE_ANGLE_GAP	20
 
-#define		PID_RATE_PITCH_KP			0.75
+#define		PID_RATE_PITCH_KP			0.65
 #define		PID_RATE_PITCH_KI			0.0
-#define		PID_RATE_PITCH_KD			0.055
+#define		PID_RATE_PITCH_KD			0.05
 #define		PID_RATE_PITCH_OUTMIN		-250
 #define		PID_RATE_PITCH_OUTMAX		250
 
@@ -165,9 +165,9 @@ bool barometer_initial_measurement = true;
 #define		PID_ANGLE_PITCH_OUTMIN		-250
 #define		PID_ANGLE_PITCH_OUTMAX		250
 
-#define		PID_RATE_ROLL_KP			0.75
+#define		PID_RATE_ROLL_KP			0.65
 #define		PID_RATE_ROLL_KI			0.0
-#define		PID_RATE_ROLL_KD			0.055
+#define		PID_RATE_ROLL_KD			0.05
 #define		PID_RATE_ROLL_OUTMIN		-250
 #define		PID_RATE_ROLL_OUTMAX		250
 
@@ -208,15 +208,15 @@ bool barometer_initial_measurement = true;
 #define		PID_ACC_ALT_KI			0.057 // Helpful range is between 0.02 and 0.1
 #define		PID_ACC_ALT_KD			0.0071 // It shouldn't be greater than 0.02
 
-#define		PID_ACC_X_KP			0.4 
+#define		PID_ACC_X_KP			0.8 
 #define		PID_ACC_X_KI			0.0    
-#define		PID_ACC_X_KD			0.0 
+#define		PID_ACC_X_KD			0.02 
 #define		PID_ACC_X_OUTMIN		-1000    //need to be revised
 #define		PID_ACC_X_OUTMAX		1000     //need to be revised
 
-#define		PID_ACC_Y_KP			0.4  
+#define		PID_ACC_Y_KP			0.8  
 #define		PID_ACC_Y_KI			0.0    
-#define		PID_ACC_Y_KD			0.0 
+#define		PID_ACC_Y_KD			0.02 
 #define		PID_ACC_Y_OUTMIN		-1000    //need to be revised
 #define		PID_ACC_Y_OUTMAX		1000     //need to be revised
 
