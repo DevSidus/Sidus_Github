@@ -39,6 +39,9 @@ This header file define all the configurable variables including constants, pin 
 //Comment out below line if you have 6 CH RX_TX
 #define		MY_RX_TX_IS_6_CHANNEL
 
+//Comment out below line if you want to use SD Card (USensor will not be used)
+#define		USE_SD_CARD
+
 //Comment out one of the following barometer hardware selections
 #define		BAROMETER_MS5611
 //#define		BAROMETER_BMP180
@@ -91,6 +94,7 @@ bool barometer_initial_measurement = true;
 #define		PIN_M_BL			14
 
 #define		PIN_BUZZER			12
+#define		PIN_SDCARD_CS		2
 
 #define		PIN_MPU_POWER_ON	13
 #define		PIN_MCU_SDA			21
@@ -264,6 +268,10 @@ bool barometer_initial_measurement = true;
 
 #define		BATT_LEVEL_CRITICAL			10.5
 #define		BATT_LEVEL_EXIST			2.5
+
+String		sdcard_filepath;
+long lastTime = 0;
+long appendPacketCounter = 0;
 
 double		PID_THR_BATT_SCALE_FACTOR = 1.0;
 double		PID_BATT_VOLTAGE_SLOPE = -0.12;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -22,7 +23,7 @@ namespace Ground_Station
         cMsgUdpR01 MsgUdpR01 = new cMsgUdpR01();
         String textFileName = "";
         DateTime startTime=DateTime.Now;
-
+        System.IO.FileStream F;
         UdpClient myUdpServer = new UdpClient(cConfig.UDP_PORT_NUM);
         IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, cConfig.UDP_PORT_NUM);
         bool clientConnected = false;
@@ -598,6 +599,62 @@ namespace Ground_Station
                 MsgUdpT01.message.saveHomePos = 0xAA;  //decimal 170
             else
                 MsgUdpT01.message.saveHomePos = 0x00; // decimal 0
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            F.Read(MsgUdpR01.dataBytes, 0, Marshal.SizeOf(MsgUdpR01.message));
+
+            trackBar_record.Value = Convert.ToInt32(F.Position / Marshal.SizeOf(MsgUdpR01.message));
+            if(cb_record_display.Checked)  updateMessagesForDataAnalysis();
+            if(cb_record_save.Checked) writeToTextFile();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+           
+            if(ofd_record.ShowDialog() == DialogResult.OK)
+            {
+                label_record.Text = ofd_record.FileName;
+
+                try
+                {
+                    F = new FileStream(ofd_record.FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    trackBar_record.Maximum = Convert.ToInt32(F.Length / Marshal.SizeOf(MsgUdpR01.message));
+                    label_packet_size.Text = "Packet Size:" + trackBar_record.Maximum.ToString();
+                }
+                catch
+                {
+
+                }
+            }
+
+
+        }
+
+        private void b_play_Click(object sender, EventArgs e)
+        {
+            if(b_play.Text == "Play")
+            {
+
+                timer_record.Enabled = true;
+                b_play.Text = "Pause";
+            }
+            else
+            {
+                timer_record.Enabled = false;
+                b_play.Text = "Play";
+
+                F.Position = 0;
+            }
+
+        }
+
+        private void trackBar_record_Scroll(object sender, EventArgs e)
+        {
+
+            toolTip1.SetToolTip(trackBar_record, trackBar_record.Value.ToString());
+            F.Position = trackBar_record.Value * Marshal.SizeOf(MsgUdpR01.message);
         }
     }
 }

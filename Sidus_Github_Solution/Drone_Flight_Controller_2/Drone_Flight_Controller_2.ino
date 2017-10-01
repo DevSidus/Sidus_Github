@@ -13,6 +13,10 @@ Description: This is the main code for Drone_Flight_Controller Project
 #include <../../tools/sdk/include/driver/driver/rmt.h>
 #include <../../c_library_v2/common/mavlink.h>
 
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
+
 using namespace std;
 //Local Include Files
 #include "kalmanFilter.h"
@@ -94,7 +98,77 @@ mavlink_message_t mavlinkMessage;
 uint8_t mavlinkBuffer[MAVLINK_MAX_PACKET_LEN];
 uint16_t mavlinkMessageLength;
 
+File sd_logfile;
 
+void appendFile(fs::FS &fs, const char * path, const uint8_t * message, size_t size) {
+	//Serial.printf("Appending to file: %s\n", path);
+
+	//File file = fs.open(path, FILE_APPEND);
+	if (!sd_logfile) 
+	{
+		//Serial.println("Failed to open file for appending");
+		return;
+	}
+
+	if (sd_logfile.write(message, size)) 
+	{
+		//Serial.println("Message appended");
+		appendPacketCounter++;
+	}
+	else 
+	{
+		//Serial.println("Append failed");
+	}
+	if (appendPacketCounter % 60 == 0)   //at every # of packet append, close and reopen file
+	{
+		sd_logfile.close();
+		sd_logfile = fs.open(sdcard_filepath, FILE_APPEND);
+	}
+}
+
+void createFile(fs::FS &fs) {
+
+	for (int i = 0; i < 9999; i++)
+	{
+		sd_logfile = fs.open("/"+String(i)+".bin");
+		if (!sd_logfile)
+		{
+			//Serial.print("i:");
+			//Serial.println(i);
+			sd_logfile = fs.open("/" + String(i) + ".bin", FILE_WRITE);
+			if (!sd_logfile)
+			{
+				Serial.println("Failed to open file for writing");
+				return;
+			}
+			else
+			{
+
+				sd_logfile.close();
+
+				sdcard_filepath = "/" + String(i) + ".bin";
+				Serial.println("File Created: " + sdcard_filepath);
+
+				sd_logfile = fs.open(sdcard_filepath, FILE_APPEND);
+
+				if (!sd_logfile) 
+				{
+					Serial.println("Dosya Append Acilamadi");
+				}
+				else
+				{
+					Serial.println("Dosya Append Acildi");
+				}
+			}
+			return;
+		}
+		else
+		{
+			sd_logfile.close();
+		}
+	}
+
+}
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(SERIAL_COM_SPEED);
@@ -108,6 +182,7 @@ void setup() {
 
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
+	//pinMode(PIN_SDCARD_CS, OUTPUT);
 	//pinMode(PIN_BATTERY, INPUT);
 	pinMode(PIN_RX_ROLL, INPUT);
 	pinMode(PIN_RX_PITCH, INPUT);
@@ -120,9 +195,10 @@ void setup() {
 	pinMode(PIN_ULTSENS_TRIG, OUTPUT);
 	pinMode(PIN_ULTSENS_ECHO, INPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
+	digitalWrite(PIN_ULTSENS_TRIG, HIGH);
+
 	delay(100);
 	
-
 
 
 	Wire.begin(PIN_MCU_SDA, PIN_MCU_SCL);
@@ -149,33 +225,36 @@ void setup() {
 
 	//Processor 0 Tasks
 	xTaskCreatePinnedToCore(task_test, "task_test", 1024, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_0, "task_rx_0", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_1, "task_rx_1", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_2, "task_rx_2", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 8192, NULL, 20, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 8192, NULL, 5, NULL, 0);
-	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 4096, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_melody, "task_melody", 2048, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_0, "task_rx_0", 1200, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_1, "task_rx_1", 1200, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_2, "task_rx_2", 1200, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 1200, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 1200, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 1200, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 3072, NULL, 20, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 1024, NULL, 5, NULL, 0);
+	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 1024, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 1024, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 1024, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_melody, "task_melody", 1024, NULL, 1, NULL, 0);
+	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 1024, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_position_kalman, "task_position_kalman", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_position_kalman, "task_position_kalman", 3072, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_compass_kalman, "task_compass_kalman", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_OTA, "task_OTA", 4096, NULL, 20, NULL, 0);
+	//xTaskCreatePinnedToCore(task_OTA, "task_OTA", 3072, NULL, 20, NULL, 0);
 	//xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_gps, "task_gps", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
-	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 10000, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_compass, "task_compass", 2048, NULL, 10, NULL, 1);
-	xTaskCreatePinnedToCore(task_PID, "task_PID", 4096, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 2048, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_baro, "task_baro", 2048, NULL, 10, NULL, 1);
-	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 2048, NULL, 10, NULL, 1);
+	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 3072, NULL, 20, NULL, 1);
+	xTaskCreatePinnedToCore(task_compass, "task_compass", 1536, NULL, 10, NULL, 1);
+	xTaskCreatePinnedToCore(task_PID, "task_PID", 3072, NULL, 20, NULL, 1);
+	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 1536, NULL, 20, NULL, 1);
+	xTaskCreatePinnedToCore(task_baro, "task_baro", 1536, NULL, 10, NULL, 1);
+#ifndef USE_SD_CARD
+	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 1536, NULL, 10, NULL, 1);
+#endif // USE_SD_CARD
+
 
 
 	//esp_event_loop_init((system_event_cb_t*)&task_UDPhandle, NULL);
@@ -217,6 +296,7 @@ void task_mpu(void * parameter)
 		}
 		//mpuProcessTaskDuration = micros() - mpuProcessStartTime;
 		//Serial.println(millis());
+
 		delay(3);
 	}
 	vTaskDelete(NULL);
@@ -286,6 +366,7 @@ void task_ultrasonic(void * parameter)
 
 		ultrasonicDistanceOld = ultrasonicDistance;
 
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 		delay(50);
 	}
 	vTaskDelete(NULL);
@@ -514,7 +595,7 @@ void task_rx_0(void * parameter)
 	rmt_driver_install(rmt_rx_ch0.channel, RMT_RX_BUFFER_SIZE, 0);
 
 	RingbufHandle_t rb_ch0 = NULL;
-	rmt_get_ringbuf_handler(rmt_rx_ch0.channel, &rb_ch0);
+	rmt_get_ringbuf_handle(rmt_rx_ch0.channel, &rb_ch0);
 	rmt_rx_start(rmt_rx_ch0.channel, true);
 	//--------RMT CONFIG RADIO ROLL CHANNEL-----------------//
 
@@ -564,7 +645,7 @@ void task_rx_1(void * parameter)
 	rmt_driver_install(rmt_rx_ch1.channel, RMT_RX_BUFFER_SIZE, 0);
 
 	RingbufHandle_t rb_ch1 = NULL;
-	rmt_get_ringbuf_handler(rmt_rx_ch1.channel, &rb_ch1);
+	rmt_get_ringbuf_handle(rmt_rx_ch1.channel, &rb_ch1);
 	rmt_rx_start(rmt_rx_ch1.channel, true);
 	//--------RMT CONFIG RADIO PITCH CHANNEL-----------------//
 	size_t rx_size = 0;
@@ -612,7 +693,7 @@ void task_rx_2(void * parameter)
 	rmt_driver_install(rmt_rx_ch2.channel, RMT_RX_BUFFER_SIZE, 0);
 
 	RingbufHandle_t rb_ch2 = NULL;
-	rmt_get_ringbuf_handler(rmt_rx_ch2.channel, &rb_ch2);
+	rmt_get_ringbuf_handle(rmt_rx_ch2.channel, &rb_ch2);
 	rmt_rx_start(rmt_rx_ch2.channel, true);
 	//--------RMT CONFIG RADIO THR CHANNEL-----------------//
 
@@ -668,7 +749,7 @@ void task_rx_3(void * parameter)
 	rmt_driver_install(rmt_rx_ch3.channel, RMT_RX_BUFFER_SIZE, 0);
 
 	RingbufHandle_t rb_ch3 = NULL;
-	rmt_get_ringbuf_handler(rmt_rx_ch3.channel, &rb_ch3);
+	rmt_get_ringbuf_handle(rmt_rx_ch3.channel, &rb_ch3);
 	rmt_rx_start(rmt_rx_ch3.channel, true);
 	//--------RMT CONFIG RADIO YAW CHANNEL-----------------//
 
@@ -714,7 +795,7 @@ void task_rx_4(void * parameter)
 	rmt_driver_install(rmt_rx_ch4.channel, RMT_RX_BUFFER_SIZE, 0);
 
 	RingbufHandle_t rb_ch4 = NULL;
-	rmt_get_ringbuf_handler(rmt_rx_ch4.channel, &rb_ch4);
+	rmt_get_ringbuf_handle(rmt_rx_ch4.channel, &rb_ch4);
 	rmt_rx_start(rmt_rx_ch4.channel, true);
 	//--------RMT CONFIG RADIO 5TH_CHAN CHANNEL-----------------//
 
@@ -760,7 +841,7 @@ void task_rx_5(void * parameter)
 	rmt_driver_install(rmt_rx_ch5.channel, RMT_RX_BUFFER_SIZE, 0);
 
 	RingbufHandle_t rb_ch5 = NULL;
-	rmt_get_ringbuf_handler(rmt_rx_ch5.channel, &rb_ch5);
+	rmt_get_ringbuf_handle(rmt_rx_ch5.channel, &rb_ch5);
 	rmt_rx_start(rmt_rx_ch5.channel, true);
 	//--------RMT CONFIG RADIO 6TH_CHAN CHANNEL-----------------//
 
@@ -843,6 +924,16 @@ void task_Motor(void * parameter)
 
 void task_UDP(void * parameter)
 {
+
+#ifdef USE_SD_CARD
+	delay(500);
+	initSDcard();
+	delay(100);
+	createFile(SD);
+#endif // USE_SD_CARD
+
+
+
 	#ifdef MAVLINK_PROTOCOL
 		uint8_t mavlinkType = MAV_TYPE_QUADROTOR;
 		uint8_t mavlinkAutopilot = MAV_AUTOPILOT_GENERIC;
@@ -852,8 +943,10 @@ void task_UDP(void * parameter)
 		qcMavlink.system_status = MAV_STATE_STANDBY;  ///< System ready for flight
 	#endif // MAVLINK_PROTOCOL
 
+
 	while (true)
 	{
+		prepareUDPmessages();
 		if (wifi_connected)
 		{
 			if (udp_connected)
@@ -868,7 +961,6 @@ void task_UDP(void * parameter)
 					{
 
 						#ifdef SIDUS_PROTOCOL
-							prepareUDPmessages();
 							udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
 						#else	
 							mavlink_msg_heartbeat_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage, mavlinkType, mavlinkAutopilot, qcMavlink.base_mode, qcMavlink.custom_mode, qcMavlink.system_status);
@@ -904,6 +996,11 @@ void task_UDP(void * parameter)
 				}
 			}			
 		}
+
+#ifdef USE_SD_CARD
+		appendFile(SD, sdcard_filepath.c_str(), MsgUdpR01.dataBytes, sizeof(MsgUdpR01.message));
+#endif // USE_SD_CARD
+
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 		//Serial.println("t_ok");
 		delay(10);
@@ -929,7 +1026,6 @@ void task_UDPrx(void * parameter)
 					//Serial.println("udp message received");
 					//udpLastMessageTime = millis();
 				}
-				//processUDPrx();
 				xSemaphoreGive(xUdpSemaphore);
 			}
 
@@ -1113,7 +1209,9 @@ void task_altitude_kalman(void * parameter)
 		//Acceleration Derivative
 		// Calculate Filter Output
 		qc.accelDiff.z = filtObjAccelDiffZ.filter(qc.accelWorldEstimated.z, deltaTimeAccelDiff);
- 
+
+		//Serial.println(millis() - lastTime);
+		//lastTime = millis();
 
 		delay(9);
 	}
@@ -3035,4 +3133,35 @@ void convertNed2World(double _nedX, double _nedY, double _heading, double *_worl
 {
 	*_worldX = _nedX * cos(_heading * M_PI / 180) + _nedY* sin(_heading * M_PI / 180);
 	*_worldY = _nedX * -sin(_heading * M_PI / 180) + _nedY * cos(_heading * M_PI / 180);
+}
+
+void initSDcard()
+{
+	if (!SD.begin(PIN_SDCARD_CS, SPI, 40000000U, "/sd")) {
+		Serial.println("Card Mount Failed");
+		return;
+	}
+	uint8_t cardType = SD.cardType();
+
+	if (cardType == CARD_NONE) {
+		Serial.println("No SD card attached");
+		return;
+	}
+
+	Serial.print("SD Card Type: ");
+	if (cardType == CARD_MMC) {
+		Serial.println("MMC");
+	}
+	else if (cardType == CARD_SD) {
+		Serial.println("SDSC");
+	}
+	else if (cardType == CARD_SDHC) {
+		Serial.println("SDHC");
+	}
+	else {
+		Serial.println("UNKNOWN");
+	}
+
+	uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+	Serial.printf("SD Card Size: %lluMB\n", cardSize);
 }
