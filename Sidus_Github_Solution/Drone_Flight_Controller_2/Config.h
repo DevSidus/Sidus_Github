@@ -252,6 +252,7 @@ bool barometer_initial_measurement = true;
 #define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
 
+#define		SERIAL_DEFAULT_GPS_SPEED	9600
 #define		SERIAL_GPS_SPEED			115200
 #define		GPS_UPDATE_THRESHOLD_TIME	2000
 
@@ -395,13 +396,22 @@ struct structGPS
 	double alt;
 	uint16_t hdop;
 	uint16_t vdop;
-	uint16_t vel;
+	uint16_t sog;
 	uint16_t cog;
 	uint8_t satellites_visible;
 	bool gpsIsFix;
 	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
 	struct3Daxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
 	double nE; // The prime vertical radius of curvature
+
+	double	altMSL;			///< [m], Height above mean sea level
+	double  posAcc;			///< [m], Horizontal accuracy estimate
+	double  altAcc;			///< [m], Vertical accuracy estimate
+	double  velN;			///< [m/s], NED north velocity
+	double  velE;			///< [m/s], NED east velocity
+	double  velD;			///< [m/s], NED down velocity
+	double  velAcc;			///< [m/s], Speed accuracy estimate
+
 }qcGPS;
 
 struct structPOI
@@ -417,6 +427,7 @@ structPOI homePoint; // Home Point
 structPOI destinationPoint; // Destination Point
 
 bool homePointSelected = false;
+bool positionHoldAvailable = false;
 
 struct structMAVLINK
 {
@@ -568,3 +579,34 @@ double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering
 double deltaTimeAccelDiff; // will be used at Exact Filtering
 double deltaTimeAccelCmdDiff; // will be used at Exact Filtering
+
+
+// UBlox GPS UBX Commands
+// Command sending packet to the receiver to change baudrate to 115200
+// CFG-PRT packet
+byte ubxPortConfigPacketPart1[28] = {
+	0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x00, 0xC2,
+	0x01, 0x00, 0x07, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x7E
+};
+byte ubxPortConfigPacketPart2[9] = {
+	0xB5, 0x62, 0x06, 0x00, 0x01, 0x00, 0x01, 0x08, 0x22
+};
+
+// Command sending packet to the receiver to change frequency to 10 Hz
+// CFG-RATE packet
+byte ubxRateConfigPacketPart1[14] = {
+	0xB5, 0x62, 0x06, 0x08, 0x06, 0x00, 0x64, 0x00, 0x01, 0x00, 0x01, 0x00, 0x7A, 0x12
+};
+byte ubxRateConfigPacketPart2[8] = {
+	0xB5, 0x62, 0x06, 0x08, 0x00, 0x00, 0x0E, 0x30
+};
+
+// Command sending packet to the receiver to enable NAV-PVT messages
+// CFG-MSG packet
+byte ubxMessageConfigPacketPart1[16] = { 
+	0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0x01, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x18, 0xE1
+};
+//
+byte ubxMessageConfigPacketPart2[10] = { 
+	0xB5, 0x62, 0x06, 0x01, 0x02, 0x00, 0x01, 0x07, 0x11, 0x3A
+};

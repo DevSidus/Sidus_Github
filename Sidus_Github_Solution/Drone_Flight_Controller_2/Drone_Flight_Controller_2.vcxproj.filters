@@ -87,6 +87,9 @@
     <ClInclude Include="LocalTinyGPS++.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="uBloxGPS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp">
@@ -141,6 +144,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LocalTinyGPS++.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uBloxGPS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
