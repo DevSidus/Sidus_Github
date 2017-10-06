@@ -366,11 +366,19 @@ struct structEuler
 	double theta;
 	double phi;
 };
+
 struct struct3Daxis
 {
 	double x;
 	double y;
 	double z;
+};
+
+struct structNEDaxis
+{
+	double N;
+	double E;
+	double D;
 };
 
 struct structIMU
@@ -399,19 +407,17 @@ struct structGPS
 	uint16_t sog;
 	uint16_t cog;
 	uint8_t satellites_visible;
+	uint8_t gpsFixType;
 	bool gpsIsFix;
 	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
-	struct3Daxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
+	structNEDaxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
 	double nE; // The prime vertical radius of curvature
 
 	double	altMSL;			///< [m], Height above mean sea level
-	double  posAcc;			///< [m], Horizontal accuracy estimate
-	double  altAcc;			///< [m], Vertical accuracy estimate
-	double  velN;			///< [m/s], NED north velocity
-	double  velE;			///< [m/s], NED east velocity
-	double  velD;			///< [m/s], NED down velocity
-	double  velAcc;			///< [m/s], Speed accuracy estimate
-
+	double  posAcccuracy;			///< [m], Horizontal accuracy estimate
+	double  altAccuracy;			///< [m], Vertical accuracy estimate
+	structNEDaxis nedVelocity;   ///< [m/s], NED north, east and down velocity			
+	double  velAccuracy;			///< [m/s], Speed accuracy estimate
 }qcGPS;
 
 struct structPOI
@@ -428,6 +434,16 @@ structPOI destinationPoint; // Destination Point
 
 bool homePointSelected = false;
 bool positionHoldAvailable = false;
+
+typedef enum
+{
+	noFix = 0,
+	deadReckoning = 1,
+	fix2D = 2,
+	fix3D = 3,
+	gnssDeadReckoning = 4,
+	timeOnlyFix = 5
+}gpsFixType;
 
 struct structMAVLINK
 {

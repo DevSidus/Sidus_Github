@@ -379,30 +379,33 @@ void task_ultrasonic(void * parameter)
 void task_gps(void * parameter)
 {
 
-	//// Start with GPS's default configuration
+	// Start with GPS's default configuration
 	SerialGps.begin(SERIAL_DEFAULT_GPS_SPEED);
 
 	// change frequency to 10 Hz
 	SerialGps.write(ubxRateConfigPacketPart1, 14);
 	delay(1000);
-	SerialGps.write(ubxRateConfigPacketPart2, 8);
-	delay(1000);
-
-	SerialGps.write(ubxPortConfigPacketPart1,28);
-	delay(1000);
-	SerialGps.write(ubxPortConfigPacketPart2, 9);
-	delay(1000);
-	
-	// Change GPS Port configuration
-	SerialGps.end();
-	delay(100);
-	SerialGps.begin(SERIAL_GPS_SPEED);
+	//SerialGps.write(ubxRateConfigPacketPart2, 8);
+	//delay(1000);
 
 	// Enable NAV-PVT messages
 	SerialGps.write(ubxMessageConfigPacketPart1,16);
 	delay(1000);
-	SerialGps.write(ubxMessageConfigPacketPart2, 10);
-	delay(1000);
+	//SerialGps.write(ubxMessageConfigPacketPart2, 10);
+	//delay(1000);
+
+	// Change GPS Port configuration
+	//SerialGps.write(ubxPortConfigPacketPart1,28);
+	//delay(1000);
+	//SerialGps.write(ubxPortConfigPacketPart2, 9);
+	//delay(1000);
+	
+	//SerialGps.end();
+	//delay(100);
+	//SerialGps.begin(SERIAL_GPS_SPEED);
+	//SerialGps.println("xxxyyyzzz");
+	//SerialGps.flush();
+	//delay(100);
 
 	uint8_t val;
 
@@ -412,6 +415,7 @@ void task_gps(void * parameter)
 		while (SerialGps.available() > 0)
 		{
 			val = SerialGps.read();
+			// Serial.write(val);
 
 			gps.encode(val);
 
@@ -440,31 +444,38 @@ void task_gps(void * parameter)
 
 			if (gpsUbx.parse(val)) {
 				gpsUbx.read(&uBloxData);
-				qcGPS.posAcc = uBloxData.hAcc;
-				qcGPS.velN = uBloxData.velN;
-				qcGPS.velE = uBloxData.velE;
-				qcGPS.velAcc = uBloxData.sAcc;
-
+				qcGPS.posAcccuracy = uBloxData.hAcc;
+				qcGPS.nedVelocity.N = uBloxData.velN;
+				qcGPS.nedVelocity.E = uBloxData.velE;
+				qcGPS.velAccuracy = uBloxData.sAcc;
+				qcGPS.gpsFixType = uBloxData.fixType;
 			}
 
 		}
 
 
-		if (gps.location.age() > GPS_UPDATE_THRESHOLD_TIME || !gps.location.isValid() || (uBloxData.fixType == 0))
+		if (gps.location.age() > GPS_UPDATE_THRESHOLD_TIME || !gps.location.isValid() || (qcGPS.gpsFixType == noFix))
 		{
 			qcGPS.gpsIsFix = false;
+			positionHoldAvailable = false;
 		}
 		else
 		{
 			qcGPS.gpsIsFix = true;
 		}
 
-
+		//Serial.print(qcGPS.lat,7); Serial.print(" ");
+		//Serial.print(qcGPS.nedVelocity.N,4); Serial.print(" ");
+		//Serial.println(qcGPS.gpsFixType);
+		
+		/*Serial.print(qcGPS.gpsFixType); Serial.print(" ");
+		Serial.println(gps.course.deg(),5);*/
+		
 		if (qcGPS.gpsIsFix)
 		{
 			// Calculate World X/Y Velocity from GPS measurements
 			// convertNed2World(qcGPS.sog * cos(qcGPS.cog * M_PI / 180), qcGPS.sog * sin(qcGPS.cog * M_PI / 180), compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
-			convertNed2World(qcGPS.velN, qcGPS.velE, compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
+			convertNed2World(qcGPS.nedVelocity.N, qcGPS.nedVelocity.E, compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
 
 			// Calculate World X/Y Position from GPS measurements
 			calculateGeodetic2Ecef(qcGPS.lat, qcGPS.lon, qcGPS.alt, &qcGPS.ecefCoordinate.x, &qcGPS.ecefCoordinate.y, &qcGPS.ecefCoordinate.z);
@@ -487,9 +498,9 @@ void task_gps(void * parameter)
 
 			if (homePointSelected)
 			{
-				calculateEcef2Ned(qcGPS.ecefCoordinate.x, qcGPS.ecefCoordinate.y, qcGPS.ecefCoordinate.z, homePoint.ecefCoordinate.x, homePoint.ecefCoordinate.y, homePoint.ecefCoordinate.z, homePoint.lat, homePoint.lon, &qcGPS.nedCoordinate.x, &qcGPS.nedCoordinate.y, &qcGPS.nedCoordinate.z);
+				calculateEcef2Ned(qcGPS.ecefCoordinate.x, qcGPS.ecefCoordinate.y, qcGPS.ecefCoordinate.z, homePoint.ecefCoordinate.x, homePoint.ecefCoordinate.y, homePoint.ecefCoordinate.z, homePoint.lat, homePoint.lon, &qcGPS.nedCoordinate.N, &qcGPS.nedCoordinate.E, &qcGPS.nedCoordinate.D);
 
-				convertNed2World(qcGPS.nedCoordinate.x, qcGPS.nedCoordinate.y, compassHdgEstimated, &qc.posWorld.x, &qc.posWorld.y);
+				convertNed2World(qcGPS.nedCoordinate.N, qcGPS.nedCoordinate.E, compassHdgEstimated, &qc.posWorld.x, &qc.posWorld.y);
 
 				positionHoldAvailable = true;
 
@@ -500,15 +511,17 @@ void task_gps(void * parameter)
 				Serial.print(homePoint.lon*1e7); Serial.print(" ");
 				Serial.print(homePoint.alt); Serial.print(" ");
 
-				Serial.print(qcGPS.nedCoordinate.x); Serial.print(" ");
-				Serial.print(qcGPS.nedCoordinate.y); Serial.print(" ");
-				Serial.print(qcGPS.nedCoordinate.z); Serial.print(" ");
+				Serial.print(qcGPS.nedCoordinate.N); Serial.print(" ");
+				Serial.print(qcGPS.nedCoordinate.E); Serial.print(" ");
+				Serial.print(qcGPS.nedCoordinate.D); Serial.print(" ");
 
 				Serial.print(qc.posWorld.x); Serial.print(" ");
 				Serial.print(qc.posWorld.y); Serial.print(" ");
 				Serial.println(compassHdgEstimated);*/
 			}
 		}
+
+		// Serial.println(uxTaskGetStackHighWaterMark(NULL));
 
 		delay(20);
 	}
@@ -1243,8 +1256,8 @@ void task_position_kalman(void * parameter)
 
 	//***********************************************************************************
 	// Kalman Parameters for Single Position Estimation
-	double deltaRowPos = qcGPS.posAcc; // 3.0;
-	double sigmaRowPos = qcGPS.posAcc; // 3.0;
+	double deltaRowPos = 3.0; // 3.0;
+	double sigmaRowPos = qcGPS.posAcccuracy; // 3.0;
 	
 	double sigmaQ_Pos = deltaRowPos;
 	double Q_Pos = pow(sigmaQ_Pos, 2) * T; // Process noise covariance matrix
@@ -1266,8 +1279,8 @@ void task_position_kalman(void * parameter)
 
 	//***********************************************************************************
 	// Kalman Parameters for Single Velocity Estimation
-	double deltaRowVel = qcGPS.velAcc; // 0.3;
-	double sigmaRowVel = qcGPS.velAcc; // 0.3;
+	double deltaRowVel = 0.3; // 0.3;
+	double sigmaRowVel = qcGPS.velAccuracy; // 0.3;
 
 	double sigmaQ_Vel = deltaRowVel;
 	double Q_Vel = pow(sigmaQ_Vel, 2) * T; // Process noise covariance matrix
@@ -1292,15 +1305,15 @@ void task_position_kalman(void * parameter)
 	double F_PosVelAcc[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
 	double H_PosVelAcc[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 }; // Measurement matrix
 
-	double deltaAccelXY = 0.005;
+	double deltaAccelXY = 0.01; // 0.005;
 	double sigmaQ_PosVelAcc = deltaAccelXY;
 	double Q_PosVelAcc[9] = { 1 / 4 * pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,2), 1 / 2 * pow(T,3), pow(T,2), T, 1 / 2 * pow(T,2), T, 1 };
 	for (int i = 0; i < 9; i++) Q_PosVelAcc[i] *= pow(sigmaQ_PosVelAcc, 2); // Process noise covariance matrix
 
 	// Default measurement noise covariance matrix, will be updated in the loop
-	double sigmaPos = qcGPS.posAcc; // 1;
-	double sigmaVel = qcGPS.velAcc; // 0.1;
-	double sigmaAccelXY = 0.005;
+	double sigmaPos = qcGPS.posAcccuracy; // 1;
+	double sigmaVel = qcGPS.velAccuracy; // 0.1;
+	double sigmaAccelXY = 0.01; // 0.005;
 	double R_PosVelAcc[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix
 
 	// Initialization
@@ -1332,48 +1345,69 @@ void task_position_kalman(void * parameter)
 
 		//***********************************************************************************
 		// Kalman Filter for Single Position Estimation
-		sigmaRowPos = qcGPS.posAcc;
-		R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
+		if (positionHoldAvailable) {
+			sigmaRowPos = qcGPS.posAcccuracy;
+			R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
 
-		kalmanFilterOneParameter(m_PosX_n1, P_PosX_n1, qc.posWorld.x, 1.0, Q_Pos, 1.0, R_Pos, &m_PosX_n, &P_PosX_n);
-		kalmanFilterOneParameter(m_PosY_n1, P_PosY_n1, qc.posWorld.y, 1.0, Q_Pos, 1.0, R_Pos, &m_PosY_n, &P_PosY_n);
+			kalmanFilterOneParameter(m_PosX_n1, P_PosX_n1, qc.posWorld.x, 1.0, Q_Pos, 1.0, R_Pos, &m_PosX_n, &P_PosX_n);
+			kalmanFilterOneParameter(m_PosY_n1, P_PosY_n1, qc.posWorld.y, 1.0, Q_Pos, 1.0, R_Pos, &m_PosY_n, &P_PosY_n);
 
-		m_PosX_n1 = m_PosX_n;
-		m_PosY_n1 = m_PosY_n;
-		P_PosX_n1 = P_PosX_n;
-		P_PosY_n1 = P_PosY_n;
+			m_PosX_n1 = m_PosX_n;
+			m_PosY_n1 = m_PosY_n;
+			P_PosX_n1 = P_PosX_n;
+			P_PosY_n1 = P_PosY_n;
+		}
 		//***********************************************************************************
 
 
 		//***********************************************************************************
 		// Kalman Filter for Single Velocity Estimation
-		sigmaRowVel = qcGPS.velAcc;
-		R_Vel = pow(sigmaRowVel, 2); // Measurement noise covariance matrix
+		if (positionHoldAvailable) {
+			sigmaRowVel = qcGPS.velAccuracy;
+			R_Vel = pow(sigmaRowVel, 2); // Measurement noise covariance matrix
 
-		kalmanFilterOneParameter(m_VelX_n1, P_VelX_n1, qc.velWorld.x, 1.0, Q_Vel, 1.0, R_Vel, &m_VelX_n, &P_VelX_n);
-		kalmanFilterOneParameter(m_VelY_n1, P_VelY_n1, qc.velWorld.y, 1.0, Q_Vel, 1.0, R_Vel, &m_VelY_n, &P_VelY_n);
+			kalmanFilterOneParameter(m_VelX_n1, P_VelX_n1, qc.velWorld.x, 1.0, Q_Vel, 1.0, R_Vel, &m_VelX_n, &P_VelX_n);
+			kalmanFilterOneParameter(m_VelY_n1, P_VelY_n1, qc.velWorld.y, 1.0, Q_Vel, 1.0, R_Vel, &m_VelY_n, &P_VelY_n);
 
-		m_VelX_n1 = m_VelX_n;
-		m_VelY_n1 = m_VelY_n;
-		P_VelX_n1 = P_VelX_n;
-		P_VelY_n1 = P_VelY_n;
+			m_VelX_n1 = m_VelX_n;
+			m_VelY_n1 = m_VelY_n;
+			P_VelX_n1 = P_VelX_n;
+			P_VelY_n1 = P_VelY_n;
+		}
 		//***********************************************************************************
 
 		//***********************************************************************************
 		// Kalman Filter for Position, Velocity and Acceleration Estimation
-		y_PosVelAccX_n[0] = m_PosX_n; // qc.posWorld.x; // 
-		y_PosVelAccX_n[1] = m_VelX_n; // qc.velWorld.x; //
-		y_PosVelAccX_n[2] = qc.accelWorld.x;
-		
-		y_PosVelAccY_n[0] = m_PosY_n; // qc.posWorld.y; // 
-		y_PosVelAccY_n[1] = m_VelY_n; // qc.velWorld.y; // 
-		y_PosVelAccY_n[2] = qc.accelWorld.y;
+		if (positionHoldAvailable) {
 
-			//// Update measurement noise covariance matrix
-		sigmaPos = qcGPS.posAcc;
-		sigmaVel = qcGPS.velAcc;
-		R_PosVelAcc[0] = pow(sigmaPos, 2);
-		R_PosVelAcc[4] = pow(sigmaVel, 2);
+			if ((abs(qc.velWorldEstimated.x) > 0.2) || abs(qc.velWorldEstimated.y) > 0.2) {
+				y_PosVelAccX_n[0] = qc.posWorld.x; // m_PosX_n; // 
+				y_PosVelAccY_n[0] = qc.posWorld.y; // m_PosY_n; // 
+			}
+			y_PosVelAccX_n[1] = qc.velWorld.x; // m_VelX_n; // 
+			y_PosVelAccY_n[1] = qc.velWorld.y; // m_VelY_n; //
+
+			sigmaPos = qcGPS.posAcccuracy;
+			sigmaVel = qcGPS.velAccuracy;
+			R_PosVelAcc[0] = pow(sigmaPos, 2);
+			R_PosVelAcc[4] = pow(sigmaVel, 2);
+		}
+		else {
+			y_PosVelAccX_n[0] = m_PosVelAccX_n1[0];
+			y_PosVelAccX_n[1] = m_PosVelAccX_n1[1];
+
+			y_PosVelAccY_n[0] = m_PosVelAccY_n1[0];
+			y_PosVelAccY_n[1] = m_PosVelAccY_n1[1];
+
+			sigmaPos = 1000;
+			sigmaVel = 1000;
+			R_PosVelAcc[0] = pow(sigmaPos, 2);
+			R_PosVelAcc[4] = pow(sigmaVel, 2);
+		}
+
+		
+		y_PosVelAccX_n[2] = qc.accelWorld.x;
+		y_PosVelAccY_n[2] = qc.accelWorld.y;	
 
 		kalmanFilter3State3Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
 		kalmanFilter3State3Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
@@ -1393,15 +1427,21 @@ void task_position_kalman(void * parameter)
 		//***********************************************************************************
 
 
-		//Serial.print(qc.posWorld.x); Serial.print(" ");
-		//Serial.print(qc.velWorld.x); Serial.print(" ");
-		//Serial.print(qc.accelWorld.x); Serial.print(" ");
-		//Serial.print(qc.posWorldEstimated.x); Serial.print(" ");
-		//Serial.print(qc.velWorldEstimated.x); Serial.print(" ");
-		//Serial.println(qc.accelWorldEstimated.x);
+		Serial.print(qc.posWorld.x); Serial.print(" ");
+		Serial.print(qc.velWorld.x); Serial.print(" ");
+		Serial.print(qc.accelWorld.x); Serial.print(" ");
+		Serial.print(qc.posWorld.y); Serial.print(" ");
+		Serial.print(qc.velWorld.y); Serial.print(" ");
+		Serial.print(qc.accelWorld.y); Serial.print(" ");
+		Serial.print(qc.posWorldEstimated.x); Serial.print(" ");
+		Serial.print(qc.velWorldEstimated.x); Serial.print(" ");
+		Serial.print(qc.accelWorldEstimated.x); Serial.print(" ");
+		Serial.print(qc.posWorldEstimated.y); Serial.print(" ");
+		Serial.print(qc.velWorldEstimated.y); Serial.print(" ");
+		Serial.println(qc.accelWorldEstimated.y);
 
-		//Serial.print(qcGPS.posAcc); Serial.print(" ");
-		//Serial.println(qcGPS.velAcc);
+		//Serial.print(qcGPS.posAcccuracy); Serial.print(" ");
+		//Serial.println(qcGPS.velAccuracy);
 
 		//Serial.println(micros() - strtTime);
 
@@ -1411,7 +1451,7 @@ void task_position_kalman(void * parameter)
 		qc.accelDiff.x = filtObjAccelDiffX.filter(qc.accelWorldEstimated.x, deltaTimeAccelDiff);
 		qc.accelDiff.y = filtObjAccelDiffY.filter(qc.accelWorldEstimated.y, deltaTimeAccelDiff);
 
-		delay(9);
+		delay(10);
 	}
 	vTaskDelete(NULL);
 }
@@ -3162,8 +3202,14 @@ void calculateEcef2Ned(double _ecefX, double _ecefY, double _ecefZ, double _ecef
 
 void convertNed2World(double _nedX, double _nedY, double _heading, double *_worldX, double *_worldY)
 {
-	*_worldX = _nedX * cos(_heading * M_PI / 180) + _nedY* sin(_heading * M_PI / 180);
+	*_worldX = _nedX * cos(_heading * M_PI / 180) + _nedY * sin(_heading * M_PI / 180);
 	*_worldY = _nedX * -sin(_heading * M_PI / 180) + _nedY * cos(_heading * M_PI / 180);
+}
+
+void convertWorld2Ned(double _worldX, double _worldY, double _heading, double *_nedX, double *_nedY)
+{
+	*_nedX = _worldX * cos(_heading * M_PI / 180) + _worldY * -sin(_heading * M_PI / 180);
+	*_nedY = _worldX * sin(_heading * M_PI / 180) + _worldY * cos(_heading * M_PI / 180);
 }
 
 void initSDcard()
