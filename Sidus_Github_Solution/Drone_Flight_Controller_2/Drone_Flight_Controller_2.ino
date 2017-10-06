@@ -280,6 +280,11 @@ void task_test(void * parameter)
 
 void task_mpu(void * parameter)
 {
+	TickType_t xLastWakeTime;
+	const TickType_t xFrequency = 4;
+	// Initialise the xLastWakeTime variable with the current time.
+	xLastWakeTime = xTaskGetTickCount();
+
 	statusMpu = statusType_NotInitiated;
 	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
 	{
@@ -288,19 +293,16 @@ void task_mpu(void * parameter)
 	}
 
 	deltaTimeGyroDiff = 0.005;
-	
+
 	while (true)
 	{
-		//mpuProcessStartTime = micros();
 		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)2) == pdTRUE)
 		{
 			processMpu();
 			xSemaphoreGive(xI2CSemaphore);
 		}
-		//mpuProcessTaskDuration = micros() - mpuProcessStartTime;
-		//Serial.println(millis());
 
-		delay(3);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 	vTaskDelete(NULL);
 	return;
@@ -322,12 +324,11 @@ void task_baro(void * parameter)
 	while (true)
 	{
 
-			processBarometer();
+		processBarometer();
 
-
-#ifdef BAROMETER_MS5611
-		delay(9);
-#endif
+		#ifdef BAROMETER_MS5611
+				delay(9);
+		#endif
 	}
 	vTaskDelete(NULL);
 	return;
