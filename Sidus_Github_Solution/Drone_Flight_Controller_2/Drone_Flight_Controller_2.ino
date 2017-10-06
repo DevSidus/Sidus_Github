@@ -381,31 +381,28 @@ void task_gps(void * parameter)
 
 	// Start with GPS's default configuration
 	SerialGps.begin(SERIAL_DEFAULT_GPS_SPEED);
+	delay(200);
+
+	// Change GPS Port configuration
+	SerialGps.write(ubxPortConfigPacketPart1,28);
+	delay(200);
+	//SerialGps.write(ubxPortConfigPacketPart2, 9);
+	//delay(1000);
+
+	SerialGps.changeBaud(SERIAL_GPS_SPEED);
+	delay(200);
 
 	// change frequency to 10 Hz
 	SerialGps.write(ubxRateConfigPacketPart1, 14);
-	delay(1000);
+	delay(200);
 	//SerialGps.write(ubxRateConfigPacketPart2, 8);
 	//delay(1000);
 
 	// Enable NAV-PVT messages
 	SerialGps.write(ubxMessageConfigPacketPart1,16);
-	delay(1000);
+	delay(200);
 	//SerialGps.write(ubxMessageConfigPacketPart2, 10);
 	//delay(1000);
-
-	// Change GPS Port configuration
-	//SerialGps.write(ubxPortConfigPacketPart1,28);
-	//delay(1000);
-	//SerialGps.write(ubxPortConfigPacketPart2, 9);
-	//delay(1000);
-	
-	//SerialGps.end();
-	//delay(100);
-	//SerialGps.begin(SERIAL_GPS_SPEED);
-	//SerialGps.println("xxxyyyzzz");
-	//SerialGps.flush();
-	//delay(100);
 
 	uint8_t val;
 
@@ -415,35 +412,39 @@ void task_gps(void * parameter)
 		while (SerialGps.available() > 0)
 		{
 			val = SerialGps.read();
-			// Serial.write(val);
 
-			gps.encode(val);
+			#ifndef UBOX
+				gps.encode(val);
 
-			if (gps.location.isUpdated())
-			{
-				qcGPS.lat = gps.location.lat();
-				qcGPS.lon = gps.location.lng();
-			}
-			if (gps.altitude.isUpdated())
-			{
-				qcGPS.alt = gps.altitude.meters();
-			}
-			if (gps.hdop.isUpdated())
-			{
-				qcGPS.hdop = gps.hdop.value();
-			}
-			if (gps.speed.isUpdated())
-			{
-				qcGPS.sog = gps.speed.mps();
-			}
-			if (gps.course.isUpdated())
-			{
-				qcGPS.cog = gps.course.deg();
-			}
-
+				if (gps.location.isUpdated())
+				{
+					qcGPS.lat = gps.location.lat();
+					qcGPS.lon = gps.location.lng();
+				}
+				if (gps.altitude.isUpdated())
+				{
+					qcGPS.alt = gps.altitude.meters();
+				}
+				if (gps.hdop.isUpdated())
+				{
+					qcGPS.hdop = gps.hdop.value();
+				}
+				if (gps.speed.isUpdated())
+				{
+					qcGPS.sog = gps.speed.mps();
+				}
+				if (gps.course.isUpdated())
+				{
+					qcGPS.cog = gps.course.deg();
+				}
+			
+			#endif // !UBOX
 
 			if (gpsUbx.parse(val)) {
 				gpsUbx.read(&uBloxData);
+				qcGPS.lat = uBloxData.lat;
+				qcGPS.lon = uBloxData.lon;
+				qcGPS.alt = uBloxData.hMSL;
 				qcGPS.posAcccuracy = uBloxData.hAcc;
 				qcGPS.nedVelocity.N = uBloxData.velN;
 				qcGPS.nedVelocity.E = uBloxData.velE;
@@ -453,16 +454,28 @@ void task_gps(void * parameter)
 
 		}
 
-
-		if (gps.location.age() > GPS_UPDATE_THRESHOLD_TIME || !gps.location.isValid() || (qcGPS.gpsFixType == noFix))
-		{
-			qcGPS.gpsIsFix = false;
-			positionHoldAvailable = false;
-		}
-		else
-		{
-			qcGPS.gpsIsFix = true;
-		}
+		#ifndef UBOX
+			if (gps.location.age() > GPS_UPDATE_THRESHOLD_TIME || !gps.location.isValid())
+			{
+				qcGPS.gpsIsFix = false;
+				positionHoldAvailable = false;
+			}
+			else
+			{
+				qcGPS.gpsIsFix = true;
+			}
+		#else
+			if (qcGPS.gpsFixType == noFix)
+			{
+				qcGPS.gpsIsFix = false;
+				positionHoldAvailable = false;
+			}
+			else
+			{
+				qcGPS.gpsIsFix = true;
+			}
+		#endif // !UBOX
+			
 
 		//Serial.print(qcGPS.lat,7); Serial.print(" ");
 		//Serial.print(qcGPS.nedVelocity.N,4); Serial.print(" ");
@@ -474,8 +487,12 @@ void task_gps(void * parameter)
 		if (qcGPS.gpsIsFix)
 		{
 			// Calculate World X/Y Velocity from GPS measurements
-			// convertNed2World(qcGPS.sog * cos(qcGPS.cog * M_PI / 180), qcGPS.sog * sin(qcGPS.cog * M_PI / 180), compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
-			convertNed2World(qcGPS.nedVelocity.N, qcGPS.nedVelocity.E, compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
+
+			#ifndef UBOX
+				convertNed2World(qcGPS.sog * cos(qcGPS.cog * M_PI / 180), qcGPS.sog * sin(qcGPS.cog * M_PI / 180), compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
+			#else
+				convertNed2World(qcGPS.nedVelocity.N, qcGPS.nedVelocity.E, compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
+			#endif // !UBOX
 
 			// Calculate World X/Y Position from GPS measurements
 			calculateGeodetic2Ecef(qcGPS.lat, qcGPS.lon, qcGPS.alt, &qcGPS.ecefCoordinate.x, &qcGPS.ecefCoordinate.y, &qcGPS.ecefCoordinate.z);
@@ -1246,18 +1263,12 @@ void task_altitude_kalman(void * parameter)
 void task_position_kalman(void * parameter)
 {
 
-	while (positionHoldAvailable == false)
-	{
-		delay(100);
-		Serial.println("Position hold is not ready");
-	}
-
 	double T = 0.010; // Sampling Period
 
 	//***********************************************************************************
 	// Kalman Parameters for Single Position Estimation
 	double deltaRowPos = 3.0; // 3.0;
-	double sigmaRowPos = qcGPS.posAcccuracy; // 3.0;
+	double sigmaRowPos = 3.0; // qcGPS.posAcccuracy;
 	
 	double sigmaQ_Pos = deltaRowPos;
 	double Q_Pos = pow(sigmaQ_Pos, 2) * T; // Process noise covariance matrix
@@ -1265,8 +1276,8 @@ void task_position_kalman(void * parameter)
 	double R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
 
 	// Initialization
-	double m_PosX_n1 = qc.posWorld.x; // 0;
-	double m_PosY_n1 = qc.posWorld.y; // 0;
+	double m_PosX_n1 = 0; // qc.posWorld.x;
+	double m_PosY_n1 = 0; // qc.posWorld.y;
 	double P_PosX_n1 = pow(sigmaRowPos, 2);
 	double P_PosY_n1 = pow(sigmaRowPos, 2);
 
@@ -1280,7 +1291,7 @@ void task_position_kalman(void * parameter)
 	//***********************************************************************************
 	// Kalman Parameters for Single Velocity Estimation
 	double deltaRowVel = 0.3; // 0.3;
-	double sigmaRowVel = qcGPS.velAccuracy; // 0.3;
+	double sigmaRowVel = 0.3; // qcGPS.velAccuracy;
 
 	double sigmaQ_Vel = deltaRowVel;
 	double Q_Vel = pow(sigmaQ_Vel, 2) * T; // Process noise covariance matrix
@@ -1288,8 +1299,8 @@ void task_position_kalman(void * parameter)
 	double R_Vel = pow(sigmaRowVel, 2); // Measurement noise covariance matrix
 
 	// Initialization
-	double m_VelX_n1 = qc.velWorld.x;
-	double m_VelY_n1 = qc.velWorld.y;
+	double m_VelX_n1 = 0; // qc.velWorld.x;
+	double m_VelY_n1 = 0; // qc.velWorld.y;
 	double P_VelX_n1 = pow(sigmaRowPos, 2);
 	double P_VelY_n1 = pow(sigmaRowPos, 2);
 
@@ -1311,14 +1322,14 @@ void task_position_kalman(void * parameter)
 	for (int i = 0; i < 9; i++) Q_PosVelAcc[i] *= pow(sigmaQ_PosVelAcc, 2); // Process noise covariance matrix
 
 	// Default measurement noise covariance matrix, will be updated in the loop
-	double sigmaPos = qcGPS.posAcccuracy; // 1;
-	double sigmaVel = qcGPS.velAccuracy; // 0.1;
+	double sigmaPos = 3.0; // qcGPS.posAcccuracy;
+	double sigmaVel = 0.3; // qcGPS.velAccuracy;
 	double sigmaAccelXY = 0.01; // 0.005;
 	double R_PosVelAcc[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix
 
 	// Initialization
-	double m_PosVelAccX_n1[3] = { qc.posWorld.x, qc.velWorld.x, qc.accelWorld.x };
-	double m_PosVelAccY_n1[3] = { qc.posWorld.y, qc.velWorld.y, qc.accelWorld.y };
+	double m_PosVelAccX_n1[3] = { 0, 0, 0 }; // { qc.posWorld.x, qc.velWorld.x, qc.accelWorld.x };
+	double m_PosVelAccY_n1[3] = { 0, 0, 0 }; // { qc.posWorld.y, qc.velWorld.y, qc.accelWorld.y };
 	double P_PosVelAccX_n1[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) };
 	double P_PosVelAccY_n1[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) };
 
@@ -1427,18 +1438,18 @@ void task_position_kalman(void * parameter)
 		//***********************************************************************************
 
 
-		Serial.print(qc.posWorld.x); Serial.print(" ");
-		Serial.print(qc.velWorld.x); Serial.print(" ");
-		Serial.print(qc.accelWorld.x); Serial.print(" ");
-		Serial.print(qc.posWorld.y); Serial.print(" ");
-		Serial.print(qc.velWorld.y); Serial.print(" ");
-		Serial.print(qc.accelWorld.y); Serial.print(" ");
-		Serial.print(qc.posWorldEstimated.x); Serial.print(" ");
-		Serial.print(qc.velWorldEstimated.x); Serial.print(" ");
-		Serial.print(qc.accelWorldEstimated.x); Serial.print(" ");
-		Serial.print(qc.posWorldEstimated.y); Serial.print(" ");
-		Serial.print(qc.velWorldEstimated.y); Serial.print(" ");
-		Serial.println(qc.accelWorldEstimated.y);
+		//Serial.print(qc.posWorld.x); Serial.print(" ");
+		//Serial.print(qc.velWorld.x); Serial.print(" ");
+		//Serial.print(qc.accelWorld.x); Serial.print(" ");
+		//Serial.print(qc.posWorld.y); Serial.print(" ");
+		//Serial.print(qc.velWorld.y); Serial.print(" ");
+		//Serial.print(qc.accelWorld.y); Serial.print(" ");
+		//Serial.print(qc.posWorldEstimated.x); Serial.print(" ");
+		//Serial.print(qc.velWorldEstimated.x); Serial.print(" ");
+		//Serial.print(qc.accelWorldEstimated.x); Serial.print(" ");
+		//Serial.print(qc.posWorldEstimated.y); Serial.print(" ");
+		//Serial.print(qc.velWorldEstimated.y); Serial.print(" ");
+		//Serial.println(qc.accelWorldEstimated.y);
 
 		//Serial.print(qcGPS.posAcccuracy); Serial.print(" ");
 		//Serial.println(qcGPS.velAccuracy);
@@ -1633,20 +1644,36 @@ bool initMPU()
 	//
 
 	// SN: 031002
-	mpu.setXAccelOffset(-195);
-	mpu.setYAccelOffset(-669);
-	mpu.setZAccelOffset(1631);
-	mpu.setXGyroOffset(59);
-	mpu.setYGyroOffset(-22);
-	mpu.setZGyroOffset(-12);
+	//mpu.setXAccelOffset(-195);
+	//mpu.setYAccelOffset(-669);
+	//mpu.setZAccelOffset(1631);
+	//mpu.setXGyroOffset(59);
+	//mpu.setYGyroOffset(-22);
+	//mpu.setZGyroOffset(-12);
 
-	//SN:031003
+	// SN:031003
 	//mpu.setXAccelOffset(-4528);
 	//mpu.setYAccelOffset(-4577);
 	//mpu.setZAccelOffset(1523);
 	//mpu.setXGyroOffset(74);
 	//mpu.setYGyroOffset(-16);
 	//mpu.setZGyroOffset(-22);
+
+	// SN: 031001US
+	mpu.setXAccelOffset(1108);
+	mpu.setYAccelOffset(1757);
+	mpu.setZAccelOffset(1407);
+	mpu.setXGyroOffset(40);
+	mpu.setYGyroOffset(19);
+	mpu.setZGyroOffset(21);
+
+	// SN: 031002US
+	//mpu.setXAccelOffset(1701);
+	//mpu.setYAccelOffset(-259);
+	//mpu.setZAccelOffset(679);
+	//mpu.setXGyroOffset(-1);
+	//mpu.setYGyroOffset(-70);
+	//mpu.setZGyroOffset(-20);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
@@ -1927,13 +1954,13 @@ void processPID()
 
 	// Acc X PID
 	pidVars.accX.setpoint = -cmdMotorPitch * 20;   // negative added since rx pitch command is in the reverse direction of x-axis
-	pidVars.accX.sensedVal = qc.accelWorld.x * 100;  // cm/s^2 will be changed to transformed variable
+	pidVars.accX.sensedVal = qc.accelWorldEstimated.x * 100;  // cm/s^2 will be changed to transformed variable
 	pidVars.accX.sensedValDiff = qc.accelDiff.x * 100;   // cm/s^3 
 	pidAccX.Compute();
 
 	// Acc Y PID
 	pidVars.accY.setpoint = cmdMotorRoll * 20;
-	pidVars.accY.sensedVal = qc.accelWorld.y * 100;  // cm/s^2 will be changed to transformed variable
+	pidVars.accY.sensedVal = qc.accelWorldEstimated.y * 100;  // cm/s^2 will be changed to transformed variable
 	pidVars.accY.sensedValDiff = qc.accelDiff.y * 100;   // cm/s^3 
 	pidAccY.Compute();
 
@@ -2621,12 +2648,30 @@ void processCompass()
 #pragma endregion
 	
 #pragma region FCB SN: 031002 compass values
-	compassHdgXoffset = 92;
-	compassHdgYoffset = 134;
-	compassHdgZoffset = -191;
-	compassHdgXrange = 1000;
-	compassHdgYrange = 1006;
-	compassHdgZrange = 907;
+	//compassHdgXoffset = 92;
+	//compassHdgYoffset = 134;
+	//compassHdgZoffset = -191;
+	//compassHdgXrange = 1000;
+	//compassHdgYrange = 1006;
+	//compassHdgZrange = 907;
+#pragma endregion
+
+#pragma region FCB SN: 031001US compass values
+	compassHdgXoffset = 20.24;
+	compassHdgYoffset = 289.34;
+	compassHdgZoffset = 90.62;
+	compassHdgXrange = 969.68;
+	compassHdgYrange = 911.72;
+	compassHdgZrange = 863.88;
+#pragma endregion
+
+#pragma region FCB SN: 031002US compass values
+	//compassHdgXoffset = -47.50;
+	//compassHdgYoffset = 196.50;
+	//compassHdgZoffset = -124.50;
+	//compassHdgXrange = 1065.00;
+	//compassHdgYrange = 1017.00;
+	//compassHdgZrange = 1007.00;
 #pragma endregion
 
 	Vector compassNorm;

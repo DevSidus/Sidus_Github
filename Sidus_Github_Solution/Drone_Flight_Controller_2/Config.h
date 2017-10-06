@@ -15,6 +15,10 @@ This header file define all the configurable variables including constants, pin 
 #define		DRONE_AP_NAME					"SigmaDrone"
 #define		DRONE_AP_PASS					"sidus12345"
 
+//#define		WIFI_SSID						"YANIKS HOUSE"
+//#define		WIFI_PASS						"YanikTurkiye06"
+//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14"
+
 #define		WIFI_SSID						"khorfo_net"
 #define		WIFI_PASS						"ahmet_ipek_12082004"
 #define		DEFAULT_GROUND_STATION_IP		"192.168.4.2"
@@ -76,6 +80,8 @@ bool barometer_initial_measurement = true;
 #define		COMPASS_OFFSET_X_DEFAULT	304
 #define		COMPASS_OFFSET_Y_DEFAULT	-360
 
+//GPS UBOX/NMEA Definitions
+#define		UBOX
 
 //Pin Definitions
 #define		PIN_LED				5
@@ -401,7 +407,7 @@ struct structGPS
 {
 	double lat;
 	double lon;
-	double alt;
+	double alt; ///< [m], Height above mean sea level
 	uint16_t hdop;
 	uint16_t vdop;
 	uint16_t sog;
@@ -412,8 +418,6 @@ struct structGPS
 	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
 	structNEDaxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
 	double nE; // The prime vertical radius of curvature
-
-	double	altMSL;			///< [m], Height above mean sea level
 	double  posAcccuracy;			///< [m], Horizontal accuracy estimate
 	double  altAccuracy;			///< [m], Vertical accuracy estimate
 	structNEDaxis nedVelocity;   ///< [m/s], NED north, east and down velocity			
