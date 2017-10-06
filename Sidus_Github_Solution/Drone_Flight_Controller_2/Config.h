@@ -15,6 +15,10 @@ This header file define all the configurable variables including constants, pin 
 #define		DRONE_AP_NAME					"SigmaDrone"
 #define		DRONE_AP_PASS					"sidus12345"
 
+//#define		WIFI_SSID						"YANIKS HOUSE"
+//#define		WIFI_PASS						"YanikTurkiye06"
+//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14"
+
 #define		WIFI_SSID						"khorfo_net"
 #define		WIFI_PASS						"ahmet_ipek_12082004"
 #define		DEFAULT_GROUND_STATION_IP		"192.168.4.2"
@@ -76,6 +80,8 @@ bool barometer_initial_measurement = true;
 #define		COMPASS_OFFSET_X_DEFAULT	304
 #define		COMPASS_OFFSET_Y_DEFAULT	-360
 
+//GPS UBOX/NMEA Definitions
+#define		UBOX
 
 //Pin Definitions
 #define		PIN_LED				5
@@ -252,6 +258,7 @@ bool barometer_initial_measurement = true;
 #define		SERIAL_COM_SPEED			921600
 #define		SERIAL_PARSE_OVF_MULT		3
 
+#define		SERIAL_DEFAULT_GPS_SPEED	9600
 #define		SERIAL_GPS_SPEED			115200
 #define		GPS_UPDATE_THRESHOLD_TIME	2000
 
@@ -365,11 +372,19 @@ struct structEuler
 	double theta;
 	double phi;
 };
+
 struct struct3Daxis
 {
 	double x;
 	double y;
 	double z;
+};
+
+struct structNEDaxis
+{
+	double N;
+	double E;
+	double D;
 };
 
 struct structIMU
@@ -392,16 +407,21 @@ struct structGPS
 {
 	double lat;
 	double lon;
-	double alt;
+	double alt; ///< [m], Height above mean sea level
 	uint16_t hdop;
 	uint16_t vdop;
-	uint16_t vel;
+	uint16_t sog;
 	uint16_t cog;
 	uint8_t satellites_visible;
+	uint8_t gpsFixType;
 	bool gpsIsFix;
 	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
-	struct3Daxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
+	structNEDaxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
 	double nE; // The prime vertical radius of curvature
+	double  posAcccuracy;			///< [m], Horizontal accuracy estimate
+	double  altAccuracy;			///< [m], Vertical accuracy estimate
+	structNEDaxis nedVelocity;   ///< [m/s], NED north, east and down velocity			
+	double  velAccuracy;			///< [m/s], Speed accuracy estimate
 }qcGPS;
 
 struct structPOI
@@ -417,6 +437,17 @@ structPOI homePoint; // Home Point
 structPOI destinationPoint; // Destination Point
 
 bool homePointSelected = false;
+bool positionHoldAvailable = false;
+
+typedef enum
+{
+	noFix = 0,
+	deadReckoning = 1,
+	fix2D = 2,
+	fix3D = 3,
+	gnssDeadReckoning = 4,
+	timeOnlyFix = 5
+}gpsFixType;
 
 struct structMAVLINK
 {
@@ -568,3 +599,34 @@ double deltaTimeGyroDiff; // will be used at Exact Filtering
 double deltaTimeRateCmdDiff; // will be used at Exact Filtering
 double deltaTimeAccelDiff; // will be used at Exact Filtering
 double deltaTimeAccelCmdDiff; // will be used at Exact Filtering
+
+
+// UBlox GPS UBX Commands
+// Command sending packet to the receiver to change baudrate to 115200
+// CFG-PRT packet
+byte ubxPortConfigPacketPart1[28] = {
+	0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x00, 0xC2,
+	0x01, 0x00, 0x07, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x7E
+};
+byte ubxPortConfigPacketPart2[9] = {
+	0xB5, 0x62, 0x06, 0x00, 0x01, 0x00, 0x01, 0x08, 0x22
+};
+
+// Command sending packet to the receiver to change frequency to 10 Hz
+// CFG-RATE packet
+byte ubxRateConfigPacketPart1[14] = {
+	0xB5, 0x62, 0x06, 0x08, 0x06, 0x00, 0x64, 0x00, 0x01, 0x00, 0x01, 0x00, 0x7A, 0x12
+};
+byte ubxRateConfigPacketPart2[8] = {
+	0xB5, 0x62, 0x06, 0x08, 0x00, 0x00, 0x0E, 0x30
+};
+
+// Command sending packet to the receiver to enable NAV-PVT messages
+// CFG-MSG packet
+byte ubxMessageConfigPacketPart1[16] = { 
+	0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0x01, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x18, 0xE1
+};
+//
+byte ubxMessageConfigPacketPart2[10] = { 
+	0xB5, 0x62, 0x06, 0x01, 0x02, 0x00, 0x01, 0x07, 0x11, 0x3A
+};
