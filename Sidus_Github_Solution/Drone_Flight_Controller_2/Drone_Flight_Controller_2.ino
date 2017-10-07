@@ -235,7 +235,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 1200, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 1200, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 3072, NULL, 20, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 1024, NULL, 5, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 1536, NULL, 5, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 1024, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 1024, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 1024, NULL, 10, NULL, 0);
