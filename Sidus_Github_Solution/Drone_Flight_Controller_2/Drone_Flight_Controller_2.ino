@@ -1889,7 +1889,7 @@ void processCheckMode()
 		pidPosAlt.SetFlightMode(false);
 		pidVelAlt.SetFlightMode(false);
 		//pidAccAlt.SetFlightMode(false);   //this will be discussed later
-		pidAccAlt.SetFlightMode(false); 
+		pidAccX.SetFlightMode(false); 
 	}
 }
 
