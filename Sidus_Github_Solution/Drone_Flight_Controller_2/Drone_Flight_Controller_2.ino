@@ -38,15 +38,12 @@ using namespace std;
 #include "Local_SFE_BMP180.h"
 #endif
 
-
 #include "cMsgUdpR01.h"
 #include "cMsgUdpT01.h"
 #include "cRxFilter.h"
 
-
 //Global Class Definitions
 MPU6050 mpu;
-
 
 #ifdef BAROMETER_MS5611
 MS5611 barometer;
@@ -56,7 +53,6 @@ SFE_BMP180 barometer;
 
 HMC5883L compass;
 
-//The udp library class
 WiFiUDP udp;
 
 cMsgUdpR01 MsgUdpR01;
@@ -69,8 +65,6 @@ PID pidAngleRoll(&pidVars.angleRoll.sensedVal, &pidVars.angleRoll.output, &pidVa
 PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rateYaw.setpoint, &pidVars.rateYaw.sensedValDiff, &pidVars.rateYaw.setpointDiff);
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.sensedValDiff);
 
-
-
 PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.sensedValDiff);
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff);
 PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
@@ -79,7 +73,6 @@ PID pidAccX(&pidVars.accX.sensedVal, &pidVars.accX.output, &pidVars.accX.setpoin
 PID pidAccY(&pidVars.accY.sensedVal, &pidVars.accY.output, &pidVars.accY.setpoint, &pidVars.accY.sensedValDiff);
 
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
-
 
 cRxFilter filterRxThr(RX_MAX_PULSE_WIDTH), filterRxPitch(RX_MAX_PULSE_WIDTH), filterRxRoll(RX_MAX_PULSE_WIDTH), filterRxYaw(RX_MAX_PULSE_WIDTH);
 
@@ -103,75 +96,6 @@ uint16_t mavlinkMessageLength;
 
 File sd_logfile;
 
-void appendFile(fs::FS &fs, const char * path, const uint8_t * message, size_t size) {
-	//Serial.printf("Appending to file: %s\n", path);
-
-	//File file = fs.open(path, FILE_APPEND);
-	if (!sd_logfile) 
-	{
-		//Serial.println("Failed to open file for appending");
-		return;
-	}
-
-	if (sd_logfile.write(message, size)) 
-	{
-		//Serial.println("Message appended");
-		appendPacketCounter++;
-	}
-	else 
-	{
-		//Serial.println("Append failed");
-	}
-	if (appendPacketCounter % 60 == 0)   //at every # of packet append, close and reopen file
-	{
-		sd_logfile.close();
-		sd_logfile = fs.open(sdcard_filepath, FILE_APPEND);
-	}
-}
-
-void createFile(fs::FS &fs) {
-
-	for (int i = 0; i < 9999; i++)
-	{
-		sd_logfile = fs.open("/"+String(i)+".bin");
-		if (!sd_logfile)
-		{
-			//Serial.print("i:");
-			//Serial.println(i);
-			sd_logfile = fs.open("/" + String(i) + ".bin", FILE_WRITE);
-			if (!sd_logfile)
-			{
-				Serial.println("Failed to open file for writing");
-				return;
-			}
-			else
-			{
-
-				sd_logfile.close();
-
-				sdcard_filepath = "/" + String(i) + ".bin";
-				Serial.println("File Created: " + sdcard_filepath);
-
-				sd_logfile = fs.open(sdcard_filepath, FILE_APPEND);
-
-				if (!sd_logfile) 
-				{
-					Serial.println("Dosya Append Acilamadi");
-				}
-				else
-				{
-					Serial.println("Dosya Append Acildi");
-				}
-			}
-			return;
-		}
-		else
-		{
-			sd_logfile.close();
-		}
-	}
-
-}
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(SERIAL_COM_SPEED);
@@ -261,6 +185,64 @@ void setup() {
 
 
 	//esp_event_loop_init((system_event_cb_t*)&task_UDPhandle, NULL);
+}
+
+void appendFile(fs::FS &fs, const char * path, const uint8_t * message, size_t size) {
+
+	if (!sd_logfile)	return;
+
+	if (sd_logfile.write(message, size))	appendPacketCounter++;
+	//else	//Serial.println("Append failed");
+
+	if (appendPacketCounter % 60 == 0)   //at every # of packet append, close and reopen file
+	{
+		sd_logfile.close();
+		sd_logfile = fs.open(sdcard_filepath, FILE_APPEND);
+	}
+}
+
+void createFile(fs::FS &fs) {
+
+	for (int i = 0; i < 9999; i++)
+	{
+		sd_logfile = fs.open("/" + String(i) + ".bin");
+		if (!sd_logfile)
+		{
+			//Serial.print("i:");
+			//Serial.println(i);
+			sd_logfile = fs.open("/" + String(i) + ".bin", FILE_WRITE);
+			if (!sd_logfile)
+			{
+				Serial.println("Failed to open file for writing");
+				return;
+			}
+			else
+			{
+
+				sd_logfile.close();
+
+				sdcard_filepath = "/" + String(i) + ".bin";
+				Serial.println("File Created: " + sdcard_filepath);
+
+				sd_logfile = fs.open(sdcard_filepath, FILE_APPEND);
+
+				if (!sd_logfile)
+				{
+					Serial.println("Dosya Append Acilamadi");
+				}
+				else
+				{
+					Serial.println("Dosya Append Acildi");
+				}
+			}
+			return;
+		}
+		else
+		{
+			sd_logfile.close();
+		}
+	}
+
 }
 // the loop function runs over and over again until power down or reset
 void loop() {
@@ -1633,48 +1615,12 @@ bool initMPU()
 	Serial.println(F("Initializing DMP..."));
 	devStatus = mpu.dmpInitialize();
 
-	// supply your own gyro offsets here, scaled for min sensitivity
-	//Jeff Rowberg's IMU_Zero sketch is used to calculate those values
-	// SN: 031001
-	//mpu.setXAccelOffset(-2553);
-	//mpu.setYAccelOffset(-989);
-	//mpu.setZAccelOffset(1689);
-	//mpu.setXGyroOffset(88);
-	//mpu.setYGyroOffset(-26);
-	//mpu.setZGyroOffset(-5);
-	//
-
-	// SN: 031002
-	//mpu.setXAccelOffset(-195);
-	//mpu.setYAccelOffset(-669);
-	//mpu.setZAccelOffset(1631);
-	//mpu.setXGyroOffset(59);
-	//mpu.setYGyroOffset(-22);
-	//mpu.setZGyroOffset(-12);
-
-	// SN:031003
-	//mpu.setXAccelOffset(-4528);
-	//mpu.setYAccelOffset(-4577);
-	//mpu.setZAccelOffset(1523);
-	//mpu.setXGyroOffset(74);
-	//mpu.setYGyroOffset(-16);
-	//mpu.setZGyroOffset(-22);
-
-	// SN: 031001US
-	mpu.setXAccelOffset(1108);
-	mpu.setYAccelOffset(1757);
-	mpu.setZAccelOffset(1407);
-	mpu.setXGyroOffset(40);
-	mpu.setYGyroOffset(19);
-	mpu.setZGyroOffset(21);
-
-	// SN: 031002US
-	//mpu.setXAccelOffset(1701);
-	//mpu.setYAccelOffset(-259);
-	//mpu.setZAccelOffset(679);
-	//mpu.setXGyroOffset(-1);
-	//mpu.setYGyroOffset(-70);
-	//mpu.setZGyroOffset(-20);
+	mpu.setXAccelOffset(mpuXAccelOffset);
+	mpu.setYAccelOffset(mpuYAccelOffset);
+	mpu.setZAccelOffset(mpuZAccelOffset);
+	mpu.setXGyroOffset(mpuXGyroOffset);
+	mpu.setYGyroOffset(mpuYGyroOffset);
+	mpu.setZGyroOffset(mpuZGyroOffset);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
@@ -2637,43 +2583,6 @@ void processCompass()
 	/// Code part that will be used for normal operation
 	//--------------------------------------------------------------------------------
 	/// Offset and scale values should be defined after the calibration process
-
-	//spare gy-86 module data
-#pragma region spare gy-86 compass values
-	//compassHdgXoffset = -36;
-	//compassHdgYoffset = -200;
-	//compassHdgZoffset = 82;
-	//compassHdgXrange = 1340;
-	//compassHdgYrange = 1337;
-	//compassHdgZrange = 1168;
-#pragma endregion
-	
-#pragma region FCB SN: 031002 compass values
-	//compassHdgXoffset = 92;
-	//compassHdgYoffset = 134;
-	//compassHdgZoffset = -191;
-	//compassHdgXrange = 1000;
-	//compassHdgYrange = 1006;
-	//compassHdgZrange = 907;
-#pragma endregion
-
-#pragma region FCB SN: 031001US compass values
-	compassHdgXoffset = 20.24;
-	compassHdgYoffset = 289.34;
-	compassHdgZoffset = 90.62;
-	compassHdgXrange = 969.68;
-	compassHdgYrange = 911.72;
-	compassHdgZrange = 863.88;
-#pragma endregion
-
-#pragma region FCB SN: 031002US compass values
-	//compassHdgXoffset = -47.50;
-	//compassHdgYoffset = 196.50;
-	//compassHdgZoffset = -124.50;
-	//compassHdgXrange = 1065.00;
-	//compassHdgYrange = 1017.00;
-	//compassHdgZrange = 1007.00;
-#pragma endregion
 
 	Vector compassNorm;
 

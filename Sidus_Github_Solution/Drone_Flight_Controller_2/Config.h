@@ -23,18 +23,17 @@ This header file define all the configurable variables including constants, pin 
 #define		WIFI_PASS						"ahmet_ipek_12082004"
 #define		DEFAULT_GROUND_STATION_IP		"192.168.4.2"
 
+
 //#define		WIFI_SSID						"AAGCA"
 //#define		WIFI_PASS						"ahmet(12082004)"
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2"
 
-#define		DRONE_WEIGHT					1200.0     //in grams
-
 #define		UDP_PORT						8080
+
+#define		DRONE_WEIGHT					1200.0     //in grams
 
 #define		SIDUS_PROTOCOL
 //#define		MAVLINK_PROTOCOL
-
-#define		WIFI_CONNECTION_THRESHOLD	 10000
 
 //Comment out below line if you do not want command calibration
 #define		COMMAND_CALIBRATION
@@ -57,10 +56,97 @@ double computedAlt=0;
 bool barometer_initial_measurement = true;
 #endif // BAROMETER_BMP180
 
+//Comment out one of the following defines which is your FCB and be sure corresponding offsets and constants are inserted in config file
+//#define SN_031001
+//#define SN_031002
+#define SN_031003
+//#define SN_031001US
+//#define SN_031002US
+
+
+#ifdef SN_031001
+	#define mpuXAccelOffset				-2553
+	#define mpuYAccelOffset				-989
+	#define mpuZAccelOffset				1689
+	#define mpuXGyroOffset				88
+	#define mpuYGyroOffset				-26
+	#define mpuZGyroOffset				-5
+
+	double compassHdgXoffset = 92;
+	double compassHdgYoffset = 134;
+	double compassHdgZoffset = -191;
+	double compassHdgXrange = 1000;
+	double compassHdgYrange = 1006;
+	double compassHdgZrange = 907;
+#endif // SN_031001
+#ifdef SN_031002
+	#define mpuXAccelOffset				-195
+	#define mpuYAccelOffset				-669
+	#define mpuZAccelOffset				1631
+	#define mpuXGyroOffset				59
+	#define mpuYGyroOffset				-22
+	#define mpuZGyroOffset				-12
+
+	double compassHdgXoffset = 92;
+	double compassHdgYoffset = 134;
+	double compassHdgZoffset = -191;
+	double compassHdgXrange = 1000;
+	double compassHdgYrange = 1006;
+	double compassHdgZrange = 907;
+#endif // SN_031002
+#ifdef SN_031003
+	#define mpuXAccelOffset				-4528
+	#define mpuYAccelOffset				-4577
+	#define mpuZAccelOffset				1523
+	#define mpuXGyroOffset				74
+	#define mpuYGyroOffset				-16
+	#define mpuZGyroOffset				-22
+
+	double compassHdgXoffset = 92;
+	double compassHdgYoffset = 134;
+	double compassHdgZoffset = -191;
+	double compassHdgXrange = 1000;
+	double compassHdgYrange = 1006;
+	double compassHdgZrange = 907;
+#endif // SN_031003
+#ifdef SN_031001US
+	#define mpuXAccelOffset				1108
+	#define mpuYAccelOffset				1757
+	#define mpuZAccelOffset				1407
+	#define mpuXGyroOffset				40
+	#define mpuYGyroOffset				19
+	#define mpuZGyroOffset				21
+
+	double compassHdgXoffset = 20.24;
+	double compassHdgYoffset = 289.34;
+	double compassHdgZoffset = 90.62;
+	double compassHdgXrange = 969.68;
+	double compassHdgYrange = 911.72;
+	double compassHdgZrange = 863.88;
+#endif // SN_031001US
+#ifdef SN_031002US
+	#define mpuXAccelOffset				1701
+	#define mpuYAccelOffset				-259
+	#define mpuZAccelOffset				679
+	#define mpuXGyroOffset				-1
+	#define mpuYGyroOffset				-70
+	#define mpuZGyroOffset				-20
+
+	double compassHdgXoffset = -47.50;
+	double compassHdgYoffset = 196.50;
+	double compassHdgZoffset = -124.50;
+	double compassHdgXrange = 1065.00;
+	double compassHdgYrange = 1017.00;
+	double compassHdgZrange = 1007.00;
+#endif // SN_031002US
+
+
 // Define gravity parameters
 #define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8350.0
 #define		MPU_G_MAPPING_IN_BITS				8192.0 // 1 G
 #define		GRAVITY_IN_METER_PER_SECOND2		9.80665
+
+#define		WIFI_CONNECTION_THRESHOLD	 10000
 
 // Define Earth Parameters
 #define		REA_SEMI_MAJOR_AXIS					6378137.0 // The semi-major axis
@@ -318,8 +404,6 @@ double compassHdg;
 double compassHdgEstimated;
 double compassHdgXmax, compassHdgYmax, compassHdgZmax;
 double compassHdgXmin, compassHdgYmin, compassHdgZmin;
-double compassHdgXoffset, compassHdgYoffset, compassHdgZoffset;
-double compassHdgXrange, compassHdgYrange, compassHdgZrange;
 
 short batteryVoltageInBits;
 uint32_t udpLastMessageTime;
@@ -630,3 +714,4 @@ byte ubxMessageConfigPacketPart1[16] = {
 byte ubxMessageConfigPacketPart2[10] = { 
 	0xB5, 0x62, 0x06, 0x01, 0x02, 0x00, 0x01, 0x07, 0x11, 0x3A
 };
+
