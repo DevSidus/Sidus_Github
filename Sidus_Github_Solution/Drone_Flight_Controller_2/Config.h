@@ -570,7 +570,6 @@ typedef enum
 {
 	autoModeOFF = 0,
 	autoModeAltitude = 1,
-	autoModeAltToOFF = 2,
 }autoModeType;
 
 typedef enum

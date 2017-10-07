@@ -2188,21 +2188,6 @@ void postPIDprocesses()
 	{
 		cmdMotorThr = pidVars.accAlt.output;
 	}
-	else if (autoModeStatus == autoModeAltToOFF)
-	{
-		if (abs(cmdMotorThr - cmdRxThr) < 8)
-		{
-			autoModeStatus = autoModeOFF;
-		}
-		else if (cmdMotorThr > cmdRxThr)
-		{
-			cmdMotorThr -= 0.3;
-		}
-		else
-		{
-			cmdMotorThr += 0.3;
-		}
-	}
 	else
 	{
 		autoModeStartAltitude = -qc.posWorldEstimated.z;   // negative added since altitude vector is opposite of z-axis
