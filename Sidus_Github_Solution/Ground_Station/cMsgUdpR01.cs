@@ -161,8 +161,14 @@ namespace Ground_Station
         public byte gpsStatus { get; set; }
         public double gpsLat { get; set; }
         public double gpsLon { get; set; }
-        public float gpsAlt { get; set; }
-        public short gpsHdop { get; set; }
+        public double gpsAlt { get; set; }
+        public double homeLat { get; set; }
+        public double homeLon { get; set; }
+        public double homeAlt { get; set; }
+        public double gpsVelN { get; set; }
+        public double gpsVelE { get; set; }
+        public double gpsPosAccuracy { get; set; }
+        public double gpsVelAccuracy { get; set; }
     }
     class cMsgUdpR01
     {

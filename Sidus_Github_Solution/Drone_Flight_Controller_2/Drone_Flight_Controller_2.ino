@@ -428,7 +428,7 @@ void task_gps(void * parameter)
 				qcGPS.lat = uBloxData.lat;
 				qcGPS.lon = uBloxData.lon;
 				qcGPS.alt = uBloxData.hMSL;
-				qcGPS.posAcccuracy = uBloxData.hAcc;
+				qcGPS.posAccuracy = uBloxData.hAcc;
 				qcGPS.nedVelocity.N = uBloxData.velN;
 				qcGPS.nedVelocity.E = uBloxData.velE;
 				qcGPS.velAccuracy = uBloxData.sAcc;
@@ -480,7 +480,7 @@ void task_gps(void * parameter)
 			// Calculate World X/Y Position from GPS measurements
 			calculateGeodetic2Ecef(qcGPS.lat, qcGPS.lon, qcGPS.alt, &qcGPS.ecefCoordinate.x, &qcGPS.ecefCoordinate.y, &qcGPS.ecefCoordinate.z);
 
-			if (!homePointSelected)
+			if (setHomePoint && !homePointSelected)
 			{
 				homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
 				homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
@@ -489,9 +489,9 @@ void task_gps(void * parameter)
 				homePoint.lon = qcGPS.lon;
 				homePoint.alt = qcGPS.alt;
 
-				/*Serial.print(homePoint.lat*1e7); Serial.print(" ");
-				Serial.print(homePoint.lon*1e7); Serial.print(" ");
-				Serial.println(homePoint.alt);*/
+				//Serial.print(homePoint.lat*1e7); Serial.print(" ");
+				//Serial.print(homePoint.lon*1e7); Serial.print(" ");
+				//Serial.println(homePoint.alt);
 
 				homePointSelected = true;
 			}
@@ -1251,7 +1251,7 @@ void task_position_kalman(void * parameter)
 	//***********************************************************************************
 	// Kalman Parameters for Single Position Estimation
 	double deltaRowPos = 3.0; // 3.0;
-	double sigmaRowPos = 3.0; // qcGPS.posAcccuracy;
+	double sigmaRowPos = 3.0; // qcGPS.posAccuracy;
 	
 	double sigmaQ_Pos = deltaRowPos;
 	double Q_Pos = pow(sigmaQ_Pos, 2) * T; // Process noise covariance matrix
@@ -1305,7 +1305,7 @@ void task_position_kalman(void * parameter)
 	for (int i = 0; i < 9; i++) Q_PosVelAcc[i] *= pow(sigmaQ_PosVelAcc, 2); // Process noise covariance matrix
 
 	// Default measurement noise covariance matrix, will be updated in the loop
-	double sigmaPos = 3.0; // qcGPS.posAcccuracy;
+	double sigmaPos = 3.0; // qcGPS.posAccuracy;
 	double sigmaVel = 0.3; // qcGPS.velAccuracy;
 	double sigmaAccelXY = 0.01; // 0.005;
 	double R_PosVelAcc[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix
@@ -1340,7 +1340,7 @@ void task_position_kalman(void * parameter)
 		//***********************************************************************************
 		// Kalman Filter for Single Position Estimation
 		if (positionHoldAvailable) {
-			sigmaRowPos = qcGPS.posAcccuracy;
+			sigmaRowPos = qcGPS.posAccuracy;
 			R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
 
 			kalmanFilterOneParameter(m_PosX_n1, P_PosX_n1, qc.posWorld.x, 1.0, Q_Pos, 1.0, R_Pos, &m_PosX_n, &P_PosX_n);
@@ -1381,7 +1381,7 @@ void task_position_kalman(void * parameter)
 			y_PosVelAccX_n[1] = qc.velWorld.x; // m_VelX_n; // 
 			y_PosVelAccY_n[1] = qc.velWorld.y; // m_VelY_n; //
 
-			sigmaPos = qcGPS.posAcccuracy;
+			sigmaPos = qcGPS.posAccuracy;
 			sigmaVel = qcGPS.velAccuracy;
 			R_PosVelAcc[0] = pow(sigmaPos, 2);
 			R_PosVelAcc[4] = pow(sigmaVel, 2);
@@ -1434,7 +1434,7 @@ void task_position_kalman(void * parameter)
 		//Serial.print(qc.velWorldEstimated.y); Serial.print(" ");
 		//Serial.println(qc.accelWorldEstimated.y);
 
-		//Serial.print(qcGPS.posAcccuracy); Serial.print(" ");
+		//Serial.print(qcGPS.posAccuracy); Serial.print(" ");
 		//Serial.println(qcGPS.velAccuracy);
 
 		//Serial.println(micros() - strtTime);
@@ -2709,6 +2709,8 @@ void updateUdpMsgVars()
 		break;
 	default:break;
 	}
+
+	setHomePoint = MsgUdpT01.message.saveHomePos;
 }
 
 void applyPidCommandRatePitchRoll()
@@ -2932,7 +2934,13 @@ void prepareUDPmessages()
 	MsgUdpR01.message.gpsLat				= qcGPS.lat*1e7;
 	MsgUdpR01.message.gpsLon				= qcGPS.lon*1e7;
 	MsgUdpR01.message.gpsAlt				= qcGPS.alt;
-	MsgUdpR01.message.gpsHdop				= qcGPS.hdop;
+	MsgUdpR01.message.homeLat				= homePoint.lat*1e7;
+	MsgUdpR01.message.homeLon				= homePoint.lon*1e7;
+	MsgUdpR01.message.homeAlt				= homePoint.alt;
+	MsgUdpR01.message.gpsVelN				= qcGPS.nedVelocity.N;
+	MsgUdpR01.message.gpsVelE				= qcGPS.nedVelocity.E;
+	MsgUdpR01.message.gpsPosAccuracy		= qcGPS.posAccuracy;
+	MsgUdpR01.message.gpsVelAccuracy		= qcGPS.velAccuracy;
 
 	MsgUdpR01.getPacket();
 }

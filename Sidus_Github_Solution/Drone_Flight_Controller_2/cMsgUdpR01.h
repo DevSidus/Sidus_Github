@@ -158,8 +158,14 @@ struct structMsgUdpR01
 	unsigned char gpsStatus;
 	double gpsLat;
 	double gpsLon;
-	float gpsAlt;
-	short gpsHdop;
+	double gpsAlt;
+	double homeLat;
+	double homeLon;
+	double homeAlt;
+	double gpsVelN;
+	double gpsVelE;
+	double gpsPosAccuracy;
+	double gpsVelAccuracy;
 
 };
 #pragma pack(pop)
