@@ -72,6 +72,9 @@ PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt
 PID pidAccX(&pidVars.accX.sensedVal, &pidVars.accX.output, &pidVars.accX.setpoint, &pidVars.accX.sensedValDiff);
 PID pidAccY(&pidVars.accY.sensedVal, &pidVars.accY.output, &pidVars.accY.setpoint, &pidVars.accY.sensedValDiff);
 
+PID pidVelX(&pidVars.velX.sensedVal, &pidVars.velX.output, &pidVars.velX.setpoint, &pidVars.velX.sensedValDiff);
+PID pidVelY(&pidVars.velY.sensedVal, &pidVars.velY.output, &pidVars.velY.setpoint, &pidVars.velY.sensedValDiff);
+
 cBuzzerMelody buzzer(PIN_BUZZER, BUZZER_PWM_CHANNEL);
 
 cRxFilter filterRxThr(RX_MAX_PULSE_WIDTH), filterRxPitch(RX_MAX_PULSE_WIDTH), filterRxRoll(RX_MAX_PULSE_WIDTH), filterRxYaw(RX_MAX_PULSE_WIDTH);
@@ -1876,7 +1879,10 @@ void processCheckMode()
 		pidPosAlt.SetFlightMode(true);
 		pidVelAlt.SetFlightMode(true);
 		pidAccAlt.SetFlightMode(true);   //this will be discussed later
-		pidAccX.SetFlightMode(true); 
+		pidAccX.SetFlightMode(true);
+		pidAccY.SetFlightMode(true);
+		pidVelX.SetFlightMode(true);
+		pidVelY.SetFlightMode(true);
 	}
 	else
 	{
@@ -1889,7 +1895,10 @@ void processCheckMode()
 		pidPosAlt.SetFlightMode(false);
 		pidVelAlt.SetFlightMode(false);
 		//pidAccAlt.SetFlightMode(false);   //this will be discussed later
-		pidAccX.SetFlightMode(false); 
+		pidAccX.SetFlightMode(false);
+		pidAccY.SetFlightMode(false);
+		pidVelX.SetFlightMode(false);
+		pidVelY.SetFlightMode(false);
 	}
 }
 
@@ -1899,14 +1908,28 @@ void processPID()
 
 	getBodyToEulerAngularRates();
 
+
+	// Vel X PID
+	pidVars.velX.setpoint = -cmdMotorPitch * 4;   // negative added since rx pitch command is in the reverse direction of x-axis
+	pidVars.velX.sensedVal = qc.velWorldEstimated.x * 100;  // cm/s will be changed to transformed variable
+	pidVars.velX.sensedValDiff = qc.accelWorldEstimated.x * 100;   // cm/s^2 
+	pidVelX.Compute();
+
+	// Vel Y PID
+	pidVars.velY.setpoint = cmdMotorRoll * 4;
+	pidVars.velY.sensedVal = qc.velWorldEstimated.y * 100;  // cm/s will be changed to transformed variable
+	pidVars.velY.sensedValDiff = qc.accelWorldEstimated.y * 100;   // cm/s^2 
+	pidVelY.Compute();
+
+
 	// Acc X PID
-	pidVars.accX.setpoint = -cmdMotorPitch * 20;   // negative added since rx pitch command is in the reverse direction of x-axis
+	pidVars.accX.setpoint = pidVars.velX.output; //-cmdMotorPitch * 20;  // negative added since rx pitch command is in the reverse direction of x-axis
 	pidVars.accX.sensedVal = qc.accelWorldEstimated.x * 100;  // cm/s^2 will be changed to transformed variable
 	pidVars.accX.sensedValDiff = qc.accelDiff.x * 100;   // cm/s^3 
 	pidAccX.Compute();
 
 	// Acc Y PID
-	pidVars.accY.setpoint = cmdMotorRoll * 20;
+	pidVars.accY.setpoint = pidVars.velY.output; //cmdMotorRoll * 20;
 	pidVars.accY.sensedVal = qc.accelWorldEstimated.y * 100;  // cm/s^2 will be changed to transformed variable
 	pidVars.accY.sensedValDiff = qc.accelDiff.y * 100;   // cm/s^3 
 	pidAccY.Compute();
@@ -2115,6 +2138,22 @@ void initPIDvariables()
 	pidVars.accY.outputLimitMax = PID_ACC_Y_OUTMAX;
 	pidVars.accY.output = 0;
 	pidVars.accY.outputCompensated = 0;
+	
+	pidVars.velX.Kp = PID_VEL_X_KP;
+	pidVars.velX.Ki = PID_VEL_X_KI;
+	pidVars.velX.Kd = PID_VEL_X_KD;
+	pidVars.velX.outputLimitMin = PID_VEL_X_OUTMIN;
+	pidVars.velX.outputLimitMax = PID_VEL_X_OUTMAX;
+	pidVars.velX.output = 0;
+	pidVars.velX.outputCompensated = 0;
+
+	pidVars.velY.Kp = PID_VEL_Y_KP;
+	pidVars.velY.Ki = PID_VEL_Y_KI;
+	pidVars.velY.Kd = PID_VEL_Y_KD;
+	pidVars.velY.outputLimitMin = PID_VEL_Y_OUTMIN;
+	pidVars.velY.outputLimitMax = PID_VEL_Y_OUTMAX;
+	pidVars.velY.output = 0;
+	pidVars.velY.outputCompensated = 0;
 
 	deltaTimeRateCmdDiff = 0.01;
 	deltaTimeAccelCmdDiff = 0.01;
@@ -2155,6 +2194,12 @@ void initPIDtuning()
 
 	pidAccY.SetOutputLimits(pidVars.accY.outputLimitMin, pidVars.accY.outputLimitMax);
 	pidAccY.SetTunings(pidVars.accY.Kp, pidVars.accY.Ki, pidVars.accY.Kd);
+
+	pidVelX.SetOutputLimits(pidVars.velX.outputLimitMin, pidVars.velX.outputLimitMax);
+	pidVelX.SetTunings(pidVars.velX.Kp, pidVars.velX.Ki, pidVars.velX.Kd);
+
+	pidVelY.SetOutputLimits(pidVars.velY.outputLimitMin, pidVars.velY.outputLimitMax);
+	pidVelY.SetTunings(pidVars.velY.Kp, pidVars.velY.Ki, pidVars.velY.Kd);
 }
 
 void prePIDprocesses()
@@ -2756,10 +2801,16 @@ void applyPidCommandPosAlt()
 void applyPidCommandVelAlt()
 {
 	//Set Altitude Velocity PID parameters
-	pidVars.velAlt.Kp = MsgUdpT01.message.pidVelAltKp * RESOLUTION_PID_VEL_KP;
-	pidVars.velAlt.Ki = MsgUdpT01.message.pidVelAltKi * RESOLUTION_PID_VEL_KI;
-	pidVars.velAlt.Kd = MsgUdpT01.message.pidVelAltKd * RESOLUTION_PID_VEL_KD;
-	pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
+	//pidVars.velAlt.Kp = MsgUdpT01.message.pidVelAltKp * RESOLUTION_PID_VEL_KP;
+	//pidVars.velAlt.Ki = MsgUdpT01.message.pidVelAltKi * RESOLUTION_PID_VEL_KI;
+	//pidVars.velAlt.Kd = MsgUdpT01.message.pidVelAltKd * RESOLUTION_PID_VEL_KD;
+	//pidVelAlt.SetTunings(pidVars.velAlt.Kp, pidVars.velAlt.Ki, pidVars.velAlt.Kd);
+
+	pidVars.velX.Kp = MsgUdpT01.message.pidVelAltKp * RESOLUTION_PID_VEL_KP;
+	pidVars.velX.Ki = MsgUdpT01.message.pidVelAltKi * RESOLUTION_PID_VEL_KI;
+	pidVars.velX.Kd = MsgUdpT01.message.pidVelAltKd * RESOLUTION_PID_VEL_KD;
+	pidVelX.SetTunings(pidVars.velX.Kp, pidVars.velX.Ki, pidVars.velX.Kd);
+	pidVelY.SetTunings(pidVars.velX.Kp, pidVars.velX.Ki, pidVars.velX.Kd);
 }
 
 void applyPidCommandAccAlt()
@@ -2884,13 +2935,21 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidPosAltIresult		= pidPosAlt.Get_I_Result();
 	MsgUdpR01.message.pidPosAltDresult		= pidPosAlt.Get_D_Result();
 
-	MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
-	MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
-	MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
-	MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
-	MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
-	MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
-	MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
+	//MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
+	//MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
+	//MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
+	//MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
+	//MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
+	//MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
+	//MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
+	MsgUdpR01.message.pidVelAltKp			= pidVars.velX.Kp / RESOLUTION_PID_VEL_KP;
+	MsgUdpR01.message.pidVelAltKi			= pidVars.velX.Ki / RESOLUTION_PID_VEL_KI;
+	MsgUdpR01.message.pidVelAltKd			= pidVars.velX.Kd / RESOLUTION_PID_VEL_KD;
+	MsgUdpR01.message.pidVelAltOutput		= pidVars.velX.output;
+	MsgUdpR01.message.pidVelAltPresult		= pidVelX.Get_P_Result();
+	MsgUdpR01.message.pidVelAltIresult		= pidVelX.Get_I_Result();
+	MsgUdpR01.message.pidVelAltDresult		= pidVelX.Get_D_Result();
+
 	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_ACC_KP;
 	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_ACC_KI;
 	MsgUdpR01.message.pidAccAltKd			= pidVars.accAlt.Kd / RESOLUTION_PID_ACC_KD;

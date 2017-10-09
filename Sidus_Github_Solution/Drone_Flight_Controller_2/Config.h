@@ -316,6 +316,19 @@ bool barometer_initial_measurement = true;
 #define		PID_ACC_Y_OUTMIN		-1000    //need to be revised
 #define		PID_ACC_Y_OUTMAX		1000     //need to be revised
 
+#define		PID_VEL_X_KP			5.0 
+#define		PID_VEL_X_KI			0.0    
+#define		PID_VEL_X_KD			0.0 
+#define		PID_VEL_X_OUTMIN		-1000    //need to be revised
+#define		PID_VEL_X_OUTMAX		1000     //need to be revised
+
+#define		PID_VEL_Y_KP			5.0  
+#define		PID_VEL_Y_KI			0.0    
+#define		PID_VEL_Y_KD			0.0 
+#define		PID_VEL_Y_OUTMIN		-1000    //need to be revised
+#define		PID_VEL_Y_OUTMAX		1000     //need to be revised
+
+
 #define		RX_MAX_PULSE_WIDTH			2075	//in microseconds
 
 #define		MPU_GYRO_DEG_SEC_TO_LSB		16.4     //This value can be used to convert deg/sec to LSB
@@ -448,6 +461,8 @@ struct structSuperPID
 	structPID posAlt;
 	structPID accX;
 	structPID accY;
+	structPID velX;
+	structPID velY;
 }pidVars;
 
 struct structEuler
