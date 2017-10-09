@@ -502,7 +502,7 @@ struct structGPS
 	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
 	structNEDaxis nedCoordinate; // Local North-East-Down (NED) Cartesian coordinate
 	double nE; // The prime vertical radius of curvature
-	double  posAcccuracy;			///< [m], Horizontal accuracy estimate
+	double  posAccuracy;			///< [m], Horizontal accuracy estimate
 	double  altAccuracy;			///< [m], Vertical accuracy estimate
 	structNEDaxis nedVelocity;   ///< [m/s], NED north, east and down velocity			
 	double  velAccuracy;			///< [m/s], Speed accuracy estimate
@@ -512,7 +512,7 @@ struct structPOI
 {
 	double lat;
 	double lon;
-	double alt;
+	double alt; ///< [m], Height above mean sea level
 	struct3Daxis ecefCoordinate; // Earth-Centered Earth-Fixed (ECEF) Cartesian coordinate
 	double nE; // The prime vertical radius of curvature
 };
@@ -520,6 +520,7 @@ struct structPOI
 structPOI homePoint; // Home Point
 structPOI destinationPoint; // Destination Point
 
+bool setHomePoint = false;
 bool homePointSelected = false;
 bool positionHoldAvailable = false;
 
