@@ -102,12 +102,14 @@ bool barometer_initial_measurement = true;
 	#define mpuYGyroOffset				-16
 	#define mpuZGyroOffset				-22
 
-	double compassHdgXoffset = 92;
-	double compassHdgYoffset = 134;
-	double compassHdgZoffset = -191;
-	double compassHdgXrange = 1000;
-	double compassHdgYrange = 1006;
-	double compassHdgZrange = 907;
+	double compassHdgXoffset = 32;
+	double compassHdgYoffset = 97;
+	double compassHdgZoffset = 249;
+	double compassHdgXrange = 1243;
+	double compassHdgYrange = 1278;
+	double compassHdgZrange = 1117;
+
+
 #endif // SN_031003
 #ifdef SN_031001US
 	#define mpuXAccelOffset				1108
