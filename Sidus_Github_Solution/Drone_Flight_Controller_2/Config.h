@@ -230,6 +230,10 @@ bool barometer_initial_measurement = true;
 #define		DC_THR_MIN		1100.0
 #define		DC_THR_MAX		1900.0
 
+#define		ALT_VEL_ZERO_CMD_GAP		120.0
+#define		ALT_VEL_ZERO_CMD_MIN     (CMD_THR_MIN + CMD_THR_MAX - ALT_VEL_ZERO_CMD_GAP)/2.0
+#define		ALT_VEL_ZERO_CMD_MAX     (CMD_THR_MIN + CMD_THR_MAX + ALT_VEL_ZERO_CMD_GAP)/2.0
+
 #define		CMD_THR_TAKEOFF 1300.0
 
 #define		CMD_YAW_MIN		-45.0
