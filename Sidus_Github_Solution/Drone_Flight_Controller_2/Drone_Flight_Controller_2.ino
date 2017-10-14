@@ -2575,35 +2575,35 @@ void processCompass()
 	//--------------------------------------------------------------------------------
 	/// Code part that will be used for calibration operation
 
-	if (compassRaw.XAxis > compassHdgXmax) compassHdgXmax = compassRaw.XAxis;
-	if (compassRaw.XAxis < compassHdgXmin) compassHdgXmin = compassRaw.XAxis;
+	//if (compassRaw.XAxis > compassHdgXmax) compassHdgXmax = compassRaw.XAxis;
+	//if (compassRaw.XAxis < compassHdgXmin) compassHdgXmin = compassRaw.XAxis;
 
-	if (compassRaw.YAxis > compassHdgYmax) compassHdgYmax = compassRaw.YAxis;
-	if (compassRaw.YAxis < compassHdgYmin) compassHdgYmin = compassRaw.YAxis;
+	//if (compassRaw.YAxis > compassHdgYmax) compassHdgYmax = compassRaw.YAxis;
+	//if (compassRaw.YAxis < compassHdgYmin) compassHdgYmin = compassRaw.YAxis;
 
-	if (compassRaw.ZAxis > compassHdgZmax) compassHdgZmax = compassRaw.ZAxis;
-	if (compassRaw.ZAxis < compassHdgZmin) compassHdgZmin = compassRaw.ZAxis;
+	//if (compassRaw.ZAxis > compassHdgZmax) compassHdgZmax = compassRaw.ZAxis;
+	//if (compassRaw.ZAxis < compassHdgZmin) compassHdgZmin = compassRaw.ZAxis;
 
-	compassHdgXoffset = (compassHdgXmax + compassHdgXmin) / 2;
-	compassHdgYoffset = (compassHdgYmax + compassHdgYmin) / 2;
-	compassHdgZoffset = (compassHdgZmax + compassHdgZmin) / 2;
+	//compassHdgXoffset = (compassHdgXmax + compassHdgXmin) / 2;
+	//compassHdgYoffset = (compassHdgYmax + compassHdgYmin) / 2;
+	//compassHdgZoffset = (compassHdgZmax + compassHdgZmin) / 2;
 
-	compassHdgXrange = (compassHdgXmax - compassHdgXmin);
-	compassHdgYrange = (compassHdgYmax - compassHdgYmin);
-	compassHdgZrange = (compassHdgZmax - compassHdgZmin);
+	//compassHdgXrange = (compassHdgXmax - compassHdgXmin);
+	//compassHdgYrange = (compassHdgYmax - compassHdgYmin);
+	//compassHdgZrange = (compassHdgZmax - compassHdgZmin);
 
-	Serial.print("xOffset:");
-	Serial.print(compassHdgXoffset);
-	Serial.print("  xRange:");
-	Serial.print(compassHdgXrange);
-	Serial.print("  yOffset:");
-	Serial.print(compassHdgYoffset);
-	Serial.print("  yRange:");
-	Serial.print(compassHdgYrange);
-	Serial.print("  zOffset:");
-	Serial.print(compassHdgZoffset);
-	Serial.print("  zRange:");
-	Serial.println(compassHdgZrange);
+	//Serial.print("xOffset:");
+	//Serial.print(compassHdgXoffset);
+	//Serial.print("  xRange:");
+	//Serial.print(compassHdgXrange);
+	//Serial.print("  yOffset:");
+	//Serial.print(compassHdgYoffset);
+	//Serial.print("  yRange:");
+	//Serial.print(compassHdgYrange);
+	//Serial.print("  zOffset:");
+	//Serial.print(compassHdgZoffset);
+	//Serial.print("  zRange:");
+	//Serial.println(compassHdgZrange);
 
 	// End of Calibration Part
 	//--------------------------------------------------------------------------------
