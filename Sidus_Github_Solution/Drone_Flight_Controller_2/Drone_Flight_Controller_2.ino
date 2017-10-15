@@ -1285,6 +1285,12 @@ void task_altitude_kalman(void * parameter)
 void task_position_kalman(void * parameter)
 {
 
+	while (millis() < POSITION_KALMAN_TASK_START_TIME)
+	{
+		delay(200);
+	}
+
+
 	double T = 0.010; // Sampling Period
 
 	//***********************************************************************************
@@ -1770,7 +1776,7 @@ void processMpu()
 
 			qc.accelWorld.x = (qc.accel.x*cos(qc.euler.theta) + qc.accel.z*cos(qc.euler.phi)*sin(qc.euler.theta) + qc.accel.y*sin(qc.euler.theta)*sin(qc.euler.phi)) * ACC_BITS_TO_M_SECOND2;
 			qc.accelWorld.y = (qc.accel.y*cos(qc.euler.phi) - qc.accel.z*sin(qc.euler.phi)) * ACC_BITS_TO_M_SECOND2;
-			qc.accelWorld.z = (qc.accel.z*cos(qc.euler.theta)*cos(qc.euler.phi) - qc.accel.x*sin(qc.euler.theta) + qc.accel.y*cos(qc.euler.theta)*sin(qc.euler.phi) + MPU_GRAVITY_MEASUREMENT_IN_BITS) * ACC_BITS_TO_M_SECOND2;
+			qc.accelWorld.z = (qc.accel.z*cos(qc.euler.theta)*cos(qc.euler.phi) - qc.accel.x*sin(qc.euler.theta) + qc.accel.y*cos(qc.euler.theta)*sin(qc.euler.phi) + mpu_gravity_measurement_in_bits) * ACC_BITS_TO_M_SECOND2;
 
 			// Differantiate Gyro Values for PID Kd branch
 			// Update Buffer
@@ -1886,7 +1892,7 @@ void processCheckMode()
 
 	if (cmdRxThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdRxYaw<CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxRoll > CMD_RX_PITCH_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP && cmdRxPitch>CMD_RX_PITCH_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP)
 	{
-		modeQuad = modeQuadARMED;
+		modeQuad = modeQuadPreARM;
 		//Serial.println("QUAD is ARMED");
 	}
 	else if (cmdRxThr < CMD_THR_MIN + CMD_MODE_CHANGE_THR_GAP && cmdRxYaw < CMD_YAW_MIN + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxRoll < -CMD_RX_PITCH_ROLL_MAX + CMD_MODE_CHANGE_ANGLE_GAP && cmdRxPitch>CMD_RX_PITCH_ROLL_MAX - CMD_MODE_CHANGE_ANGLE_GAP)
@@ -1903,6 +1909,29 @@ void processCheckMode()
 	{
 		modeQuad = modeQuadDirCmd;
 	}
+
+	if (modeQuad == modeQuadPreARM)
+	{
+		//if (gravityAcquired && (!qcGPS.gpsIsFix || homePointSelected))  //this condition will be replaced after homePoint averaging implemented below 
+		if (gravityAcquired)
+		{
+			modeQuad = modeQuadARMED;
+		}
+		else
+		{
+			//if required conditions met (drone is standing still), get gravity measurement
+			if (abs(qc.gyro.x) < 3 && abs(qc.gyro.y) < 3 && abs(qc.gyro.z) < 3)
+			{
+				mpu_gravity_measurement_in_bits = sqrt(pow(qc.accel.x, 2) + pow(qc.accel.y, 2) + pow(qc.accel.z, 2));
+
+				gravityAcquired = true;
+			}
+			//homePoint averaging should be implemented here
+		}
+
+	}
+
+
 
 	if (modeQuad == modeQuadARMED && cmdMotorThr > CMD_THR_TAKEOFF)
 	{

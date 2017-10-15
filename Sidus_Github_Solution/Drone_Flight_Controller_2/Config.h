@@ -145,7 +145,6 @@ bool barometer_initial_measurement = true;
 
 
 // Define gravity parameters
-#define		MPU_GRAVITY_MEASUREMENT_IN_BITS		8350.0
 #define		MPU_G_MAPPING_IN_BITS				8192.0 // 1 G
 #define		GRAVITY_IN_METER_PER_SECOND2		9.80665
 
@@ -382,6 +381,8 @@ bool barometer_initial_measurement = true;
 #define		BATT_LEVEL_CRITICAL			10.5
 #define		BATT_LEVEL_EXIST			2.5
 
+#define     POSITION_KALMAN_TASK_START_TIME   15000    //in millis
+
 String		sdcard_filepath;
 long lastTime = 0;
 long appendPacketCounter = 0;
@@ -438,6 +439,9 @@ bool mpuFirstDataCheck;
 bool wifi_connected = false;
 bool udp_connected = false;
 int wifi_connection_attempt = 0;
+
+double mpu_gravity_measurement_in_bits = MPU_G_MAPPING_IN_BITS;
+bool gravityAcquired = false;
 
 
 struct structPID
@@ -586,6 +590,7 @@ typedef enum
 	modeQuadDirCmd = 1,
 	modeQuadARMED = 2,
 	modeQuadSpare = 3,
+	modeQuadPreARM = 4,
 
 }modeQuadType;
 
