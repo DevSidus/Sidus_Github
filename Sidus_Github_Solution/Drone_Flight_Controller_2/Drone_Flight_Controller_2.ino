@@ -40,6 +40,9 @@ using namespace std;
 
 #include "cMsgUdpR01.h"
 #include "cMsgUdpT01.h"
+#include "cMsgUdpRAndroid.h"
+#include "cMsgUdpTAndroid.h"
+
 #include "cRxFilter.h"
 
 //Global Class Definitions
@@ -57,6 +60,8 @@ WiFiUDP udp;
 
 cMsgUdpR01 MsgUdpR01;
 cMsgUdpT01 MsgUdpT01;
+cMsgUdpRAndroid MsgUdpRAndroid;
+cMsgUdpTAndroid MsgUdpTAndroid;
 
 PID pidRatePitch(&pidVars.ratePitch.sensedVal, &pidVars.ratePitch.output, &pidVars.ratePitch.setpoint, &pidVars.ratePitch.sensedValDiff, &pidVars.ratePitch.setpointDiff);
 PID pidAnglePitch(&pidVars.anglePitch.sensedVal, &pidVars.anglePitch.output, &pidVars.anglePitch.setpoint, &pidVars.anglePitch.sensedValDiff);
@@ -953,14 +958,12 @@ void task_Motor(void * parameter)
 void task_UDP(void * parameter)
 {
 
-#ifdef USE_SD_CARD
-	delay(500);
-	initSDcard();
-	delay(100);
-	createFile(SD);
-#endif // USE_SD_CARD
-
-
+	#ifdef USE_SD_CARD
+		delay(500);
+		initSDcard();
+		delay(100);
+		createFile(SD);
+	#endif // USE_SD_CARD
 
 	#ifdef MAVLINK_PROTOCOL
 		uint8_t mavlinkType = MAV_TYPE_QUADROTOR;
@@ -975,6 +978,12 @@ void task_UDP(void * parameter)
 	while (true)
 	{
 		prepareUDPmessages();
+
+		#ifdef SIDUS_ANDROID_PROTOCOL
+			prepareAndroidUDPmessages();
+		#endif // SIDUS_ANDROID_PROTOCOL
+
+		
 		if (wifi_connected)
 		{
 			if (udp_connected)
@@ -987,10 +996,14 @@ void task_UDP(void * parameter)
 					}
 					else
 					{
-
 						#ifdef SIDUS_PROTOCOL
-							udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
-						#else	
+							#ifdef SIDUS_ANDROID_PROTOCOL
+								udp.write(MsgUdpRAndroid.dataBytes, sizeof(MsgUdpRAndroid.dataBytes));
+							#else // SIDUS_PROTOCOL
+								udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+							#endif // SIDUS_ANDROID_PROTOCOL
+
+						#else // MAVLINK_PROTOCOL	
 							mavlink_msg_heartbeat_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage, mavlinkType, mavlinkAutopilot, qcMavlink.base_mode, qcMavlink.custom_mode, qcMavlink.system_status);
 							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
 							udp.write(mavlinkBuffer, mavlinkMessageLength);
@@ -1002,8 +1015,8 @@ void task_UDP(void * parameter)
 							mavlink_msg_gps_raw_int_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage, micros(), 3, qcGPS.lat*1e7, qcGPS.lon*1e7, qcGPS.alt*1e3, 0, 0, 0, 0, qcGPS.satellites_visible);
 							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
 							udp.write(mavlinkBuffer, mavlinkMessageLength);
-
 						#endif // SIDUS_PROTOCOL
+						
 
 						if (udp.endPacket() != 1)
 						{
@@ -1025,9 +1038,9 @@ void task_UDP(void * parameter)
 			}			
 		}
 
-#ifdef USE_SD_CARD
-		appendFile(SD, sdcard_filepath.c_str(), MsgUdpR01.dataBytes, sizeof(MsgUdpR01.message));
-#endif // USE_SD_CARD
+		#ifdef USE_SD_CARD
+				appendFile(SD, sdcard_filepath.c_str(), MsgUdpR01.dataBytes, sizeof(MsgUdpR01.message));
+		#endif // USE_SD_CARD
 
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 		//Serial.println("t_ok");
@@ -1044,16 +1057,39 @@ void task_UDPrx(void * parameter)
 		{
 			if (xSemaphoreTake(xUdpSemaphore, (TickType_t)10) == pdTRUE)
 			{
-				if (udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
-				{
-					udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
-					MsgUdpT01.setPacket();
+				#ifdef SIDUS_PROTOCOL
+					#ifdef SIDUS_ANDROID_PROTOCOL
+						if (udp.parsePacket() >= sizeof(MsgUdpTAndroid.dataBytes))
+						{
+							udp.read(MsgUdpTAndroid.dataBytes, sizeof(MsgUdpTAndroid.dataBytes));
+							MsgUdpTAndroid.setPacket();
 
-					updateUdpMsgVars();
+							updateAndroidUdpMsgVars();
 
-					//Serial.println("udp message received");
-					//udpLastMessageTime = millis();
-				}
+							// Serial.print(setHomePoint);
+
+							//Serial.println("udp message received");
+							//udpLastMessageTime = millis();
+						}
+					#else // SIDUS_PROTOCOL
+						if (udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
+						{
+							udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
+							MsgUdpT01.setPacket();
+
+							updateUdpMsgVars();
+
+							//Serial.println("udp message received");
+							//udpLastMessageTime = millis();
+						}
+					#endif // SIDUS_ANDROID_PROTOCOL
+				
+				#else // MAVLINK_PROTOCOL
+
+					// This code part will be added when Mavlink Receive Channel is available
+
+				#endif // SIDUS_PROTOCOL
+				
 				xSemaphoreGive(xUdpSemaphore);
 			}
 
@@ -2743,6 +2779,11 @@ void updateUdpMsgVars()
 	setHomePoint = MsgUdpT01.message.saveHomePos;
 }
 
+void updateAndroidUdpMsgVars()
+{
+	setHomePoint = MsgUdpTAndroid.message.saveHomePos;
+}
+
 void applyPidCommandRatePitchRoll()
 {
 	//Set Pitch Rate PID parameters
@@ -2987,6 +3028,46 @@ void prepareUDPmessages()
 	MsgUdpR01.message.gpsVelAccuracy		= qcGPS.velAccuracy;
 
 	MsgUdpR01.getPacket();
+}
+
+void prepareAndroidUDPmessages()
+{
+	MsgUdpRAndroid.message.timeStamp = millis();
+
+	MsgUdpRAndroid.message.modeQuad = modeQuad;
+	MsgUdpRAndroid.message.autoModeStatus = autoModeStatus;
+	MsgUdpRAndroid.message.posHoldAvailable = positionHoldAvailable;
+
+	MsgUdpRAndroid.message.batteryVoltage = batteryVoltageInVolts;
+
+	MsgUdpRAndroid.message.mpuRoll = qc.euler.phi * 180 / M_PI;
+	MsgUdpRAndroid.message.mpuPitch = qc.euler.theta * 180 / M_PI;
+	MsgUdpRAndroid.message.mpuYaw = qc.euler.psi * 180 / M_PI;
+
+	MsgUdpRAndroid.message.baroTemp = barometerTemp;
+	MsgUdpRAndroid.message.baroAlt = barometerAlt;
+
+	MsgUdpRAndroid.message.compassHdg = compassHdgEstimated;
+
+	MsgUdpRAndroid.message.gpsLat = qcGPS.lat*1e7;
+	MsgUdpRAndroid.message.gpsLon = qcGPS.lon*1e7;
+	MsgUdpRAndroid.message.gpsAlt = qcGPS.alt;
+	MsgUdpRAndroid.message.homeLat = homePoint.lat*1e7;
+	MsgUdpRAndroid.message.homeLon = homePoint.lon*1e7;
+	MsgUdpRAndroid.message.homeAlt = homePoint.alt;
+	MsgUdpRAndroid.message.gpsVelN = qcGPS.nedVelocity.N;
+	MsgUdpRAndroid.message.gpsVelE = qcGPS.nedVelocity.E;
+	MsgUdpRAndroid.message.gpsPosAccuracy = qcGPS.posAccuracy;
+	MsgUdpRAndroid.message.gpsVelAccuracy = qcGPS.velAccuracy;
+
+	MsgUdpRAndroid.message.quadVelocityWorldX = qc.velWorldEstimated.x;
+	MsgUdpRAndroid.message.quadPositionWorldX = qc.posWorldEstimated.x;
+	MsgUdpRAndroid.message.quadVelocityWorldY = qc.velWorldEstimated.y;
+	MsgUdpRAndroid.message.quadPositionWorldY = qc.posWorldEstimated.y;
+	MsgUdpRAndroid.message.quadVelocityWorldZ = qc.velWorldEstimated.z;
+	MsgUdpRAndroid.message.quadPositionWorldZ = qc.posWorldEstimated.z;
+
+	MsgUdpRAndroid.getPacket();
 }
 
 void checkMpuGSHealth()

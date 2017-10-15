@@ -33,6 +33,7 @@ This header file define all the configurable variables including constants, pin 
 #define		DRONE_WEIGHT					1200.0     //in grams
 
 #define		SIDUS_PROTOCOL
+//#define		SIDUS_ANDROID_PROTOCOL
 //#define		MAVLINK_PROTOCOL
 
 //Comment out below line if you do not want command calibration
