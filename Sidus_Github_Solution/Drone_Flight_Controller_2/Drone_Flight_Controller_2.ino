@@ -1959,13 +1959,13 @@ void processPID()
 
 
 	// Acc X PID
-	pidVars.accX.setpoint = pidVars.velX.output; //-cmdMotorPitch * 20;  // negative added since rx pitch command is in the reverse direction of x-axis
+	pidVars.accX.setpoint = -cmdMotorPitch * 20;  //pidVars.velX.output; // negative added since rx pitch command is in the reverse direction of x-axis
 	pidVars.accX.sensedVal = qc.accelWorldEstimated.x * 100;  // cm/s^2 will be changed to transformed variable
 	pidVars.accX.sensedValDiff = qc.accelDiff.x * 100;   // cm/s^3 
 	pidAccX.Compute();
 
 	// Acc Y PID
-	pidVars.accY.setpoint = pidVars.velY.output; //cmdMotorRoll * 20;
+	pidVars.accY.setpoint = cmdMotorRoll * 20;  //pidVars.velY.output; //
 	pidVars.accY.sensedVal = qc.accelWorldEstimated.y * 100;  // cm/s^2 will be changed to transformed variable
 	pidVars.accY.sensedValDiff = qc.accelDiff.y * 100;   // cm/s^3 
 	pidAccY.Compute();
@@ -2044,8 +2044,8 @@ void processPID()
 
 	filterPosPIDoutputs();
 	// Velocity Commands
-	velCmd.z = pidVars.posAlt.outputFiltered;
-	
+	//velCmd.z = pidVars.posAlt.outputFiltered;
+	velCmd.z = getAltVelCmd(cmdRxThr);
 	// Velocity Altitude PID
 	pidVars.velAlt.setpoint = velCmd.z;  // cm/second
 	pidVars.velAlt.sensedVal = -qc.velWorldEstimated.z * 100;  // cm/second           // negative added since altitude vector is opposite of z-axis
@@ -3329,4 +3329,11 @@ void initSDcard()
 
 	uint64_t cardSize = SD.cardSize() / (1024 * 1024);
 	Serial.printf("SD Card Size: %lluMB\n", cardSize);
+}
+
+double getAltVelCmd(double _val)
+{
+	if (_val < ALT_VEL_ZERO_CMD_MIN) return (_val - ALT_VEL_ZERO_CMD_MIN);
+	else if (_val > ALT_VEL_ZERO_CMD_MAX) return (_val - ALT_VEL_ZERO_CMD_MAX);
+	else  return 0;
 }
