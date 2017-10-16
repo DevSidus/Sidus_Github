@@ -230,7 +230,7 @@ bool barometer_initial_measurement = true;
 #define		DC_THR_MIN		1100.0
 #define		DC_THR_MAX		1900.0
 
-#define		ALT_VEL_ZERO_CMD_GAP		120.0
+#define		ALT_VEL_ZERO_CMD_GAP		100.0
 #define		ALT_VEL_ZERO_CMD_MIN     (CMD_THR_MIN + CMD_THR_MAX - ALT_VEL_ZERO_CMD_GAP)/2.0
 #define		ALT_VEL_ZERO_CMD_MAX     (CMD_THR_MIN + CMD_THR_MAX + ALT_VEL_ZERO_CMD_GAP)/2.0
 
@@ -303,8 +303,8 @@ bool barometer_initial_measurement = true;
 #define		PID_VEL_ALT_KP			5.0 // May be tuned better
 #define		PID_VEL_ALT_KI			0.0
 #define		PID_VEL_ALT_KD			0.1 // May be tuned better
-#define		PID_VEL_ALT_OUTMIN		-250
-#define		PID_VEL_ALT_OUTMAX		250
+#define		PID_VEL_ALT_OUTMIN		-500
+#define		PID_VEL_ALT_OUTMAX		500
 
 #define		PID_ACC_ALT_KP			0.357  // Shouldn't be increased than 0.8
 #define		PID_ACC_ALT_KI			0.057 // Helpful range is between 0.02 and 0.1

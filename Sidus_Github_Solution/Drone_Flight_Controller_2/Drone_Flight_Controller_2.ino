@@ -2066,7 +2066,8 @@ void processPID()
 
 
 	//Position Altitude PID
-	pidVars.posAlt.setpoint = double(cmdRx6thCh)/10.0 + autoModeStartAltitude; //meters
+	//pidVars.posAlt.setpoint = double(cmdRx6thCh)/10.0 + autoModeStartAltitude; //meters
+	pidVars.posAlt.setpoint = autoModeStartAltitude; //meters
 	pidVars.posAlt.sensedVal = -qc.posWorldEstimated.z;  // meters                  // negative added since altitude vector is opposite of z-axis
 	pidVars.posAlt.sensedValDiff = -qc.velWorldEstimated.z;  // m/s                 // negative added since altitude vector is opposite of z-axis
 	pidPosAlt.Compute();
@@ -2074,7 +2075,15 @@ void processPID()
 	filterPosPIDoutputs();
 	// Velocity Commands
 	//velCmd.z = pidVars.posAlt.outputFiltered;
-	velCmd.z = getAltVelCmd(cmdRxThr);
+	if (getAltVelCmd(cmdRxThr) == 0)
+	{
+		velCmd.z = pidVars.posAlt.outputFiltered;
+	}
+	else
+	{
+		velCmd.z = getAltVelCmd(cmdRxThr);
+		autoModeStartAltitude = -qc.posWorldEstimated.z;   // negative added since altitude vector is opposite of z-axis
+	}
 	// Velocity Altitude PID
 	pidVars.velAlt.setpoint = velCmd.z;  // cm/second
 	pidVars.velAlt.sensedVal = -qc.velWorldEstimated.z * 100;  // cm/second           // negative added since altitude vector is opposite of z-axis
