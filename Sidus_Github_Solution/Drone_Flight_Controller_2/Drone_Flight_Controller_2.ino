@@ -236,11 +236,11 @@ void createFile(fs::FS &fs) {
 
 				if (!sd_logfile)
 				{
-					Serial.println("Dosya Append Acilamadi");
+					Serial.println("File Append Could not Opened!");
 				}
 				else
 				{
-					Serial.println("Dosya Append Acildi");
+					Serial.println("File Append Opened");
 				}
 			}
 			return;
@@ -1295,47 +1295,47 @@ void task_position_kalman(void * parameter)
 
 	//***********************************************************************************
 	// Kalman Parameters for Single Position Estimation
-	double deltaRowPos = 3.0; // 3.0;
-	double sigmaRowPos = 3.0; // qcGPS.posAccuracy;
-	
-	double sigmaQ_Pos = deltaRowPos;
-	double Q_Pos = pow(sigmaQ_Pos, 2) * T; // Process noise covariance matrix
+	//double deltaRowPos = 3.0; // 3.0;
+	//double sigmaRowPos = 3.0; // qcGPS.posAccuracy;
+	//
+	//double sigmaQ_Pos = deltaRowPos;
+	//double Q_Pos = pow(sigmaQ_Pos, 2) * T; // Process noise covariance matrix
 
-	double R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
+	//double R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
 
-	// Initialization
-	double m_PosX_n1 = 0; // qc.posWorld.x;
-	double m_PosY_n1 = 0; // qc.posWorld.y;
-	double P_PosX_n1 = pow(sigmaRowPos, 2);
-	double P_PosY_n1 = pow(sigmaRowPos, 2);
+	//// Initialization
+	//double m_PosX_n1 = 0; // qc.posWorld.x;
+	//double m_PosY_n1 = 0; // qc.posWorld.y;
+	//double P_PosX_n1 = pow(sigmaRowPos, 2);
+	//double P_PosY_n1 = pow(sigmaRowPos, 2);
 
-	double m_PosX_n = 0.0;
-	double m_PosY_n = 0.0;
-	double P_PosX_n = 0.0;
-	double P_PosY_n = 0.0;
+	//double m_PosX_n = 0.0;
+	//double m_PosY_n = 0.0;
+	//double P_PosX_n = 0.0;
+	//double P_PosY_n = 0.0;
 	//***********************************************************************************
 
 
 	//***********************************************************************************
 	// Kalman Parameters for Single Velocity Estimation
-	double deltaRowVel = 0.3; // 0.3;
-	double sigmaRowVel = 0.3; // qcGPS.velAccuracy;
+	//double deltaRowVel = 0.3; // 0.3;
+	//double sigmaRowVel = 0.3; // qcGPS.velAccuracy;
 
-	double sigmaQ_Vel = deltaRowVel;
-	double Q_Vel = pow(sigmaQ_Vel, 2) * T; // Process noise covariance matrix
+	//double sigmaQ_Vel = deltaRowVel;
+	//double Q_Vel = pow(sigmaQ_Vel, 2) * T; // Process noise covariance matrix
 
-	double R_Vel = pow(sigmaRowVel, 2); // Measurement noise covariance matrix
+	//double R_Vel = pow(sigmaRowVel, 2); // Measurement noise covariance matrix
 
-	// Initialization
-	double m_VelX_n1 = 0; // qc.velWorld.x;
-	double m_VelY_n1 = 0; // qc.velWorld.y;
-	double P_VelX_n1 = pow(sigmaRowPos, 2);
-	double P_VelY_n1 = pow(sigmaRowPos, 2);
+	//// Initialization
+	//double m_VelX_n1 = 0; // qc.velWorld.x;
+	//double m_VelY_n1 = 0; // qc.velWorld.y;
+	//double P_VelX_n1 = pow(sigmaRowVel, 2);
+	//double P_VelY_n1 = pow(sigmaRowVel, 2);
 
-	double m_VelX_n = 0.0;
-	double m_VelY_n = 0.0;
-	double P_VelX_n = 0.0;
-	double P_VelY_n = 0.0;
+	//double m_VelX_n = 0.0;
+	//double m_VelY_n = 0.0;
+	//double P_VelX_n = 0.0;
+	//double P_VelY_n = 0.0;
 	//***********************************************************************************
 
 
@@ -1344,15 +1344,15 @@ void task_position_kalman(void * parameter)
 	double F_PosVelAcc[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
 	double H_PosVelAcc[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 }; // Measurement matrix
 
-	double deltaAccelXY = 0.01; // 0.005;
+	double deltaAccelXY = 0.04; // 0.005;
 	double sigmaQ_PosVelAcc = deltaAccelXY;
 	double Q_PosVelAcc[9] = { 1 / 4 * pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,2), 1 / 2 * pow(T,3), pow(T,2), T, 1 / 2 * pow(T,2), T, 1 };
 	for (int i = 0; i < 9; i++) Q_PosVelAcc[i] *= pow(sigmaQ_PosVelAcc, 2); // Process noise covariance matrix
 
 	// Default measurement noise covariance matrix, will be updated in the loop
-	double sigmaPos = 3.0; // qcGPS.posAccuracy;
-	double sigmaVel = 0.3; // qcGPS.velAccuracy;
-	double sigmaAccelXY = 0.01; // 0.005;
+	double sigmaPos = 4000.0; // qcGPS.posAccuracy;
+	double sigmaVel = 400.0; // qcGPS.velAccuracy;
+	double sigmaAccelXY = 0.04; // 0.005;
 	double R_PosVelAcc[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix
 
 	// Initialization
@@ -1384,35 +1384,35 @@ void task_position_kalman(void * parameter)
 
 		//***********************************************************************************
 		// Kalman Filter for Single Position Estimation
-		if (positionHoldAvailable) {
-			sigmaRowPos = qcGPS.posAccuracy;
-			R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
+		//if (positionHoldAvailable) {
+		//	sigmaRowPos = qcGPS.posAccuracy;
+		//	R_Pos = pow(sigmaRowPos, 2); // Measurement noise covariance matrix
 
-			kalmanFilterOneParameter(m_PosX_n1, P_PosX_n1, qc.posWorld.x, 1.0, Q_Pos, 1.0, R_Pos, &m_PosX_n, &P_PosX_n);
-			kalmanFilterOneParameter(m_PosY_n1, P_PosY_n1, qc.posWorld.y, 1.0, Q_Pos, 1.0, R_Pos, &m_PosY_n, &P_PosY_n);
+		//	kalmanFilterOneParameter(m_PosX_n1, P_PosX_n1, qc.posWorld.x, 1.0, Q_Pos, 1.0, R_Pos, &m_PosX_n, &P_PosX_n);
+		//	kalmanFilterOneParameter(m_PosY_n1, P_PosY_n1, qc.posWorld.y, 1.0, Q_Pos, 1.0, R_Pos, &m_PosY_n, &P_PosY_n);
 
-			m_PosX_n1 = m_PosX_n;
-			m_PosY_n1 = m_PosY_n;
-			P_PosX_n1 = P_PosX_n;
-			P_PosY_n1 = P_PosY_n;
-		}
+		//	m_PosX_n1 = m_PosX_n;
+		//	m_PosY_n1 = m_PosY_n;
+		//	P_PosX_n1 = P_PosX_n;
+		//	P_PosY_n1 = P_PosY_n;
+		//}
 		//***********************************************************************************
 
 
 		//***********************************************************************************
 		// Kalman Filter for Single Velocity Estimation
-		if (positionHoldAvailable) {
-			sigmaRowVel = qcGPS.velAccuracy;
-			R_Vel = pow(sigmaRowVel, 2); // Measurement noise covariance matrix
+		//if (positionHoldAvailable) {
+		//	sigmaRowVel = qcGPS.velAccuracy;
+		//	R_Vel = pow(sigmaRowVel, 2); // Measurement noise covariance matrix
 
-			kalmanFilterOneParameter(m_VelX_n1, P_VelX_n1, qc.velWorld.x, 1.0, Q_Vel, 1.0, R_Vel, &m_VelX_n, &P_VelX_n);
-			kalmanFilterOneParameter(m_VelY_n1, P_VelY_n1, qc.velWorld.y, 1.0, Q_Vel, 1.0, R_Vel, &m_VelY_n, &P_VelY_n);
+		//	kalmanFilterOneParameter(m_VelX_n1, P_VelX_n1, qc.velWorld.x, 1.0, Q_Vel, 1.0, R_Vel, &m_VelX_n, &P_VelX_n);
+		//	kalmanFilterOneParameter(m_VelY_n1, P_VelY_n1, qc.velWorld.y, 1.0, Q_Vel, 1.0, R_Vel, &m_VelY_n, &P_VelY_n);
 
-			m_VelX_n1 = m_VelX_n;
-			m_VelY_n1 = m_VelY_n;
-			P_VelX_n1 = P_VelX_n;
-			P_VelY_n1 = P_VelY_n;
-		}
+		//	m_VelX_n1 = m_VelX_n;
+		//	m_VelY_n1 = m_VelY_n;
+		//	P_VelX_n1 = P_VelX_n;
+		//	P_VelY_n1 = P_VelY_n;
+		//}
 		//***********************************************************************************
 
 		//***********************************************************************************
@@ -1433,13 +1433,13 @@ void task_position_kalman(void * parameter)
 		}
 		else {
 			y_PosVelAccX_n[0] = m_PosVelAccX_n1[0];
-			y_PosVelAccX_n[1] = m_PosVelAccX_n1[1];
+			y_PosVelAccX_n[1] = 0; // m_PosVelAccX_n1[1];
 
 			y_PosVelAccY_n[0] = m_PosVelAccY_n1[0];
-			y_PosVelAccY_n[1] = m_PosVelAccY_n1[1];
+			y_PosVelAccY_n[1] = 0; // m_PosVelAccY_n1[1];
 
-			sigmaPos = 1000;
-			sigmaVel = 1000;
+			sigmaPos = 4000;
+			sigmaVel = 400;
 			R_PosVelAcc[0] = pow(sigmaPos, 2);
 			R_PosVelAcc[4] = pow(sigmaVel, 2);
 		}
