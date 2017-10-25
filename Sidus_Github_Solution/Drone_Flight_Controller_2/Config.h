@@ -15,18 +15,19 @@ This header file define all the configurable variables including constants, pin 
 #define		DRONE_AP_NAME					"SigmaDrone"
 #define		DRONE_AP_PASS					"sidus12345"
 
+// Ground Station IP Setting and possible SSIDs
+#define		DEFAULT_GROUND_STATION_IP		"255.255.255.255" // Boradcast for all networks
+//#define		DEFAULT_GROUND_STATION_IP		"192.168.255.255" // Broadcast for internal network
+//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14" // YANIKS HOUSE
+//#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2" // khorfo_net
+//#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2" // AAGCA
+
 //#define		WIFI_SSID						"YANIKS HOUSE"
 //#define		WIFI_PASS						"YanikTurkiye06"
-//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14"
-
 #define		WIFI_SSID						"khorfo_net"
 #define		WIFI_PASS						"ahmet_ipek_12082004"
-#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2"
-
-
 //#define		WIFI_SSID						"AAGCA"
 //#define		WIFI_PASS						"ahmet(12082004)"
-//#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2"
 
 #define		UDP_PORT						8080
 
@@ -310,15 +311,15 @@ bool barometer_initial_measurement = true;
 #define		PID_ACC_ALT_KI			0.057 // Helpful range is between 0.02 and 0.1
 #define		PID_ACC_ALT_KD			0.0071 // It shouldn't be greater than 0.02
 
-#define		PID_ACC_X_KP			0.8 
+#define		PID_ACC_X_KP			1.0 
 #define		PID_ACC_X_KI			0.0    
-#define		PID_ACC_X_KD			0.02 
+#define		PID_ACC_X_KD			0.05 
 #define		PID_ACC_X_OUTMIN		-1000    //need to be revised
 #define		PID_ACC_X_OUTMAX		1000     //need to be revised
 
-#define		PID_ACC_Y_KP			0.8  
+#define		PID_ACC_Y_KP			1.0  
 #define		PID_ACC_Y_KI			0.0    
-#define		PID_ACC_Y_KD			0.02 
+#define		PID_ACC_Y_KD			0.05 
 #define		PID_ACC_Y_OUTMIN		-1000    //need to be revised
 #define		PID_ACC_Y_OUTMAX		1000     //need to be revised
 
@@ -330,7 +331,7 @@ bool barometer_initial_measurement = true;
 
 #define		PID_VEL_Y_KP			5.0  
 #define		PID_VEL_Y_KI			0.0    
-#define		PID_VEL_Y_KD			0.0 
+#define		PID_VEL_Y_KD			0.0
 #define		PID_VEL_Y_OUTMIN		-1000    //need to be revised
 #define		PID_VEL_Y_OUTMAX		1000     //need to be revised
 
@@ -381,7 +382,7 @@ bool barometer_initial_measurement = true;
 #define		BATT_LEVEL_CRITICAL			10.5
 #define		BATT_LEVEL_EXIST			2.5
 
-#define     POSITION_KALMAN_TASK_START_TIME   15000    //in millis
+#define     POSITION_KALMAN_TASK_START_TIME   10000    //in millis
 
 String		sdcard_filepath;
 long lastTime = 0;
