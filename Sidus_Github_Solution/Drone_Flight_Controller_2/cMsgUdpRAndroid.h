@@ -7,9 +7,10 @@ struct structMsgUdpRAndroid
 {
 	unsigned int timeStamp;
 
-	unsigned char modeQuad;
-	unsigned char autoModeStatus;
-	unsigned char posHoldAvailable;
+	unsigned int modeQuad;
+	unsigned int autoModeStatus;
+	unsigned int homePointSelected;
+	unsigned int posHoldAvailable;
 
 	float batteryVoltage;
 
@@ -17,7 +18,6 @@ struct structMsgUdpRAndroid
 	float mpuPitch;
 	float mpuYaw;
 
-	float baroTemp;
 	float baroAlt;
 
 	float compassHdg;
@@ -25,20 +25,17 @@ struct structMsgUdpRAndroid
 	float gpsLat;
 	float gpsLon;
 	float gpsAlt;
-	float homeLat;
-	float homeLon;
-	float homeAlt;
 	float gpsVelN;
 	float gpsVelE;
 	float gpsPosAccuracy;
 	float gpsVelAccuracy;
 
-	float quadVelocityWorldX;   // kalman filtered output
-	float quadPositionWorldX;   // kalman filtered output
-	float quadVelocityWorldY;   // kalman filtered output
-	float quadPositionWorldY;   // kalman filtered output
-	float quadVelocityWorldZ;   // kalman filtered output
-	float quadPositionWorldZ;   // kalman filtered output
+	float quadVelocityWorldX;
+	float quadPositionWorldX;
+	float quadVelocityWorldY;
+	float quadPositionWorldY;
+	float quadVelocityWorldZ;
+	float quadPositionWorldZ;
 	
 
 };

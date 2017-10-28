@@ -16,8 +16,8 @@ This header file define all the configurable variables including constants, pin 
 #define		DRONE_AP_PASS					"sidus12345"
 
 // Ground Station IP Setting and possible SSIDs
-#define		DEFAULT_GROUND_STATION_IP		"255.255.255.255" // Boradcast for all networks
-//#define		DEFAULT_GROUND_STATION_IP		"192.168.255.255" // Broadcast for internal network
+//#define		DEFAULT_GROUND_STATION_IP		"255.255.255.255" // Boradcast for all networks
+#define		DEFAULT_GROUND_STATION_IP		"192.168.0.255" // Broadcast for internal network
 //#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14" // YANIKS HOUSE
 //#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2" // khorfo_net
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2" // AAGCA
@@ -33,8 +33,11 @@ This header file define all the configurable variables including constants, pin 
 
 #define		DRONE_WEIGHT					1200.0     //in grams
 
+//Comment out SIDUS_ANDROID_PROTOCOL to establish an Android connection
 #define		SIDUS_PROTOCOL
 //#define		SIDUS_ANDROID_PROTOCOL
+
+//Comment out MAVLINK_PROTOCOL to establish a Mavlink Connection (SIDUS_PROTOCOL and SIDUS_ANDROID_PROTOCOL should be commented)
 //#define		MAVLINK_PROTOCOL
 
 //Comment out below line if you do not want command calibration
@@ -382,7 +385,7 @@ bool barometer_initial_measurement = true;
 #define		BATT_LEVEL_CRITICAL			10.5
 #define		BATT_LEVEL_EXIST			2.5
 
-#define     POSITION_KALMAN_TASK_START_TIME   10000    //in millis
+#define     POSITION_KALMAN_TASK_START_TIME   20000    //in millis
 
 String		sdcard_filepath;
 long lastTime = 0;
@@ -465,11 +468,11 @@ struct structSuperPID
 	structPID ratePitch;
 	structPID rateRoll;
 	structPID rateYaw;
-	structPID velAlt;
 	structPID anglePitch;
 	structPID angleRoll;
 	structPID angleYaw;	
 	structPID accAlt;
+	structPID velAlt;
 	structPID posAlt;
 	structPID accX;
 	structPID accY;
@@ -511,7 +514,7 @@ struct structIMU
 	struct3Daxis posWorld;
 	struct3Daxis posWorldEstimated;
 	struct3Daxis gyroDiff;
-	struct3Daxis accelDiff;
+	struct3Daxis accelWorldDiff;
 }qc;
 
 struct structGPS
@@ -549,7 +552,8 @@ structPOI destinationPoint; // Destination Point
 
 bool setHomePoint = false;
 bool homePointSelected = false;
-bool positionHoldAvailable = false;
+bool gpsPositionAvailable = false;
+bool gpsVelocityAvailable = false;
 
 typedef enum
 {
@@ -563,13 +567,19 @@ typedef enum
 
 struct structMAVLINK
 {
-	uint8_t base_mode;
 	uint32_t custom_mode;
+	uint8_t type;
+	uint8_t autopilot;
+	uint8_t base_mode;
 	uint8_t system_status;
 }qcMavlink;
 
+struct3Daxis angleCmd;
+struct3Daxis angleCmdDiff;
 struct3Daxis rateCmd;
 struct3Daxis rateCmdDiff;
+struct3Daxis posCmd; // will be used later
+struct3Daxis posCmdDiff; // will be used later
 struct3Daxis velCmd;
 struct3Daxis velCmdDiff;
 struct3Daxis accelCmd;
@@ -663,6 +673,7 @@ double cmdMotorPitch = 0, cmdMotorRoll = 0, cmdMotorThr = CMD_THR_MIN, cmdMotorY
 unsigned char modeQuad;
 unsigned char autoModeStatus;
 unsigned char statusRx;
+bool posHoldStatus = false;
 
 //StatusType Definitions
 unsigned char statusBaro;
@@ -682,35 +693,50 @@ typedef enum
 cDataFilter filtObjGyroDiffX(filterType_Diff200Hz);
 cDataFilter filtObjGyroDiffY(filterType_Diff200Hz);
 cDataFilter filtObjGyroDiffZ(filterType_Diff200Hz);
-
-cDataFilter filtObjAnglePIDoutX(filterType_LPF);
-cDataFilter filtObjAnglePIDoutY(filterType_LPF);
-cDataFilter filtObjAnglePIDoutZ(filterType_LPF);
+#define DELTATIME_GYRO_DIFF	 0.005
 
 cDataFilter filtObjRateCmdDiffX(filterType_Diff100Hz);
 cDataFilter filtObjRateCmdDiffY(filterType_Diff100Hz);
 cDataFilter filtObjRateCmdDiffZ(filterType_Diff100Hz);
+#define DELTATIME_RATECMD_DIFF	 0.01
 
-cDataFilter filtObjPosPIDoutX(filterType_LPF);
-cDataFilter filtObjPosPIDoutY(filterType_LPF);
+cDataFilter filtObjAngleCmdDiffX(filterType_Diff100Hz);
+cDataFilter filtObjAngleCmdDiffY(filterType_Diff100Hz);
+cDataFilter filtObjAngleCmdDiffZ(filterType_Diff100Hz); // will be used later
+#define DELTATIME_ANGLECMD_DIFF	 0.01
+
+cDataFilter filtObjAccelWorldDiffX(filterType_Diff100Hz);
+cDataFilter filtObjAccelWorldDiffY(filterType_Diff100Hz);
+cDataFilter filtObjAccelWorldDiffZ(filterType_Diff100Hz);
+#define DELTATIME_ACCELWORLD_DIFF	 0.01
+
+cDataFilter filtObjAccelCmdDiffX(filterType_Diff100Hz);
+cDataFilter filtObjAccelCmdDiffY(filterType_Diff100Hz);
+cDataFilter filtObjAccelCmdDiffZ(filterType_Diff100Hz);
+#define DELTATIME_ACCELCMD_DIFF	 0.01
+
+cDataFilter filtObjVelCmdDiffX(filterType_Diff100Hz);
+cDataFilter filtObjVelCmdDiffY(filterType_Diff100Hz);
+cDataFilter filtObjVelCmdDiffZ(filterType_Diff100Hz);
+#define DELTATIME_VELCMD_DIFF	 0.01
+
+cDataFilter filtObjAnglePIDoutX(filterType_LPF); // will be tested
+cDataFilter filtObjAnglePIDoutY(filterType_LPF); // will be tested
+cDataFilter filtObjAnglePIDoutZ(filterType_LPF); // will be tested
+
+cDataFilter filtObjPosPIDoutX(filterType_LPF); // will be used later
+cDataFilter filtObjPosPIDoutY(filterType_LPF); // will be used later
 cDataFilter filtObjPosPIDoutZ(filterType_LPF);
 
 cDataFilter filtObjVelPIDoutX(filterType_LPF);
 cDataFilter filtObjVelPIDoutY(filterType_LPF);
 cDataFilter filtObjVelPIDoutZ(filterType_LPF);
 
-cDataFilter filtObjAccelDiffX(filterType_Diff100Hz);
-cDataFilter filtObjAccelDiffY(filterType_Diff100Hz);
-cDataFilter filtObjAccelDiffZ(filterType_Diff100Hz);
-
-cDataFilter filtObjAccelCmdDiffZ(filterType_Diff100Hz);
+cDataFilter filtObjAccPIDoutX(filterType_LPF);
+cDataFilter filtObjAccPIDoutY(filterType_LPF);
+// Acc PID Out Z is not filtered to prevent delay
 
 cDataFilter filtObjUltrasonicDist(filterType_LPF);
-
-double deltaTimeGyroDiff; // will be used at Exact Filtering
-double deltaTimeRateCmdDiff; // will be used at Exact Filtering
-double deltaTimeAccelDiff; // will be used at Exact Filtering
-double deltaTimeAccelCmdDiff; // will be used at Exact Filtering
 
 
 // UBlox GPS UBX Commands
