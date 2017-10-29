@@ -1303,7 +1303,7 @@ void task_position_kalman(void * parameter)
 	double F_PosVelAcc[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
 	
 	double H_PosVelAcc[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 }; // Measurement matrix when gpsPos, gpsVel and Acc available
-	double H_PosVelAcc_VelAcc[6] = { 0, 1, 0, 0, 0, 1 }; // Measurement matrix when only gpsVel and Acc available
+	double H_PosVelAcc_VelAcc[6] = { 0, 0, 1, 0, 0, 1 }; // Measurement matrix when only gpsVel and Acc available
 	double H_PosVelAcc_Acc[3] = { 0, 0, 1 }; // Measurement matrix when only Acc available
 
 	double deltaAccelXY = 0.05;
