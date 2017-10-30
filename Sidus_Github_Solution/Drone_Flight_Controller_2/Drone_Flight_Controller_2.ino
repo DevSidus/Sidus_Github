@@ -1177,6 +1177,10 @@ void task_2Hz(void * parameter)
 
 void task_altitude_kalman(void * parameter)
 {
+	while (millis() < KALMAN_TASK_START_TIME)
+	{
+		delay(200);
+	}
 
 	while (!baroReady)
 	{
@@ -1289,7 +1293,7 @@ void task_altitude_kalman(void * parameter)
 void task_position_kalman(void * parameter)
 {
 
-	while (millis() < POSITION_KALMAN_TASK_START_TIME)
+	while (millis() < KALMAN_TASK_START_TIME)
 	{
 		delay(200);
 	}
@@ -1304,7 +1308,7 @@ void task_position_kalman(void * parameter)
 	
 	double H_PosVelAcc[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 }; // Measurement matrix when gpsPos, gpsVel and Acc available
 	double H_PosVelAcc_VelAcc[6] = { 0, 0, 1, 0, 0, 1 }; // Measurement matrix when only gpsVel and Acc available
-	double H_PosVelAcc_Acc[3] = { 0, 0, 1 }; // Measurement matrix when only Acc available
+	// double H_PosVelAcc_Acc[3] = { 0, 0, 1 }; // Measurement matrix when only Acc available
 
 	double deltaAccelXY = 0.05;
 	double sigmaQ_PosVelAcc = deltaAccelXY;
@@ -1317,7 +1321,7 @@ void task_position_kalman(void * parameter)
 	double sigmaAccelXY = 0.05;
 	double R_PosVelAcc[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix when gpsPos, gpsVel and Acc available
 	double R_PosVelAcc_VelAcc[4] = { pow(sigmaVel,2), 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix when only gpsVel and Acc available
-	double R_PosVelAcc_Acc = pow(sigmaAccelXY,2); // Measurement noise covariance matrix when only Acc available
+	// double R_PosVelAcc_Acc = pow(sigmaAccelXY,2); // Measurement noise covariance matrix when only Acc available
 
 	// Initialization
 	double m_PosVelAccX_n1[3] = { 0, 0, 0 }; // { qc.posWorld.x, qc.velWorld.x, qc.accelWorld.x };
@@ -1334,8 +1338,8 @@ void task_position_kalman(void * parameter)
 	double y_PosVelAccY_n[3] = { 0, 0, 0 };
 	double y_PosVelAccX_VelAcc_n[2] = { 0, 0 };
 	double y_PosVelAccY_VelAcc_n[2] = { 0, 0 };
-	double y_PosVelAccX_Acc_n = 0;
-	double y_PosVelAccY_Acc_n = 0;
+	// double y_PosVelAccX_Acc_n = 0;
+	// double y_PosVelAccY_Acc_n = 0;
 	//***********************************************************************************
 
 	// Initialize Kalman Filtering
@@ -1349,65 +1353,76 @@ void task_position_kalman(void * parameter)
 
 		//***********************************************************************************
 		// Kalman Filter for Position, Velocity and Acceleration Estimation
-		if (gpsPositionAvailable && gpsVelocityAvailable) {
+		
+		if (!gpsPositionAvailable && !gpsVelocityAvailable) { // Leaky Integral
 
-			if ((abs(qc.velWorld.x) > 0.1) || abs(qc.velWorld.y) > 0.1) {
+			qc.accelWorldEstimated.x = qc.accelWorld.x;
+			qc.accelWorldEstimated.y = qc.accelWorld.y;
+
+			qc.velWorldEstimated.x = qc.accelWorldEstimated.x * T + 0.99 * qc.velWorldEstimated.x;
+			qc.velWorldEstimated.y = qc.accelWorldEstimated.y * T + 0.99 * qc.velWorldEstimated.y;
+
+			qc.posWorldEstimated.x = 1 / 2 * qc.accelWorldEstimated.x * pow(T, 2) + qc.velWorldEstimated.x * T + 0.99 * qc.posWorldEstimated.x;
+			qc.posWorldEstimated.y = 1 / 2 * qc.accelWorldEstimated.y * pow(T, 2) + qc.velWorldEstimated.y * T + 0.99 * qc.posWorldEstimated.y;
+
+			// y_PosVelAccX_Acc_n = qc.accelWorld.x;
+			// y_PosVelAccY_Acc_n = qc.accelWorld.y;
+
+			// kalmanFilter3State1Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccX_n, P_PosVelAccX_n);
+			// kalmanFilter3State1Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccY_n, P_PosVelAccY_n);
+		}
+		else {
+
+			if (gpsPositionAvailable && gpsVelocityAvailable) {
+
 				y_PosVelAccX_n[0] = qc.posWorld.x;
 				y_PosVelAccY_n[0] = qc.posWorld.y;
+
+				y_PosVelAccX_n[1] = qc.velWorld.x;
+				y_PosVelAccY_n[1] = qc.velWorld.y;
+
+				y_PosVelAccX_n[2] = qc.accelWorld.x;
+				y_PosVelAccY_n[2] = qc.accelWorld.y;
+
+				sigmaPos = qcGPS.posAccuracy;
+				sigmaVel = qcGPS.velAccuracy;
+				R_PosVelAcc[0] = pow(sigmaPos, 2);
+				R_PosVelAcc[4] = pow(sigmaVel, 2);
+
+				kalmanFilter3State3Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
+				kalmanFilter3State3Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
+
 			}
-			
-			y_PosVelAccX_n[1] = qc.velWorld.x;
-			y_PosVelAccY_n[1] = qc.velWorld.y;
+			else if (!gpsPositionAvailable && gpsVelocityAvailable) {
 
-			y_PosVelAccX_n[2] = qc.accelWorld.x;
-			y_PosVelAccY_n[2] = qc.accelWorld.y;
+				y_PosVelAccX_VelAcc_n[0] = qc.velWorld.x;
+				y_PosVelAccY_VelAcc_n[0] = qc.velWorld.y;
 
-			sigmaPos = qcGPS.posAccuracy;
-			sigmaVel = qcGPS.velAccuracy;
-			R_PosVelAcc[0] = pow(sigmaPos, 2);
-			R_PosVelAcc[4] = pow(sigmaVel, 2);
+				y_PosVelAccX_VelAcc_n[1] = qc.accelWorld.x;
+				y_PosVelAccY_VelAcc_n[1] = qc.accelWorld.y;
 
-			kalmanFilter3State3Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
-			kalmanFilter3State3Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
+				sigmaVel = qcGPS.velAccuracy;
 
+				R_PosVelAcc_VelAcc[0] = pow(sigmaVel, 2);
+
+				kalmanFilter3State2Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
+				kalmanFilter3State2Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
+
+			}
+
+			qc.posWorldEstimated.x = m_PosVelAccX_n[0];
+			qc.velWorldEstimated.x = m_PosVelAccX_n[1];
+			qc.accelWorldEstimated.x = m_PosVelAccX_n[2];
+
+			qc.posWorldEstimated.y = m_PosVelAccY_n[0];
+			qc.velWorldEstimated.y = m_PosVelAccY_n[1];
+			qc.accelWorldEstimated.y = m_PosVelAccY_n[2];
+
+			memcpy(m_PosVelAccX_n1, m_PosVelAccX_n, sizeof(m_PosVelAccX_n));
+			memcpy(P_PosVelAccX_n1, P_PosVelAccX_n, sizeof(P_PosVelAccX_n));
+			memcpy(m_PosVelAccY_n1, m_PosVelAccY_n, sizeof(m_PosVelAccY_n));
+			memcpy(P_PosVelAccY_n1, P_PosVelAccY_n, sizeof(P_PosVelAccY_n));
 		}
-		else if (!gpsPositionAvailable && gpsVelocityAvailable) {
-			
-			y_PosVelAccX_VelAcc_n[0] = qc.velWorld.x;
-			y_PosVelAccY_VelAcc_n[0] = qc.velWorld.y;
-
-			y_PosVelAccX_VelAcc_n[1] = qc.accelWorld.x;
-			y_PosVelAccY_VelAcc_n[1] = qc.accelWorld.y;
-
-			sigmaVel = qcGPS.velAccuracy;
-
-			R_PosVelAcc_VelAcc[0] = pow(sigmaVel, 2);
-
-			kalmanFilter3State2Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
-			kalmanFilter3State2Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
-
-		}
-		else if (!gpsPositionAvailable && !gpsVelocityAvailable) {
-
-			y_PosVelAccX_Acc_n = qc.accelWorld.x;
-			y_PosVelAccY_Acc_n = qc.accelWorld.y;
-
-			kalmanFilter3State1Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccX_n, P_PosVelAccX_n);
-			kalmanFilter3State1Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccY_n, P_PosVelAccY_n);
-		}
-
-		qc.posWorldEstimated.x = m_PosVelAccX_n[0];
-		qc.velWorldEstimated.x = m_PosVelAccX_n[1];
-		qc.accelWorldEstimated.x = m_PosVelAccX_n[2];
-
-		qc.posWorldEstimated.y = m_PosVelAccY_n[0];
-		qc.velWorldEstimated.y = m_PosVelAccY_n[1];
-		qc.accelWorldEstimated.y = m_PosVelAccY_n[2];
-
-		memcpy(m_PosVelAccX_n1, m_PosVelAccX_n, sizeof(m_PosVelAccX_n));
-		memcpy(P_PosVelAccX_n1, P_PosVelAccX_n, sizeof(P_PosVelAccX_n));
-		memcpy(m_PosVelAccY_n1, m_PosVelAccY_n, sizeof(m_PosVelAccY_n));
-		memcpy(P_PosVelAccY_n1, P_PosVelAccY_n, sizeof(P_PosVelAccY_n));
 		//***********************************************************************************
 
 		calculateAccelWorldXYDifferentials();
@@ -1907,8 +1922,8 @@ void processPID()
 	getBodyToEulerAngularRates();
 
 	// Calculate Velocity X and Y Commands (Temporary Mode)
-	velCmd.x = -cmdMotorPitch * 4;   // negative added since rx pitch command is in the reverse direction of x-axis
-	velCmd.y = cmdMotorRoll * 4;
+	velCmd.x = -cmdMotorPitch * 10;   // negative added since rx pitch command is in the reverse direction of x-axis
+	velCmd.y = cmdMotorRoll * 10;
 
 	calculateVelCmdXYDifferentials();
 
@@ -1929,12 +1944,12 @@ void processPID()
 	filterVelXYPIDoutputs();
 
 	// Calculate Acceleration X and Y Commands (When Auto Mode)
-	// accelCmd.x = pidVars.velX.outputFiltered;
-	// accelCmd.y = pidVars.velY.outputFiltered;
+	accelCmd.x = pidVars.velX.outputFiltered;
+	accelCmd.y = pidVars.velY.outputFiltered;
 	
 	// Calculate Acceleration X and Y Commands (Temporary Mode)
-	accelCmd.x = -cmdMotorPitch * 20;  // negative added since rx pitch command is in the reverse direction of x-axis
-	accelCmd.y = cmdMotorRoll * 20;
+	// accelCmd.x = -cmdMotorPitch * 20;  // negative added since rx pitch command is in the reverse direction of x-axis
+	// accelCmd.y = cmdMotorRoll * 20;
 	
 	calculateAccelCmdXYDifferentials();
 

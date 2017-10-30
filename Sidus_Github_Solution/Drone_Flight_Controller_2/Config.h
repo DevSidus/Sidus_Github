@@ -385,7 +385,7 @@ bool barometer_initial_measurement = true;
 #define		BATT_LEVEL_CRITICAL			10.5
 #define		BATT_LEVEL_EXIST			2.5
 
-#define     POSITION_KALMAN_TASK_START_TIME   20000    //in millis
+#define     KALMAN_TASK_START_TIME   20000    //in millis
 
 String		sdcard_filepath;
 long lastTime = 0;
