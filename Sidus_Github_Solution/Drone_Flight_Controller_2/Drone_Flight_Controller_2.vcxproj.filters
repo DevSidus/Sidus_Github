@@ -96,6 +96,9 @@
     <ClInclude Include="cMsgUdpTAndroid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LocalLidarLite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp">
@@ -159,6 +162,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cMsgUdpTAndroid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalLidarLite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -38,6 +38,8 @@ using namespace std;
 #include "Local_SFE_BMP180.h"
 #endif
 
+#include "LocalLidarLite.h"
+
 #include "cMsgUdpR01.h"
 #include "cMsgUdpT01.h"
 #include "cMsgUdpRAndroid.h"
@@ -55,6 +57,8 @@ SFE_BMP180 barometer;
 #endif
 
 HMC5883L compass;
+LIDARLite lidar;
+
 
 WiFiUDP udp;
 
@@ -186,6 +190,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_PID, "task_PID", 3072, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 1536, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_baro, "task_baro", 1536, NULL, 10, NULL, 1);
+	xTaskCreatePinnedToCore(task_lidar, "task_lidar", 1200, NULL, 20, NULL, 1);
 #ifndef USE_SD_CARD
 	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 1536, NULL, 10, NULL, 1);
 #endif // USE_SD_CARD
@@ -1544,6 +1549,41 @@ void task_IoT(void * parameter)
 	}
 	vTaskDelete(NULL);
 }
+
+void task_lidar(void * parameter)
+{
+	while (statusMpu != statusType_Normal)
+	{
+		delay(700);
+	}
+
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
+	{
+
+		lidar.begin(0, true);
+
+		xSemaphoreGive(xI2CSemaphore);
+	}
+	while (true)
+	{
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
+		{
+			lidar_distance=lidar.distance();
+			xSemaphoreGive(xI2CSemaphore);
+		}
+		//Serial.println(lidar_distance);
+
+		if (lidar_distance > LIDAR_DISTANCE_MIN && lidar_distance < LIDAR_DISTANCE_MAX)
+			lidar_available = true;
+		else
+			lidar_available = false;
+		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
+		delay(50);
+	}
+	vTaskDelete(NULL);
+	return;
+}
+
 
 void processTest() {
 

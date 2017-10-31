@@ -387,6 +387,12 @@ bool barometer_initial_measurement = true;
 
 #define     KALMAN_TASK_START_TIME   20000    //in millis
 
+#define		LIDAR_DISTANCE_MIN		1
+#define		LIDAR_DISTANCE_MAX		10000
+int lidar_distance = 0;    // Distance measured with lidar
+bool lidar_available = false;
+
+
 String		sdcard_filepath;
 long lastTime = 0;
 long appendPacketCounter = 0;
