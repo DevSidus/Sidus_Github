@@ -19,7 +19,7 @@ This header file define all the configurable variables including constants, pin 
 //#define		DEFAULT_GROUND_STATION_IP		"255.255.255.255" // Boradcast for all networks
 //#define		DEFAULT_GROUND_STATION_IP		"192.168.0.255" // Broadcast for internal network
 //#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14" // YANIKS HOUSE
-#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2" // DRONE_AP
+#define		DEFAULT_GROUND_STATION_IP		"192.168.4.255" // DRONE_AP
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2" // AAGCA
 
 //#define		WIFI_SSID						"YANIKS HOUSE"
