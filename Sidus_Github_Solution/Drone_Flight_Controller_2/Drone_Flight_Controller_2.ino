@@ -1561,10 +1561,17 @@ void task_lidar(void * parameter)
 	{
 
 		lidar.begin(0, true);
-
+		delay(10);
+		lidar_distance = lidar.distance();
 		xSemaphoreGive(xI2CSemaphore);
 	}
-	while (true)
+
+	if (lidar_distance > LIDAR_DISTANCE_MIN && lidar_distance < LIDAR_DISTANCE_MAX)
+		lidar_available = true;
+	else
+		lidar_available = false;
+
+	while (lidar_available)
 	{
 		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
 		{
