@@ -166,7 +166,9 @@ struct structMsgUdpR01
 	double gpsVelE;
 	double gpsPosAccuracy;
 	double gpsVelAccuracy;
-
+	
+	//Lidar Distance
+	unsigned short lidar_distance;
 };
 #pragma pack(pop)
 

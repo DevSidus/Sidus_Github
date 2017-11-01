@@ -3086,6 +3086,8 @@ void prepareUDPmessages()
 	MsgUdpR01.message.gpsPosAccuracy		= qcGPS.posAccuracy;
 	MsgUdpR01.message.gpsVelAccuracy		= qcGPS.velAccuracy;
 
+	MsgUdpR01.message.lidar_distance		 = lidar_distance;
+
 	MsgUdpR01.getPacket();
 }
 

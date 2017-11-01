@@ -169,6 +169,9 @@ namespace Ground_Station
         public double gpsVelE { get; set; }
         public double gpsPosAccuracy { get; set; }
         public double gpsVelAccuracy { get; set; }
+
+
+        public ushort lidar_distance { get; set; }
     }
     class cMsgUdpR01
     {
