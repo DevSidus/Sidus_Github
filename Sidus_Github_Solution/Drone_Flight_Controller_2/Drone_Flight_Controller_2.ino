@@ -176,7 +176,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 1024, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 1024, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_melody, "task_melody", 1024, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 1024, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 1280, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_position_kalman, "task_position_kalman", 3072, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_compass_kalman, "task_compass_kalman", 2048, NULL, 10, NULL, 0);
