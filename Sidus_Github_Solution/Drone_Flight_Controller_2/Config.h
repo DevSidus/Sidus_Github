@@ -17,9 +17,9 @@ This header file define all the configurable variables including constants, pin 
 
 // Ground Station IP Setting and possible SSIDs
 //#define		DEFAULT_GROUND_STATION_IP		"255.255.255.255" // Boradcast for all networks
-#define		DEFAULT_GROUND_STATION_IP		"192.168.0.255" // Broadcast for internal network
+//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.255" // Broadcast for internal network
 //#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14" // YANIKS HOUSE
-//#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2" // khorfo_net
+#define		DEFAULT_GROUND_STATION_IP		"192.168.4.2" // DRONE_AP
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2" // AAGCA
 
 //#define		WIFI_SSID						"YANIKS HOUSE"
@@ -100,12 +100,12 @@ bool barometer_initial_measurement = true;
 	double compassHdgZrange = 907;
 #endif // SN_031002
 #ifdef SN_031003
-	#define mpuXAccelOffset				-4528
-	#define mpuYAccelOffset				-4577
-	#define mpuZAccelOffset				1523
+	#define mpuXAccelOffset				-4580
+	#define mpuYAccelOffset				-4589
+	#define mpuZAccelOffset				1517
 	#define mpuXGyroOffset				74
-	#define mpuYGyroOffset				-16
-	#define mpuZGyroOffset				-22
+	#define mpuYGyroOffset				-17
+	#define mpuZGyroOffset				-18
 
 	double compassHdgXoffset = 32;
 	double compassHdgYoffset = 97;
