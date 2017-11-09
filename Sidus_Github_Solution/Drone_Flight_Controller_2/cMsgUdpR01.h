@@ -164,6 +164,7 @@ struct structMsgUdpR01
 	double homeAlt;
 	double gpsVelN;
 	double gpsVelE;
+	double gpsVelD;
 	double gpsPosAccuracy;
 	double gpsVelAccuracy;
 	

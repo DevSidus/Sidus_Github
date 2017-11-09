@@ -78,6 +78,9 @@ PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff, &pidVars.velAlt.setpointDiff);
 PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
 
+PID pidPosX(&pidVars.posX.sensedVal, &pidVars.posX.output, &pidVars.posX.setpoint, &pidVars.posX.sensedValDiff, &pidVars.posX.setpointDiff);
+PID pidPosY(&pidVars.posY.sensedVal, &pidVars.posY.output, &pidVars.posY.setpoint, &pidVars.posY.sensedValDiff, &pidVars.posX.setpointDiff);
+
 PID pidVelX(&pidVars.velX.sensedVal, &pidVars.velX.output, &pidVars.velX.setpoint, &pidVars.velX.sensedValDiff, &pidVars.velX.setpointDiff);
 PID pidVelY(&pidVars.velY.sensedVal, &pidVars.velY.output, &pidVars.velY.setpoint, &pidVars.velY.sensedValDiff, &pidVars.velY.setpointDiff);
 
@@ -431,6 +434,11 @@ void task_gps(void * parameter)
 				{
 					qcGPS.cog = gps.course.deg();
 				}
+				if (gps.speed.isUpdated() && gps.course.isUpdated())
+				{
+					qcGPS.nedVelocity.N = qcGPS.sog * cos(qcGPS.cog * M_PI / 180);
+					qcGPS.nedVelocity.E = qcGPS.sog * sin(qcGPS.cog * M_PI / 180);
+		}
 			
 			#endif // !UBOX
 
@@ -442,6 +450,7 @@ void task_gps(void * parameter)
 				qcGPS.posAccuracy = uBloxData.hAcc;
 				qcGPS.nedVelocity.N = uBloxData.velN;
 				qcGPS.nedVelocity.E = uBloxData.velE;
+				qcGPS.nedVelocity.D = uBloxData.velD;
 				qcGPS.velAccuracy = uBloxData.sAcc;
 				qcGPS.gpsFixType = uBloxData.fixType;
 			}
@@ -471,7 +480,7 @@ void task_gps(void * parameter)
 			{
 				qcGPS.gpsIsFix = true;
 
-				if (qcGPS.velAccuracy < 2) {
+				if (qcGPS.velAccuracy < 1) {
 					gpsVelocityAvailable = true;
 				}
 				else {
@@ -482,25 +491,21 @@ void task_gps(void * parameter)
 		
 		if (qcGPS.gpsIsFix)
 		{
-			// Calculate World X/Y Velocity from GPS measurements
-
-			#ifndef UBOX
-				convertNed2World(qcGPS.sog * cos(qcGPS.cog * M_PI / 180), qcGPS.sog * sin(qcGPS.cog * M_PI / 180), compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
-			#else
-				convertNed2World(qcGPS.nedVelocity.N, qcGPS.nedVelocity.E, compassHdgEstimated, &qc.velWorld.x, &qc.velWorld.y);
-			#endif // !UBOX
 
 			// Calculate World X/Y Position from GPS measurements
 			calculateGeodetic2Ecef(qcGPS.lat, qcGPS.lon, qcGPS.alt, &qcGPS.ecefCoordinate.x, &qcGPS.ecefCoordinate.y, &qcGPS.ecefCoordinate.z);
 
 			if (setHomePoint && !homePointSelected)
 			{
-				homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
-				homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
-				homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
-				homePoint.lat = qcGPS.lat;
-				homePoint.lon = qcGPS.lon;
-				homePoint.alt = qcGPS.alt;
+
+				//homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
+				//homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
+				//homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
+				//homePoint.lat = qcGPS.lat;
+				//homePoint.lon = qcGPS.lon;
+				//homePoint.alt = qcGPS.alt;
+
+				homePointSelectionAfterAveraging();
 
 				homePointSelected = true;
 			}
@@ -509,9 +514,7 @@ void task_gps(void * parameter)
 			{
 				calculateEcef2Ned(qcGPS.ecefCoordinate.x, qcGPS.ecefCoordinate.y, qcGPS.ecefCoordinate.z, homePoint.ecefCoordinate.x, homePoint.ecefCoordinate.y, homePoint.ecefCoordinate.z, homePoint.lat, homePoint.lon, &qcGPS.nedCoordinate.N, &qcGPS.nedCoordinate.E, &qcGPS.nedCoordinate.D);
 
-				convertNed2World(qcGPS.nedCoordinate.N, qcGPS.nedCoordinate.E, compassHdgEstimated, &qc.posWorld.x, &qc.posWorld.y);
-
-				if (qcGPS.posAccuracy < 20) {
+				if (qcGPS.posAccuracy < 10) {
 					gpsPositionAvailable = true;
 				}
 				else {
@@ -1309,7 +1312,7 @@ void task_position_kalman(void * parameter)
 
 	//***********************************************************************************
 	// Kalman Parameters for Position, Velocity and Acceleration Estimation
-	double F_PosVelAcc[9] = { 1, 0, 0, T, 0.999, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
+	double F_PosVelAcc[9] = { 1, 0, 0, T, 1, 0, 1 / 2 * pow(T,2), T, 1 }; // State-transition matrix
 	
 	double H_PosVelAcc[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 }; // Measurement matrix when gpsPos, gpsVel and Acc available
 	double H_PosVelAcc_VelAcc[6] = { 0, 0, 1, 0, 0, 1 }; // Measurement matrix when only gpsVel and Acc available
@@ -1318,33 +1321,33 @@ void task_position_kalman(void * parameter)
 	double deltaAccelXY = 0.05;
 	double sigmaQ_PosVelAcc = deltaAccelXY;
 	double Q_PosVelAcc[9] = { 1 / 4 * pow(T,4), 1 / 2 * pow(T,3), 1 / 2 * pow(T,2), 1 / 2 * pow(T,3), pow(T,2), T, 1 / 2 * pow(T,2), T, 1 };
-	for (int i = 0; i < 9; i++) Q_PosVelAcc[i] *= pow(sigmaQ_PosVelAcc, 2); // Process noise covariance matrix
+	for (int i = 0; i < 9; i++) Q_PosVelAcc[i] *= pow(sigmaQ_PosVelAcc,2); // Process noise covariance matrix
 
 	// Default measurement noise covariance matrix, will be updated in the loop
-	double sigmaPos = 3; // qcGPS.posAccuracy;
-	double sigmaVel = 0.3; // qcGPS.velAccuracy;
+	double sigmaPos = 3;
+	double sigmaVel = 0.3;
 	double sigmaAccelXY = 0.05;
-	double R_PosVelAcc[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix when gpsPos, gpsVel and Acc available
-	double R_PosVelAcc_VelAcc[4] = { pow(sigmaVel,2), 0, 0, pow(sigmaAccelXY,2) }; // Measurement noise covariance matrix when only gpsVel and Acc available
-	double R_PosVelAcc_Acc = pow(sigmaAccelXY,2); // Measurement noise covariance matrix when only Acc available
+	double R_PosVelAcc[9] = { sigmaPos, 0, 0, 0, sigmaVel, 0, 0, 0, sigmaAccelXY }; // Measurement noise covariance matrix when gpsPos, gpsVel and Acc available
+	double R_PosVelAcc_VelAcc[4] = { sigmaVel, 0, 0, sigmaAccelXY }; // Measurement noise covariance matrix when only gpsVel and Acc available
+	double R_PosVelAcc_Acc = sigmaAccelXY; // Measurement noise covariance matrix when only Acc available
 
 	// Initialization
-	double m_PosVelAccX_n1[3] = { 0, 0, 0 }; // { qc.posWorld.x, qc.velWorld.x, qc.accelWorld.x };
-	double m_PosVelAccY_n1[3] = { 0, 0, 0 }; // { qc.posWorld.y, qc.velWorld.y, qc.accelWorld.y };
-	double P_PosVelAccX_n1[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) };
-	double P_PosVelAccY_n1[9] = { pow(sigmaPos,2), 0, 0, 0, pow(sigmaVel,2), 0, 0, 0, pow(sigmaAccelXY,2) };
+	double m_PosVelAccN_n1[3] = { 0, 0, 0 };
+	double m_PosVelAccE_n1[3] = { 0, 0, 0 };
+	double P_PosVelAccN_n1[9] = { sigmaPos, 0, 0, 0, sigmaVel, 0, 0, 0, sigmaAccelXY };
+	double P_PosVelAccE_n1[9] = { sigmaPos, 0, 0, 0, sigmaVel, 0, 0, 0, sigmaAccelXY };
 
-	double m_PosVelAccX_n[3] = { 0, 0, 0 };
-	double m_PosVelAccY_n[3] = { 0, 0, 0 };
-	double P_PosVelAccX_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	double P_PosVelAccY_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	double m_PosVelAccN_n[3] = { 0, 0, 0 };
+	double m_PosVelAccE_n[3] = { 0, 0, 0 };
+	double P_PosVelAccN_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	double P_PosVelAccE_n[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	
-	double y_PosVelAccX_n[3] = { 0, 0, 0 };	
-	double y_PosVelAccY_n[3] = { 0, 0, 0 };
-	double y_PosVelAccX_VelAcc_n[2] = { 0, 0 };
-	double y_PosVelAccY_VelAcc_n[2] = { 0, 0 };
-	double y_PosVelAccX_Acc_n = 0;
-	double y_PosVelAccY_Acc_n = 0;
+	double y_PosVelAccN_n[3] = { 0, 0, 0 };	
+	double y_PosVelAccE_n[3] = { 0, 0, 0 };
+	double y_PosVelAccN_VelAcc_n[2] = { 0, 0 };
+	double y_PosVelAccE_VelAcc_n[2] = { 0, 0 };
+	double y_PosVelAccN_Acc_n = 0;
+	double y_PosVelAccE_Acc_n = 0;
 	//***********************************************************************************
 
 	// Initialize Kalman Filtering
@@ -1361,66 +1364,74 @@ void task_position_kalman(void * parameter)
 		
 		if (!gpsPositionAvailable && !gpsVelocityAvailable) {
 
-			 y_PosVelAccX_Acc_n = qc.accelWorld.x;
-			 y_PosVelAccY_Acc_n = qc.accelWorld.y;
+			F_PosVelAcc[4] = 0.999; // Leaky Integral
 
-			 kalmanFilter3State1Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccX_n, P_PosVelAccX_n);
-			 kalmanFilter3State1Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccY_n, P_PosVelAccY_n);
+			y_PosVelAccN_Acc_n = qc.accelNED.N;
+			y_PosVelAccE_Acc_n = qc.accelNED.E;
+
+			kalmanFilter3State1Measurement(m_PosVelAccN_n1, P_PosVelAccN_n1, y_PosVelAccN_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccN_n, P_PosVelAccN_n);
+			kalmanFilter3State1Measurement(m_PosVelAccE_n1, P_PosVelAccE_n1, y_PosVelAccE_Acc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_Acc, R_PosVelAcc_Acc, m_PosVelAccE_n, P_PosVelAccE_n);
 		
 		}
 		else {
 
+			F_PosVelAcc[4] = 1;
+
 			if (gpsPositionAvailable && gpsVelocityAvailable) {
 
-				y_PosVelAccX_n[0] = qc.posWorld.x;
-				y_PosVelAccY_n[0] = qc.posWorld.y;
+				y_PosVelAccN_n[0] = qcGPS.nedCoordinate.N;
+				y_PosVelAccE_n[0] = qcGPS.nedCoordinate.E;
 
-				y_PosVelAccX_n[1] = qc.velWorld.x;
-				y_PosVelAccY_n[1] = qc.velWorld.y;
+				y_PosVelAccN_n[1] = qcGPS.nedVelocity.N;
+				y_PosVelAccE_n[1] = qcGPS.nedVelocity.E;
 
-				y_PosVelAccX_n[2] = qc.accelWorld.x;
-				y_PosVelAccY_n[2] = qc.accelWorld.y;
+				y_PosVelAccN_n[2] = qc.accelNED.N;
+				y_PosVelAccE_n[2] = qc.accelNED.E;
 
 				sigmaPos = qcGPS.posAccuracy;
 				sigmaVel = qcGPS.velAccuracy;
-				R_PosVelAcc[0] = pow(sigmaPos, 2);
-				R_PosVelAcc[4] = pow(sigmaVel, 2);
+				R_PosVelAcc[0] = sigmaPos;
+				R_PosVelAcc[4] = sigmaVel;
 
-				kalmanFilter3State3Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
-				kalmanFilter3State3Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
+				kalmanFilter3State3Measurement(m_PosVelAccN_n1, P_PosVelAccN_n1, y_PosVelAccN_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccN_n, P_PosVelAccN_n);
+				kalmanFilter3State3Measurement(m_PosVelAccE_n1, P_PosVelAccE_n1, y_PosVelAccE_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc, R_PosVelAcc, m_PosVelAccE_n, P_PosVelAccE_n);
 
 			}
 			else if (!gpsPositionAvailable && gpsVelocityAvailable) {
 
-				y_PosVelAccX_VelAcc_n[0] = qc.velWorld.x;
-				y_PosVelAccY_VelAcc_n[0] = qc.velWorld.y;
+				y_PosVelAccN_VelAcc_n[0] = qcGPS.nedVelocity.N;
+				y_PosVelAccE_VelAcc_n[0] = qcGPS.nedVelocity.E;
 
-				y_PosVelAccX_VelAcc_n[1] = qc.accelWorld.x;
-				y_PosVelAccY_VelAcc_n[1] = qc.accelWorld.y;
+				y_PosVelAccN_VelAcc_n[1] = qc.accelNED.N;
+				y_PosVelAccE_VelAcc_n[1] = qc.accelNED.E;
 
 				sigmaVel = qcGPS.velAccuracy;
 
-				R_PosVelAcc_VelAcc[0] = pow(sigmaVel, 2);
+				R_PosVelAcc_VelAcc[0] = sigmaVel;
 
-				kalmanFilter3State2Measurement(m_PosVelAccX_n1, P_PosVelAccX_n1, y_PosVelAccX_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccX_n, P_PosVelAccX_n);
-				kalmanFilter3State2Measurement(m_PosVelAccY_n1, P_PosVelAccY_n1, y_PosVelAccY_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccY_n, P_PosVelAccY_n);
+				kalmanFilter3State2Measurement(m_PosVelAccN_n1, P_PosVelAccN_n1, y_PosVelAccN_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccN_n, P_PosVelAccN_n);
+				kalmanFilter3State2Measurement(m_PosVelAccE_n1, P_PosVelAccE_n1, y_PosVelAccE_VelAcc_n, F_PosVelAcc, Q_PosVelAcc, H_PosVelAcc_VelAcc, R_PosVelAcc_VelAcc, m_PosVelAccE_n, P_PosVelAccE_n);
 
 			}
 
 		}
 
-		qc.posWorldEstimated.x = m_PosVelAccX_n[0];
-		qc.velWorldEstimated.x = m_PosVelAccX_n[1];
-		qc.accelWorldEstimated.x = m_PosVelAccX_n[2];
+		qc.posNEDEstimated.N = m_PosVelAccN_n[0];
+		qc.velNEDEstimated.N = m_PosVelAccN_n[1];
+		qc.accelNEDEstimated.N = m_PosVelAccN_n[2];
 
-		qc.posWorldEstimated.y = m_PosVelAccY_n[0];
-		qc.velWorldEstimated.y = m_PosVelAccY_n[1];
-		qc.accelWorldEstimated.y = m_PosVelAccY_n[2];
+		qc.posNEDEstimated.E = m_PosVelAccE_n[0];
+		qc.velNEDEstimated.E = m_PosVelAccE_n[1];
+		qc.accelNEDEstimated.E = m_PosVelAccE_n[2];
 
-		memcpy(m_PosVelAccX_n1, m_PosVelAccX_n, sizeof(m_PosVelAccX_n));
-		memcpy(P_PosVelAccX_n1, P_PosVelAccX_n, sizeof(P_PosVelAccX_n));
-		memcpy(m_PosVelAccY_n1, m_PosVelAccY_n, sizeof(m_PosVelAccY_n));
-		memcpy(P_PosVelAccY_n1, P_PosVelAccY_n, sizeof(P_PosVelAccY_n));
+		convertNed2World(qc.posNEDEstimated.N, qc.posNEDEstimated.E, compassHdgEstimated, &qc.posWorldEstimated.x, &qc.posWorldEstimated.y);
+		convertNed2World(qc.velNEDEstimated.N, qc.velNEDEstimated.E, compassHdgEstimated, &qc.velWorldEstimated.x, &qc.velWorldEstimated.y);
+		convertNed2World(qc.accelNEDEstimated.N, qc.accelNEDEstimated.E, compassHdgEstimated, &qc.accelWorldEstimated.x, &qc.accelWorldEstimated.y);
+
+		memcpy(m_PosVelAccN_n1, m_PosVelAccN_n, sizeof(m_PosVelAccN_n));
+		memcpy(P_PosVelAccN_n1, P_PosVelAccN_n, sizeof(P_PosVelAccN_n));
+		memcpy(m_PosVelAccE_n1, m_PosVelAccE_n, sizeof(m_PosVelAccE_n));
+		memcpy(P_PosVelAccE_n1, P_PosVelAccE_n, sizeof(P_PosVelAccE_n));
 
 		//***********************************************************************************
 
@@ -1760,6 +1771,8 @@ void processMpu()
 			qc.accelWorld.y = (qc.accel.y*cos(qc.euler.phi) - qc.accel.z*sin(qc.euler.phi)) * ACC_BITS_TO_M_SECOND2;
 			qc.accelWorld.z = (qc.accel.z*cos(qc.euler.theta)*cos(qc.euler.phi) - qc.accel.x*sin(qc.euler.theta) + qc.accel.y*cos(qc.euler.theta)*sin(qc.euler.phi) + mpu_gravity_measurement_in_bits) * ACC_BITS_TO_M_SECOND2;
 
+			convertWorld2Ned(qc.accelWorld.x, qc.accelWorld.y, compassHdgEstimated, &qc.accelNED.N, &qc.accelNED.E);
+
 		}
 
 	}
@@ -1903,14 +1916,15 @@ void processCheckMode()
 
 			if (qcGPS.gpsIsFix && !homePointSelected)
 			{
-				//homePoint averaging should be implemented here
 
-				homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
-				homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
-				homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
-				homePoint.lat = qcGPS.lat;
-				homePoint.lon = qcGPS.lon;
-				homePoint.alt = qcGPS.alt;
+				//homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
+				//homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
+				//homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
+				//homePoint.lat = qcGPS.lat;
+				//homePoint.lon = qcGPS.lon;
+				//homePoint.alt = qcGPS.alt;
+
+				homePointSelectionAfterAveraging();
 
 				homePointSelected = true;
 			}
@@ -1937,6 +1951,8 @@ void processCheckMode()
 		pidAccY.SetFlightMode(true);
 		pidVelX.SetFlightMode(true);
 		pidVelY.SetFlightMode(true);
+		pidPosX.SetFlightMode(true);
+		pidPosY.SetFlightMode(true);
 	}
 	else
 	{
@@ -1953,6 +1969,8 @@ void processCheckMode()
 		pidAccY.SetFlightMode(false);
 		pidVelX.SetFlightMode(false);
 		pidVelY.SetFlightMode(false);
+		pidPosX.SetFlightMode(false);
+		pidPosY.SetFlightMode(false);
 	}
 }
 
@@ -1960,11 +1978,45 @@ void processPID()
 {
 	prePIDprocesses();
 
-	getBodyToEulerAngularRates();
+	//getBodyToEulerAngularRates();
 
-	// Calculate Velocity X and Y Commands (Temporary Mode)
-	velCmd.x = -cmdMotorPitch * 10;   // negative added since rx pitch command is in the reverse direction of x-axis
-	velCmd.y = cmdMotorRoll * 10;
+	calculatePosCmdXYDifferentials();
+
+	// Pos X PID
+	pidVars.posX.setpoint = posCmd.x;
+	pidVars.posX.sensedVal = qc.posWorldEstimated.x;
+	pidVars.posX.setpointDiff = posCmdDiff.x;
+	pidVars.posX.sensedValDiff = qc.velWorldEstimated.x;
+	pidPosX.Compute();
+
+	// Pos Y PID
+	pidVars.posY.setpoint = posCmd.y;
+	pidVars.posY.sensedVal = qc.posWorldEstimated.y;
+	pidVars.posY.setpointDiff = posCmdDiff.y;
+	pidVars.posY.sensedValDiff = qc.velWorldEstimated.y;
+	pidPosY.Compute();
+
+	filterPosXYPIDoutputs();
+
+	if ((cmdMotorPitch == 0) && posHoldAvailable) // Calculate Velocity X Command (When Auto Mode)
+	{
+		velCmd.x = pidVars.posX.outputFiltered;
+	}
+	else
+	{
+		velCmd.x = -cmdMotorPitch * 10;   // negative added since rx pitch command is in the reverse direction of x-axis
+		posCmd.x = qc.posWorldEstimated.x;
+	}
+
+	if ((cmdMotorRoll == 0) && posHoldAvailable) // Calculate Velocity Y Command (When Auto Mode)
+	{
+		velCmd.y = pidVars.posY.outputFiltered;
+	}
+	else
+	{
+		velCmd.y = cmdMotorRoll * 10;
+		posCmd.y = qc.posWorldEstimated.y;
+	}
 
 	calculateVelCmdXYDifferentials();
 
@@ -2013,7 +2065,7 @@ void processPID()
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Pitch Roll Yaw Angle PID
 	
-	if (posHoldStatus)
+	if (velHoldAvailable)
 	{
 		// Calculate Angle Commands (When Auto Mode)
 		angleCmd.x = atan(pidVars.accY.outputFiltered / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;  // division by 0 should be avoided!!!
@@ -2243,6 +2295,22 @@ void initPIDvariables()
 	pidVars.velY.output = 0;
 	pidVars.velY.outputCompensated = 0;
 
+	pidVars.posX.Kp = PID_POS_X_KP;
+	pidVars.posX.Ki = PID_POS_X_KI;
+	pidVars.posX.Kd = PID_POS_X_KD;
+	pidVars.posX.outputLimitMin = PID_POS_X_OUTMIN;
+	pidVars.posX.outputLimitMax = PID_POS_X_OUTMAX;
+	pidVars.posX.output = 0;
+	pidVars.posX.outputCompensated = 0;
+
+	pidVars.posY.Kp = PID_POS_Y_KP;
+	pidVars.posY.Ki = PID_POS_Y_KI;
+	pidVars.posY.Kd = PID_POS_Y_KD;
+	pidVars.posY.outputLimitMin = PID_POS_Y_OUTMIN;
+	pidVars.posY.outputLimitMax = PID_POS_Y_OUTMAX;
+	pidVars.posY.output = 0;
+	pidVars.posY.outputCompensated = 0;
+
 }
 
 void initPIDtuning()
@@ -2285,6 +2353,12 @@ void initPIDtuning()
 
 	pidVelY.SetOutputLimits(pidVars.velY.outputLimitMin, pidVars.velY.outputLimitMax);
 	pidVelY.SetTunings(pidVars.velY.Kp, pidVars.velY.Ki, pidVars.velY.Kd);
+
+	pidPosX.SetOutputLimits(pidVars.posX.outputLimitMin, pidVars.posX.outputLimitMax);
+	pidPosX.SetTunings(pidVars.posX.Kp, pidVars.posX.Ki, pidVars.posX.Kd);
+
+	pidPosY.SetOutputLimits(pidVars.posY.outputLimitMin, pidVars.posY.outputLimitMax);
+	pidPosY.SetTunings(pidVars.posY.Kp, pidVars.posY.Ki, pidVars.posY.Kd);
 }
 
 void prePIDprocesses()
@@ -2386,11 +2460,15 @@ void handleAutoModeCommands()
 
 	if (modeQuad == modeQuadARMED && (statusRx == statusType_Normal) && (cmdRx6thCh > (CMD_6TH_CH_MAX - 10)))
 	{
-		posHoldStatus = true;
+		velHoldAvailable = true;
+		if (gpsPositionAvailable) {
+			posHoldAvailable = true;
+		}
 	}
 	else
 	{
-		posHoldStatus = false;
+		velHoldAvailable = false;
+		posHoldAvailable = false;
 	}
 
 #else	
@@ -3083,6 +3161,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.homeAlt				= homePoint.alt;
 	MsgUdpR01.message.gpsVelN				= qcGPS.nedVelocity.N;
 	MsgUdpR01.message.gpsVelE				= qcGPS.nedVelocity.E;
+	MsgUdpR01.message.gpsVelD				= qcGPS.nedVelocity.D;
 	MsgUdpR01.message.gpsPosAccuracy		= qcGPS.posAccuracy;
 	MsgUdpR01.message.gpsVelAccuracy		= qcGPS.velAccuracy;
 
@@ -3098,7 +3177,7 @@ void prepareAndroidUDPmessages()
 	MsgUdpRAndroid.message.modeQuad = modeQuad;
 	MsgUdpRAndroid.message.autoModeStatus = autoModeStatus;
 	MsgUdpRAndroid.message.homePointSelected = homePointSelected;
-	MsgUdpRAndroid.message.posHoldAvailable = gpsPositionAvailable;
+	MsgUdpRAndroid.message.posHoldAvailable = posHoldAvailable;
 
 	MsgUdpRAndroid.message.batteryVoltage = batteryVoltageInVolts;
 
@@ -3332,6 +3411,14 @@ void filterPosAltPIDoutputs()
 	pidVars.posAlt.outputFiltered = filtObjPosPIDoutZ.filter(pidVars.posAlt.output, 0);
 }
 
+void filterPosXYPIDoutputs()
+{
+	// Filtering Position X and Y PID Outputs by LPF
+	// Calculate Filter Output
+	pidVars.posX.outputFiltered = filtObjPosPIDoutX.filter(pidVars.posX.output, 0);
+	pidVars.posY.outputFiltered = filtObjPosPIDoutY.filter(pidVars.posY.output, 0);
+}
+
 void filterVelXYPIDoutputs()
 {
 	// Filtering Velocity X and Y PID Outputs by LPF
@@ -3360,6 +3447,14 @@ void calculateAccelCmdZDifferentials()
 	//// Differantiate Acceleration Commands for Acceleration PID Kd branch ////
 	// Calculate Filter Output
 	accelCmdDiff.z = filtObjAccelCmdDiffZ.filter(accelCmd.z, DELTATIME_ACCELCMD_DIFF);
+}
+
+void calculatePosCmdXYDifferentials()
+{
+	//// Differantiate Position Commands for Position PID Kd branch ////
+	// Calculate Filter Output
+	posCmdDiff.x = filtObjPosCmdDiffX.filter(posCmd.x, DELTATIME_POSCMD_DIFF);
+	posCmdDiff.y = filtObjPosCmdDiffY.filter(posCmd.y, DELTATIME_POSCMD_DIFF);
 }
 
 void calculateVelCmdXYDifferentials()
@@ -3413,16 +3508,16 @@ void calculateEcef2Ned(double _ecefX, double _ecefY, double _ecefZ, double _ecef
 	*_nedZ = (_ecefX - _ecefRefX) * rotEcef2Ned[2] + (_ecefY - _ecefRefY) * rotEcef2Ned[5] + (_ecefZ - _ecefRefZ) * rotEcef2Ned[8];
 }
 
-void convertNed2World(double _nedX, double _nedY, double _heading, double *_worldX, double *_worldY)
+void convertNed2World(double _nedN, double _nedE, double _heading, double *_worldX, double *_worldY)
 {
-	*_worldX = _nedX * cos(_heading * M_PI / 180) + _nedY * sin(_heading * M_PI / 180);
-	*_worldY = _nedX * -sin(_heading * M_PI / 180) + _nedY * cos(_heading * M_PI / 180);
+	*_worldX = _nedN * cos(_heading * M_PI / 180) + _nedE * sin(_heading * M_PI / 180);
+	*_worldY = _nedN * -sin(_heading * M_PI / 180) + _nedE * cos(_heading * M_PI / 180);
 }
 
-void convertWorld2Ned(double _worldX, double _worldY, double _heading, double *_nedX, double *_nedY)
+void convertWorld2Ned(double _worldX, double _worldY, double _heading, double *_nedN, double *_nedE)
 {
-	*_nedX = _worldX * cos(_heading * M_PI / 180) + _worldY * -sin(_heading * M_PI / 180);
-	*_nedY = _worldX * sin(_heading * M_PI / 180) + _worldY * cos(_heading * M_PI / 180);
+	*_nedN = _worldX * cos(_heading * M_PI / 180) + _worldY * -sin(_heading * M_PI / 180);
+	*_nedE = _worldX * sin(_heading * M_PI / 180) + _worldY * cos(_heading * M_PI / 180);
 }
 
 void initSDcard()
@@ -3461,4 +3556,28 @@ double getAltVelCmd(double _val)
 	if (_val < ALT_VEL_ZERO_CMD_MIN) return (_val - ALT_VEL_ZERO_CMD_MIN);
 	else if (_val > ALT_VEL_ZERO_CMD_MAX) return (_val - ALT_VEL_ZERO_CMD_MAX);
 	else  return 0;
+}
+
+void homePointSelectionAfterAveraging() {
+	
+	unsigned int averageSample = 0;
+	averagingHomePointStartTime = millis();
+
+	while ((millis() - averagingHomePointStartTime) < averagingHomePointDuration) {
+		homePoint.ecefCoordinate.x += qcGPS.ecefCoordinate.x;
+		homePoint.ecefCoordinate.y += qcGPS.ecefCoordinate.y;
+		homePoint.ecefCoordinate.z += qcGPS.ecefCoordinate.z;
+		homePoint.lat += qcGPS.lat;
+		homePoint.lon += qcGPS.lon;
+		homePoint.alt += qcGPS.alt;
+		averageSample += 1;
+	}
+
+	homePoint.ecefCoordinate.x /= averageSample;
+	homePoint.ecefCoordinate.y /= averageSample;
+	homePoint.ecefCoordinate.z /= averageSample;
+	homePoint.lat /= averageSample;
+	homePoint.lon /= averageSample;
+	homePoint.alt /= averageSample;
+
 }
