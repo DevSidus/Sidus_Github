@@ -498,14 +498,12 @@ void task_gps(void * parameter)
 			if (setHomePoint && !homePointSelected)
 			{
 
-				//homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
-				//homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
-				//homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
-				//homePoint.lat = qcGPS.lat;
-				//homePoint.lon = qcGPS.lon;
-				//homePoint.alt = qcGPS.alt;
-
-				homePointSelectionAfterAveraging();
+				homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
+				homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
+				homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
+				homePoint.lat = qcGPS.lat;
+				homePoint.lon = qcGPS.lon;
+				homePoint.alt = qcGPS.alt;
 
 				homePointSelected = true;
 			}
@@ -1917,14 +1915,12 @@ void processCheckMode()
 			if (qcGPS.gpsIsFix && !homePointSelected)
 			{
 
-				//homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
-				//homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
-				//homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
-				//homePoint.lat = qcGPS.lat;
-				//homePoint.lon = qcGPS.lon;
-				//homePoint.alt = qcGPS.alt;
-
-				homePointSelectionAfterAveraging();
+				homePoint.ecefCoordinate.x = qcGPS.ecefCoordinate.x;
+				homePoint.ecefCoordinate.y = qcGPS.ecefCoordinate.y;
+				homePoint.ecefCoordinate.z = qcGPS.ecefCoordinate.z;
+				homePoint.lat = qcGPS.lat;
+				homePoint.lon = qcGPS.lon;
+				homePoint.alt = qcGPS.alt;
 
 				homePointSelected = true;
 			}
@@ -2463,6 +2459,9 @@ void handleAutoModeCommands()
 		velHoldAvailable = true;
 		if (gpsPositionAvailable) {
 			posHoldAvailable = true;
+		}
+		else {
+			posHoldAvailable = false;
 		}
 	}
 	else
@@ -3556,28 +3555,4 @@ double getAltVelCmd(double _val)
 	if (_val < ALT_VEL_ZERO_CMD_MIN) return (_val - ALT_VEL_ZERO_CMD_MIN);
 	else if (_val > ALT_VEL_ZERO_CMD_MAX) return (_val - ALT_VEL_ZERO_CMD_MAX);
 	else  return 0;
-}
-
-void homePointSelectionAfterAveraging() {
-	
-	unsigned int averageSample = 0;
-	averagingHomePointStartTime = millis();
-
-	while ((millis() - averagingHomePointStartTime) < averagingHomePointDuration) {
-		homePoint.ecefCoordinate.x += qcGPS.ecefCoordinate.x;
-		homePoint.ecefCoordinate.y += qcGPS.ecefCoordinate.y;
-		homePoint.ecefCoordinate.z += qcGPS.ecefCoordinate.z;
-		homePoint.lat += qcGPS.lat;
-		homePoint.lon += qcGPS.lon;
-		homePoint.alt += qcGPS.alt;
-		averageSample += 1;
-	}
-
-	homePoint.ecefCoordinate.x /= averageSample;
-	homePoint.ecefCoordinate.y /= averageSample;
-	homePoint.ecefCoordinate.z /= averageSample;
-	homePoint.lat /= averageSample;
-	homePoint.lon /= averageSample;
-	homePoint.alt /= averageSample;
-
 }
