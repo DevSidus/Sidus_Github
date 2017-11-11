@@ -167,6 +167,7 @@ namespace Ground_Station
         public double homeAlt { get; set; }
         public double gpsVelN { get; set; }
         public double gpsVelE { get; set; }
+        public double gpsVelD { get; set; }
         public double gpsPosAccuracy { get; set; }
         public double gpsVelAccuracy { get; set; }
 

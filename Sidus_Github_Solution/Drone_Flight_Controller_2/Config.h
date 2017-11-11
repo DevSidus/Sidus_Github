@@ -17,15 +17,14 @@ This header file define all the configurable variables including constants, pin 
 
 // Ground Station IP Setting and possible SSIDs
 //#define		DEFAULT_GROUND_STATION_IP		"255.255.255.255" // Boradcast for all networks
-//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.255" // Broadcast for internal network
-//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.14" // YANIKS HOUSE
-#define		DEFAULT_GROUND_STATION_IP		"192.168.4.255" // DRONE_AP
+#define		DEFAULT_GROUND_STATION_IP		"192.168.4.255" // DRONE_AP Broadcast for internal network
+//#define		DEFAULT_GROUND_STATION_IP		"192.168.0.255" // YANIKS HOUSE
 //#define		DEFAULT_GROUND_STATION_IP		"172.20.10.2" // AAGCA
 
 //#define		WIFI_SSID						"YANIKS HOUSE"
 //#define		WIFI_PASS						"YanikTurkiye06"
-#define		WIFI_SSID						"khorfo_net"
-#define		WIFI_PASS						"ahmet_ipek_12082004"
+//#define		WIFI_SSID						"khorfo_net"
+//#define		WIFI_PASS						"ahmet_ipek_12082004"
 //#define		WIFI_SSID						"AAGCA"
 //#define		WIFI_PASS						"ahmet(12082004)"
 
@@ -338,6 +337,17 @@ bool barometer_initial_measurement = true;
 #define		PID_VEL_Y_OUTMIN		-1000    //need to be revised
 #define		PID_VEL_Y_OUTMAX		1000     //need to be revised
 
+#define		PID_POS_X_KP			50.0 
+#define		PID_POS_X_KI			0.0    
+#define		PID_POS_X_KD			0.0 
+#define		PID_POS_X_OUTMIN		-500
+#define		PID_POS_X_OUTMAX		500
+
+#define		PID_POS_Y_KP			50.0 
+#define		PID_POS_Y_KI			0.0    
+#define		PID_POS_Y_KD			0.0 
+#define		PID_POS_Y_OUTMIN		-500
+#define		PID_POS_Y_OUTMAX		500
 
 #define		RX_MAX_PULSE_WIDTH			2075	//in microseconds
 
@@ -484,6 +494,8 @@ struct structSuperPID
 	structPID accY;
 	structPID velX;
 	structPID velY;
+	structPID posX;
+	structPID posY;
 }pidVars;
 
 struct structEuler
@@ -514,11 +526,15 @@ struct structIMU
 	struct3Daxis gyro;
 	struct3Daxis accel;
 	struct3Daxis accelWorld;
+	structNEDaxis accelNED;
 	struct3Daxis accelWorldEstimated;
-	struct3Daxis velWorld;
+	structNEDaxis accelNEDEstimated;
+	struct3Daxis velWorld; // May be used later
 	struct3Daxis velWorldEstimated;
-	struct3Daxis posWorld;
+	structNEDaxis velNEDEstimated;
+	struct3Daxis posWorld; // May be used later
 	struct3Daxis posWorldEstimated;
+	structNEDaxis posNEDEstimated;
 	struct3Daxis gyroDiff;
 	struct3Daxis accelWorldDiff;
 }qc;
@@ -558,6 +574,8 @@ structPOI destinationPoint; // Destination Point
 
 bool setHomePoint = false;
 bool homePointSelected = false;
+unsigned int averagingHomePointStartTime; // in ms
+const unsigned int averagingHomePointDuration = 1000; // in ms
 bool gpsPositionAvailable = false;
 bool gpsVelocityAvailable = false;
 
@@ -584,8 +602,8 @@ struct3Daxis angleCmd;
 struct3Daxis angleCmdDiff;
 struct3Daxis rateCmd;
 struct3Daxis rateCmdDiff;
-struct3Daxis posCmd; // will be used later
-struct3Daxis posCmdDiff; // will be used later
+struct3Daxis posCmd;
+struct3Daxis posCmdDiff;
 struct3Daxis velCmd;
 struct3Daxis velCmdDiff;
 struct3Daxis accelCmd;
@@ -679,7 +697,8 @@ double cmdMotorPitch = 0, cmdMotorRoll = 0, cmdMotorThr = CMD_THR_MIN, cmdMotorY
 unsigned char modeQuad;
 unsigned char autoModeStatus;
 unsigned char statusRx;
-bool posHoldStatus = false;
+bool posHoldAvailable = false;
+bool velHoldAvailable = false;
 
 //StatusType Definitions
 unsigned char statusBaro;
@@ -726,12 +745,17 @@ cDataFilter filtObjVelCmdDiffY(filterType_Diff100Hz);
 cDataFilter filtObjVelCmdDiffZ(filterType_Diff100Hz);
 #define DELTATIME_VELCMD_DIFF	 0.01
 
+cDataFilter filtObjPosCmdDiffX(filterType_Diff100Hz);
+cDataFilter filtObjPosCmdDiffY(filterType_Diff100Hz);
+cDataFilter filtObjPosCmdDiffZ(filterType_Diff100Hz);
+#define DELTATIME_POSCMD_DIFF	 0.01
+
 cDataFilter filtObjAnglePIDoutX(filterType_LPF); // will be tested
 cDataFilter filtObjAnglePIDoutY(filterType_LPF); // will be tested
 cDataFilter filtObjAnglePIDoutZ(filterType_LPF); // will be tested
 
-cDataFilter filtObjPosPIDoutX(filterType_LPF); // will be used later
-cDataFilter filtObjPosPIDoutY(filterType_LPF); // will be used later
+cDataFilter filtObjPosPIDoutX(filterType_LPF);
+cDataFilter filtObjPosPIDoutY(filterType_LPF);
 cDataFilter filtObjPosPIDoutZ(filterType_LPF);
 
 cDataFilter filtObjVelPIDoutX(filterType_LPF);
