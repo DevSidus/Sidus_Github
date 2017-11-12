@@ -411,8 +411,6 @@ double		PID_THR_BATT_SCALE_FACTOR = 1.0;
 double		PID_BATT_VOLTAGE_SLOPE = -0.12;
 double		PID_BATT_MIDDLE_VOLTAGE = 11.5;
 float		batteryVoltageInVolts;
-double		commandedAltitude = 0;
-double		autoModeStartAltitude = 0;
 
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -750,20 +748,24 @@ cDataFilter filtObjPosCmdDiffY(filterType_Diff100Hz);
 cDataFilter filtObjPosCmdDiffZ(filterType_Diff100Hz);
 #define DELTATIME_POSCMD_DIFF	 0.01
 
-cDataFilter filtObjAnglePIDoutX(filterType_LPF); // will be tested
-cDataFilter filtObjAnglePIDoutY(filterType_LPF); // will be tested
-cDataFilter filtObjAnglePIDoutZ(filterType_LPF); // will be tested
+// These filters are not necessary
+//cDataFilter filtObjAnglePIDoutX(filterType_LPF);
+//cDataFilter filtObjAnglePIDoutY(filterType_LPF);
+//cDataFilter filtObjAnglePIDoutZ(filterType_LPF);
 
-cDataFilter filtObjPosPIDoutX(filterType_LPF);
-cDataFilter filtObjPosPIDoutY(filterType_LPF);
-cDataFilter filtObjPosPIDoutZ(filterType_LPF);
+// These filters are not necessary
+//cDataFilter filtObjPosPIDoutX(filterType_LPF);
+//cDataFilter filtObjPosPIDoutY(filterType_LPF);
+//cDataFilter filtObjPosPIDoutZ(filterType_LPF);
 
-cDataFilter filtObjVelPIDoutX(filterType_LPF);
-cDataFilter filtObjVelPIDoutY(filterType_LPF);
-cDataFilter filtObjVelPIDoutZ(filterType_LPF);
+// These filters are not necessary
+//cDataFilter filtObjVelPIDoutX(filterType_LPF);
+//cDataFilter filtObjVelPIDoutY(filterType_LPF);
+//cDataFilter filtObjVelPIDoutZ(filterType_LPF);
 
-cDataFilter filtObjAccPIDoutX(filterType_LPF);
-cDataFilter filtObjAccPIDoutY(filterType_LPF);
+// These filters are not necessary
+//cDataFilter filtObjAccPIDoutX(filterType_LPF);
+//cDataFilter filtObjAccPIDoutY(filterType_LPF);
 // Acc PID Out Z is not filtered to prevent delay
 
 cDataFilter filtObjUltrasonicDist(filterType_LPF);
