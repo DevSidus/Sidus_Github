@@ -67,92 +67,83 @@ struct structMsgUdpR01
 	unsigned char pidRatePitchKp;
 	unsigned char pidRatePitchKi;
 	unsigned char pidRatePitchKd;
-	short pidRatePitchOutput;
-	short pidRatePitchPresult;
-	short pidRatePitchIresult;
-	short pidRatePitchDresult;
+	float pidRatePitchOutput;
+	float pidRatePitchPresult;
+	float pidRatePitchIresult;
+	float pidRatePitchDresult;
 
 	unsigned char pidAnglePitchKp;
 	unsigned char pidAnglePitchKi;
 	unsigned char pidAnglePitchKd;
-	short pidAnglePitchOutput;
-	short pidAnglePitchPresult;
-	short pidAnglePitchIresult;
-	short pidAnglePitchDresult;
-
-	//unsigned char pidRateRollKp;
-	//unsigned char pidRateRollKi;
-	//unsigned char pidRateRollKd;
-	//short pidRateRollOutput;
-	//short pidRateRollPresult;
-	//short pidRateRollIresult;
-	//short pidRateRollDresult;
-
-	//unsigned char pidAngleRollKp;
-	//unsigned char pidAngleRollKi;
-	//unsigned char pidAngleRollKd;
-	//short pidAngleRollOutput;
-	//short pidAngleRollPresult;
-	//short pidAngleRollIresult;
-	//short pidAngleRollDresult;
+	float pidAnglePitchOutput;
+	float pidAnglePitchPresult;
+	float pidAnglePitchIresult;
+	float pidAnglePitchDresult;
 
 	unsigned char pidRateYawKp;
 	unsigned char pidRateYawKi;
 	unsigned char pidRateYawKd;
-	short pidRateYawOutput;
-	short pidRateYawPresult;
-	short pidRateYawIresult;
-	short pidRateYawDresult;
+	float pidRateYawOutput;
+	float pidRateYawPresult;
+	float pidRateYawIresult;
+	float pidRateYawDresult;
 
 	unsigned char pidAngleYawKp;
 	unsigned char pidAngleYawKi;
 	unsigned char pidAngleYawKd;
-	short pidAngleYawOutput;
-	short pidAngleYawPresult;
-	short pidAngleYawIresult;
-	short pidAngleYawDresult;
-
-	short commandedYawAngle;
+	float pidAngleYawOutput;
+	float pidAngleYawPresult;
+	float pidAngleYawIresult;
+	float pidAngleYawDresult;
+	float commandedYawAngle;
 
 	unsigned char pidPosAltKp;
 	unsigned char pidPosAltKi;
 	unsigned char pidPosAltKd;
-	short pidPosAltOutput;
-	short pidPosAltPresult;
-	short pidPosAltIresult;
-	short pidPosAltDresult;
+	float pidPosAltOutput;
+	float pidPosAltPresult;
+	float pidPosAltIresult;
+	float pidPosAltDresult;
 
 	unsigned char pidVelAltKp;
 	unsigned char pidVelAltKi;
 	unsigned char pidVelAltKd;
-	short pidVelAltOutput;
-	short pidVelAltPresult;
-	short pidVelAltIresult;
-	short pidVelAltDresult;
+	float pidVelAltOutput;
+	float pidVelAltPresult;
+	float pidVelAltIresult;
+	float pidVelAltDresult;
 
 	unsigned char pidAccAltKp;
 	unsigned char pidAccAltKi;
 	unsigned char pidAccAltKd;
-	short pidAccAltOutput;
-	short pidAccAltPresult;
-	short pidAccAltIresult;
-	short pidAccAltDresult;
+	float pidAccAltOutput;
+	float pidAccAltPresult;
+	float pidAccAltIresult;
+	float pidAccAltDresult;
 
-	unsigned char pidAccPosXKp;
-	unsigned char pidAccPosXKi;
-	unsigned char pidAccPosXKd;
-	short pidAccPosXOutput;
-	short pidAccPosXPresult;
-	short pidAccPosXIresult;
-	short pidAccPosXDresult;
+	unsigned char pidPosXKp;
+	unsigned char pidPosXKi;
+	unsigned char pidPosXKd;
+	float pidPosXOutput;
+	float pidPosXPresult;
+	float pidPosXIresult;
+	float pidPosXDresult;
 
-	unsigned char pidAccPosYKp;
-	unsigned char pidAccPosYKi;
-	unsigned char pidAccPosYKd;
-	short pidAccPosYOutput;
-	short pidAccPosYPresult;
-	short pidAccPosYIresult;
-	short pidAccPosYDresult;
+	unsigned char pidVelXKp;
+	unsigned char pidVelXKi;
+	unsigned char pidVelXKd;
+	float pidVelXOutput;
+	float pidVelXPresult;
+	float pidVelXIresult;
+	float pidVelXDresult;
+
+	unsigned char pidAccXKp;
+	unsigned char pidAccXKi;
+	unsigned char pidAccXKd;
+	float pidAccXOutput;
+	float pidAccXPresult;
+	float pidAccXIresult;
+	float pidAccXDresult;
 
 	//GPS DATA
 	unsigned char gpsStatus;
@@ -168,6 +159,9 @@ struct structMsgUdpR01
 	double gpsPosAccuracy;
 	double gpsVelAccuracy;
 	
+	unsigned char posHoldAvailable;
+	unsigned char velHoldAvailable;
+
 	//Lidar Distance
 	unsigned short lidar_distance;
 };

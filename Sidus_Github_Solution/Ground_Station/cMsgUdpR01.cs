@@ -71,92 +71,83 @@ namespace Ground_Station
         public byte pidRatePitchKp { get; set; }
         public byte pidRatePitchKi { get; set; }
         public byte pidRatePitchKd { get; set; }
-        public short pidRatePitchOutput { get; set; }
-        public short pidRatePitchPresult { get; set; }
-        public short pidRatePitchIresult { get; set; }
-        public short pidRatePitchDresult { get; set; }
+        public float pidRatePitchOutput { get; set; }
+        public float pidRatePitchPresult { get; set; }
+        public float pidRatePitchIresult { get; set; }
+        public float pidRatePitchDresult { get; set; }
 
         public byte pidAnglePitchKp { get; set; }
         public byte pidAnglePitchKi { get; set; }
         public byte pidAnglePitchKd { get; set; }
-        public short pidAnglePitchOutput { get; set; }
-        public short pidAnglePitchPresult { get; set; }
-        public short pidAnglePitchIresult { get; set; }
-        public short pidAnglePitchDresult { get; set; }
-
-        //public byte pidRateRollKp { get; set; }
-        //public byte pidRateRollKi { get; set; }
-        //public byte pidRateRollKd { get; set; }
-        //public short pidRateRollOutput { get; set; }
-        //public short pidRateRollPresult { get; set; }
-        //public short pidRateRollIresult { get; set; }
-        //public short pidRateRollDresult { get; set; }
-
-        //public byte pidAngleRollKp { get; set; }
-        //public byte pidAngleRollKi { get; set; }
-        //public byte pidAngleRollKd { get; set; }
-        //public short pidAngleRollOutput { get; set; }
-        //public short pidAngleRollPresult { get; set; }
-        //public short pidAngleRollIresult { get; set; }
-        //public short pidAngleRollDresult { get; set; }
+        public float pidAnglePitchOutput { get; set; }
+        public float pidAnglePitchPresult { get; set; }
+        public float pidAnglePitchIresult { get; set; }
+        public float pidAnglePitchDresult { get; set; }
 
         public byte pidRateYawKp { get; set; }
         public byte pidRateYawKi { get; set; }
         public byte pidRateYawKd { get; set; }
-        public short pidRateYawOutput { get; set; }
-        public short pidRateYawPresult { get; set; }
-        public short pidRateYawIresult { get; set; }
-        public short pidRateYawDresult { get; set; }
+        public float pidRateYawOutput { get; set; }
+        public float pidRateYawPresult { get; set; }
+        public float pidRateYawIresult { get; set; }
+        public float pidRateYawDresult { get; set; }
 
         public byte pidAngleYawKp { get; set; }
         public byte pidAngleYawKi { get; set; }
         public byte pidAngleYawKd { get; set; }
-        public short pidAngleYawOutput { get; set; }
-        public short pidAngleYawPresult { get; set; }
-        public short pidAngleYawIresult { get; set; }
-        public short pidAngleYawDresult { get; set; }
-
-        public short commandedYawAngle { get; set; }
+        public float pidAngleYawOutput { get; set; }
+        public float pidAngleYawPresult { get; set; }
+        public float pidAngleYawIresult { get; set; }
+        public float pidAngleYawDresult { get; set; }
+        public float commandedYawAngle { get; set; }
 
         public byte pidPosAltKp { get; set; }
         public byte pidPosAltKi { get; set; }
         public byte pidPosAltKd { get; set; }
-        public short pidPosAltOutput { get; set; }
-        public short pidPosAltPresult { get; set; }
-        public short pidPosAltIresult { get; set; }
-        public short pidPosAltDresult { get; set; }
+        public float pidPosAltOutput { get; set; }
+        public float pidPosAltPresult { get; set; }
+        public float pidPosAltIresult { get; set; }
+        public float pidPosAltDresult { get; set; }
 
         public byte pidVelAltKp { get; set; }
         public byte pidVelAltKi { get; set; }
         public byte pidVelAltKd { get; set; }
-        public short pidVelAltOutput { get; set; }
-        public short pidVelAltPresult { get; set; }
-        public short pidVelAltIresult { get; set; }
-        public short pidVelAltDresult { get; set; }
+        public float pidVelAltOutput { get; set; }
+        public float pidVelAltPresult { get; set; }
+        public float pidVelAltIresult { get; set; }
+        public float pidVelAltDresult { get; set; }
 
         public byte pidAccAltKp { get; set; }
         public byte pidAccAltKi { get; set; }
         public byte pidAccAltKd { get; set; }
-        public short pidAccAltOutput { get; set; }
-        public short pidAccAltPresult { get; set; }
-        public short pidAccAltIresult { get; set; }
-        public short pidAccAltDresult { get; set; }
+        public float pidAccAltOutput { get; set; }
+        public float pidAccAltPresult { get; set; }
+        public float pidAccAltIresult { get; set; }
+        public float pidAccAltDresult { get; set; }
 
-        public byte pidAccPosXKp { get; set; }
-        public byte pidAccPosXKi { get; set; }
-        public byte pidAccPosXKd { get; set; }
-        public short pidAccPosXOutput { get; set; }
-        public short pidAccPosXPresult { get; set; }
-        public short pidAccPosXIresult { get; set; }
-        public short pidAccPosXDresult { get; set; }
+        public byte pidPosXKp { get; set; }
+        public byte pidPosXKi { get; set; }
+        public byte pidPosXKd { get; set; }
+        public float pidPosXOutput { get; set; }
+        public float pidPosXPresult { get; set; }
+        public float pidPosXIresult { get; set; }
+        public float pidPosXDresult { get; set; }
 
-        public byte pidAccPosYKp { get; set; }
-        public byte pidAccPosYKi { get; set; }
-        public byte pidAccPosYKd { get; set; }
-        public short pidAccPosYOutput { get; set; }
-        public short pidAccPosYPresult { get; set; }
-        public short pidAccPosYIresult { get; set; }
-        public short pidAccPosYDresult { get; set; }
+        public byte pidVelXKp { get; set; }
+        public byte pidVelXKi { get; set; }
+        public byte pidVelXKd { get; set; }
+        public float pidVelXOutput { get; set; }
+        public float pidVelXPresult { get; set; }
+        public float pidVelXIresult { get; set; }
+        public float pidVelXDresult { get; set; }
+
+        public byte pidAccXKp { get; set; }
+        public byte pidAccXKi { get; set; }
+        public byte pidAccXKd { get; set; }
+        public float pidAccXOutput { get; set; }
+        public float pidAccXPresult { get; set; }
+        public float pidAccXIresult { get; set; }
+        public float pidAccXDresult { get; set; }
 
         public byte gpsStatus { get; set; }
         public double gpsLat { get; set; }
@@ -171,8 +162,11 @@ namespace Ground_Station
         public double gpsPosAccuracy { get; set; }
         public double gpsVelAccuracy { get; set; }
 
+        public byte posHoldAvailable { get; set; }
+        public byte velHoldAvailable { get; set; }
 
         public ushort lidar_distance { get; set; }
+
     }
     class cMsgUdpR01
     {

@@ -470,7 +470,7 @@ void task_gps(void * parameter)
 				gpsVelocityAvailable = true;
 			}
 		#else
-			if (qcGPS.gpsFixType == noFix)
+			if (qcGPS.gpsFixType != fix3D) // GPS should be used only at 3D Fix Mode
 			{
 				qcGPS.gpsIsFix = false;
 				gpsPositionAvailable = false;
@@ -479,13 +479,8 @@ void task_gps(void * parameter)
 			else
 			{
 				qcGPS.gpsIsFix = true;
+				gpsVelocityAvailable = true; // GPS velocity can be used at 3D Fix Mode
 
-				if (qcGPS.velAccuracy < 1) {
-					gpsVelocityAvailable = true;
-				}
-				else {
-					gpsVelocityAvailable = false;
-				}
 			}
 		#endif // !UBOX
 		
@@ -512,12 +507,7 @@ void task_gps(void * parameter)
 			{
 				calculateEcef2Ned(qcGPS.ecefCoordinate.x, qcGPS.ecefCoordinate.y, qcGPS.ecefCoordinate.z, homePoint.ecefCoordinate.x, homePoint.ecefCoordinate.y, homePoint.ecefCoordinate.z, homePoint.lat, homePoint.lon, &qcGPS.nedCoordinate.N, &qcGPS.nedCoordinate.E, &qcGPS.nedCoordinate.D);
 
-				if (qcGPS.posAccuracy < 10) {
-					gpsPositionAvailable = true;
-				}
-				else {
-					gpsPositionAvailable = false;
-				}
+				gpsPositionAvailable = true; // GPS velocity can be used at 3D Fix Mode and if home point is selected
 
 			}
 		}
@@ -3059,6 +3049,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.rxRoll				= cmdRxRollCalibrated;
 	MsgUdpR01.message.rxYaw					= cmdRxYaw;
 	MsgUdpR01.message.rx6thCh				= cmdRx6thCh;
+
 	MsgUdpR01.message.pidRatePitchKp		= pidVars.ratePitch.Kp / RESOLUTION_PID_RATE_KP;
 	MsgUdpR01.message.pidRatePitchKi		= pidVars.ratePitch.Ki / RESOLUTION_PID_RATE_KI;
 	MsgUdpR01.message.pidRatePitchKd		= pidVars.ratePitch.Kd / RESOLUTION_PID_RATE_KD;
@@ -3073,25 +3064,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidAnglePitchPresult	= pidAnglePitch.Get_P_Result();
 	MsgUdpR01.message.pidAnglePitchIresult	= pidAnglePitch.Get_I_Result();
 	MsgUdpR01.message.pidAnglePitchDresult	= pidAnglePitch.Get_D_Result();
-	//MsgUdpR01.message.pidRateRollKp			= pidVars.rateRoll.Kp / RESOLUTION_PID_RATE_KP;
-	//MsgUdpR01.message.pidRateRollKi			= pidVars.rateRoll.Ki / RESOLUTION_PID_RATE_KI;
-	//MsgUdpR01.message.pidRateRollKd			= pidVars.rateRoll.Kd / RESOLUTION_PID_RATE_KD;
-	//MsgUdpR01.message.pidRateRollOutput		= pidVars.rateRoll.output;
-	//MsgUdpR01.message.pidRateRollPresult	= pidRateRoll.Get_P_Result();
-	//MsgUdpR01.message.pidRateRollIresult	= pidRateRoll.Get_I_Result();
-	//MsgUdpR01.message.pidRateRollDresult	= pidRateRoll.Get_D_Result();
-	//MsgUdpR01.message.pidRateRollF1			= pidVars.rateRoll.f1 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidRateRollF2			= pidVars.rateRoll.f2 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAngleRollKp		= pidVars.angleRoll.Kp / RESOLUTION_PID_ANGLE_KP;
-	//MsgUdpR01.message.pidAngleRollKi		= pidVars.angleRoll.Ki / RESOLUTION_PID_ANGLE_KI;
-	//MsgUdpR01.message.pidAngleRollKd		= pidVars.angleRoll.Kd / RESOLUTION_PID_ANGLE_KD;
-	//MsgUdpR01.message.pidAngleRollOutput	= pidVars.angleRoll.output;
-	//MsgUdpR01.message.pidAngleRollPresult	= pidAngleRoll.Get_P_Result();
-	//MsgUdpR01.message.pidAngleRollIresult	= pidAngleRoll.Get_I_Result();
-	//MsgUdpR01.message.pidAngleRollDresult	= pidAngleRoll.Get_D_Result();
-	//MsgUdpR01.message.pidAngleRollF1		= pidVars.angleRoll.f1 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAngleRollF2		= pidVars.angleRoll.f2 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAngleRollOutFilter = pidVars.angleRoll.outputFilterConstant / RESOLUTION_PID_F;
+
 	MsgUdpR01.message.pidRateYawKp			= pidVars.rateYaw.Kp / RESOLUTION_PID_RATE_KP;
 	MsgUdpR01.message.pidRateYawKi			= pidVars.rateYaw.Ki / RESOLUTION_PID_RATE_KI;
 	MsgUdpR01.message.pidRateYawKd			= pidVars.rateYaw.Kd / RESOLUTION_PID_RATE_KD;
@@ -3116,13 +3089,6 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidPosAltIresult		= pidPosAlt.Get_I_Result();
 	MsgUdpR01.message.pidPosAltDresult		= pidPosAlt.Get_D_Result();
 
-	//MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
-	//MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
-	//MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
-	//MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
-	//MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
-	//MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
-	//MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
 	MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
 	MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
 	MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
@@ -3139,21 +3105,29 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
 	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
 
-	MsgUdpR01.message.pidAccPosXKp			= pidVars.accX.Kp / RESOLUTION_PID_ACC_KP;
-	MsgUdpR01.message.pidAccPosXKi			= pidVars.accX.Ki / RESOLUTION_PID_ACC_KI;
-	MsgUdpR01.message.pidAccPosXKd			= pidVars.accX.Kd / RESOLUTION_PID_ACC_KD;
-	MsgUdpR01.message.pidAccPosXOutput		= pidVars.accX.output;
-	MsgUdpR01.message.pidAccPosXPresult		= pidAccX.Get_P_Result();
-	MsgUdpR01.message.pidAccPosXIresult		= pidAccX.Get_I_Result();
-	MsgUdpR01.message.pidAccPosXDresult		= pidAccX.Get_D_Result();
+	MsgUdpR01.message.pidPosXKp				= pidVars.posX.Kp / RESOLUTION_PID_POS_KP;
+	MsgUdpR01.message.pidPosXKi				= pidVars.posX.Ki / RESOLUTION_PID_POS_KI;
+	MsgUdpR01.message.pidPosXKd				= pidVars.posX.Kd / RESOLUTION_PID_POS_KD;
+	MsgUdpR01.message.pidPosXOutput			= pidVars.posX.output;
+	MsgUdpR01.message.pidPosXPresult		= pidPosX.Get_P_Result();
+	MsgUdpR01.message.pidPosXIresult		= pidPosX.Get_I_Result();
+	MsgUdpR01.message.pidPosXDresult		= pidPosX.Get_D_Result();
 
-	MsgUdpR01.message.pidAccPosYKp			= pidVars.accY.Kp / RESOLUTION_PID_ACC_KP;
-	MsgUdpR01.message.pidAccPosYKi			= pidVars.accY.Ki / RESOLUTION_PID_ACC_KI;
-	MsgUdpR01.message.pidAccPosYKd			= pidVars.accY.Kd / RESOLUTION_PID_ACC_KD;
-	MsgUdpR01.message.pidAccPosYOutput		= pidVars.accY.output;
-	MsgUdpR01.message.pidAccPosYPresult		= pidAccY.Get_P_Result();
-	MsgUdpR01.message.pidAccPosYIresult		= pidAccY.Get_I_Result();
-	MsgUdpR01.message.pidAccPosYDresult		= pidAccY.Get_D_Result();
+	MsgUdpR01.message.pidVelXKp				= pidVars.velX.Kp / RESOLUTION_PID_VEL_KP;
+	MsgUdpR01.message.pidVelXKi				= pidVars.velX.Ki / RESOLUTION_PID_VEL_KI;
+	MsgUdpR01.message.pidVelXKd				= pidVars.velX.Kd / RESOLUTION_PID_VEL_KD;
+	MsgUdpR01.message.pidVelXOutput			= pidVars.velX.output;
+	MsgUdpR01.message.pidVelXPresult		= pidVelX.Get_P_Result();
+	MsgUdpR01.message.pidVelXIresult		= pidVelX.Get_I_Result();
+	MsgUdpR01.message.pidVelXDresult		= pidVelX.Get_D_Result();
+
+	MsgUdpR01.message.pidAccXKp				= pidVars.accX.Kp / RESOLUTION_PID_ACC_KP;
+	MsgUdpR01.message.pidAccXKi				= pidVars.accX.Ki / RESOLUTION_PID_ACC_KI;
+	MsgUdpR01.message.pidAccXKd				= pidVars.accX.Kd / RESOLUTION_PID_ACC_KD;
+	MsgUdpR01.message.pidAccXOutput			= pidVars.accX.output;
+	MsgUdpR01.message.pidAccXPresult		= pidAccX.Get_P_Result();
+	MsgUdpR01.message.pidAccXIresult		= pidAccX.Get_I_Result();
+	MsgUdpR01.message.pidAccXDresult		= pidAccX.Get_D_Result();
 
 	MsgUdpR01.message.gpsStatus				= qcGPS.gpsIsFix;
 	MsgUdpR01.message.gpsLat				= qcGPS.lat*1e7;
@@ -3168,7 +3142,10 @@ void prepareUDPmessages()
 	MsgUdpR01.message.gpsPosAccuracy		= qcGPS.posAccuracy;
 	MsgUdpR01.message.gpsVelAccuracy		= qcGPS.velAccuracy;
 
-	MsgUdpR01.message.lidar_distance		 = lidar_distance;
+	MsgUdpR01.message.posHoldAvailable		= posHoldAvailable;
+	MsgUdpR01.message.velHoldAvailable		= velHoldAvailable;
+
+	MsgUdpR01.message.lidar_distance		= lidar_distance;
 
 	MsgUdpR01.getPacket();
 }
@@ -3178,7 +3155,7 @@ void prepareAndroidUDPmessages()
 	MsgUdpRAndroid.message.timeStamp = millis();
 
 	MsgUdpRAndroid.message.modeQuad = modeQuad;
-	MsgUdpRAndroid.message.autoModeStatus = autoModeStatus;
+	MsgUdpRAndroid.message.autoModeStatus = qcGPS.gpsIsFix; // autoModeStatus; // qcGPS.gpsIsFix is being used temporarily
 	MsgUdpRAndroid.message.homePointSelected = homePointSelected;
 	MsgUdpRAndroid.message.posHoldAvailable = posHoldAvailable;
 
