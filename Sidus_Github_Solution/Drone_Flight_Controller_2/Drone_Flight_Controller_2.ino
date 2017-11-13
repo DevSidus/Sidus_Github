@@ -470,17 +470,16 @@ void task_gps(void * parameter)
 				gpsVelocityAvailable = true;
 			}
 		#else
-			if (qcGPS.gpsFixType != fix3D) // GPS should be used only at 3D Fix Mode
+			if ((qcGPS.gpsFixType == fix3D) || (qcGPS.gpsFixType == fix2D)) // GPS should be used only at 2D or 3D Fix Mode
+			{
+				qcGPS.gpsIsFix = true;
+				gpsVelocityAvailable = true; // GPS velocity can be used at 2D or 3D Fix Mode
+			}
+			else
 			{
 				qcGPS.gpsIsFix = false;
 				gpsPositionAvailable = false;
 				gpsVelocityAvailable = false;
-			}
-			else
-			{
-				qcGPS.gpsIsFix = true;
-				gpsVelocityAvailable = true; // GPS velocity can be used at 3D Fix Mode
-
 			}
 		#endif // !UBOX
 		
@@ -507,7 +506,7 @@ void task_gps(void * parameter)
 			{
 				calculateEcef2Ned(qcGPS.ecefCoordinate.x, qcGPS.ecefCoordinate.y, qcGPS.ecefCoordinate.z, homePoint.ecefCoordinate.x, homePoint.ecefCoordinate.y, homePoint.ecefCoordinate.z, homePoint.lat, homePoint.lon, &qcGPS.nedCoordinate.N, &qcGPS.nedCoordinate.E, &qcGPS.nedCoordinate.D);
 
-				gpsPositionAvailable = true; // GPS velocity can be used at 3D Fix Mode and if home point is selected
+				gpsPositionAvailable = true; // GPS velocity can be used at 2D or 3D Fix Mode and if home point is selected
 
 			}
 		}
