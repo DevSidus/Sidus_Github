@@ -2053,13 +2053,19 @@ void processPID()
 	if (velHoldAvailable)
 	{
 		// Calculate Angle Commands (When Auto Mode)
-		angleCmd.x = atan(pidVars.accY.output / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;  // division by 0 should be avoided!!!
-		if (angleCmd.x > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = CMD_AUTO_PITCH_ROLL_MAX;
-		else if (angleCmd.x < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = -CMD_AUTO_PITCH_ROLL_MAX;
+		if (qc.accelWorld.z == GRAVITY_IN_METER_PER_SECOND2) { // Free-fall detection
+			angleCmd.x = 0;
+			angleCmd.y = 0;
+		}
+		else {
+			angleCmd.y = -atan(pidVars.accX.output / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;
+			if (angleCmd.y > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = CMD_AUTO_PITCH_ROLL_MAX;
+			else if (angleCmd.y < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = -CMD_AUTO_PITCH_ROLL_MAX;
 
-		angleCmd.y = -atan(pidVars.accX.output / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;  // division by 0 should be avoided!!!
-		if (angleCmd.y > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = CMD_AUTO_PITCH_ROLL_MAX;
-		else if (angleCmd.y < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = -CMD_AUTO_PITCH_ROLL_MAX;
+			angleCmd.x = atan(pidVars.accY.output * cos(angleCmd.y * M_PI / 180) / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;
+			if (angleCmd.x > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = CMD_AUTO_PITCH_ROLL_MAX;
+			else if (angleCmd.x < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = -CMD_AUTO_PITCH_ROLL_MAX;	
+		}
 	}
 	else
 	{
