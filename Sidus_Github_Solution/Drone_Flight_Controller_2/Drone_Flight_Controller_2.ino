@@ -74,7 +74,7 @@ PID pidAngleRoll(&pidVars.angleRoll.sensedVal, &pidVars.angleRoll.output, &pidVa
 PID pidRateYaw(&pidVars.rateYaw.sensedVal, &pidVars.rateYaw.output, &pidVars.rateYaw.setpoint, &pidVars.rateYaw.sensedValDiff, &pidVars.rateYaw.setpointDiff);
 PID_YawAngle pidAngleYaw(&pidVars.angleYaw.sensedVal, &pidVars.angleYaw.output, &pidVars.angleYaw.setpoint, &pidVars.angleYaw.sensedValDiff);
 
-PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.sensedValDiff);
+PID pidPosAlt(&pidVars.posAlt.sensedVal, &pidVars.posAlt.output, &pidVars.posAlt.setpoint, &pidVars.posAlt.sensedValDiff, &pidVars.posAlt.setpointDiff);
 PID pidVelAlt(&pidVars.velAlt.sensedVal, &pidVars.velAlt.output, &pidVars.velAlt.setpoint, &pidVars.velAlt.sensedValDiff, &pidVars.velAlt.setpointDiff);
 PID pidAccAlt(&pidVars.accAlt.sensedVal, &pidVars.accAlt.output, &pidVars.accAlt.setpoint, &pidVars.accAlt.sensedValDiff, &pidVars.accAlt.setpointDiff);
 
@@ -470,22 +470,16 @@ void task_gps(void * parameter)
 				gpsVelocityAvailable = true;
 			}
 		#else
-			if (qcGPS.gpsFixType == noFix)
+			if ((qcGPS.gpsFixType == fix3D) || (qcGPS.gpsFixType == fix2D)) // GPS should be used only at 2D or 3D Fix Mode
+			{
+				qcGPS.gpsIsFix = true;
+				gpsVelocityAvailable = true; // GPS velocity can be used at 2D or 3D Fix Mode
+			}
+			else
 			{
 				qcGPS.gpsIsFix = false;
 				gpsPositionAvailable = false;
 				gpsVelocityAvailable = false;
-			}
-			else
-			{
-				qcGPS.gpsIsFix = true;
-
-				if (qcGPS.velAccuracy < 1) {
-					gpsVelocityAvailable = true;
-				}
-				else {
-					gpsVelocityAvailable = false;
-				}
 			}
 		#endif // !UBOX
 		
@@ -512,12 +506,7 @@ void task_gps(void * parameter)
 			{
 				calculateEcef2Ned(qcGPS.ecefCoordinate.x, qcGPS.ecefCoordinate.y, qcGPS.ecefCoordinate.z, homePoint.ecefCoordinate.x, homePoint.ecefCoordinate.y, homePoint.ecefCoordinate.z, homePoint.lat, homePoint.lon, &qcGPS.nedCoordinate.N, &qcGPS.nedCoordinate.E, &qcGPS.nedCoordinate.D);
 
-				if (qcGPS.posAccuracy < 10) {
-					gpsPositionAvailable = true;
-				}
-				else {
-					gpsPositionAvailable = false;
-				}
+				gpsPositionAvailable = true; // GPS velocity can be used at 2D or 3D Fix Mode and if home point is selected
 
 			}
 		}
@@ -1974,29 +1963,29 @@ void processPID()
 {
 	prePIDprocesses();
 
-	//getBodyToEulerAngularRates();
+	// getBodyToEulerAngularRates(); // This function is not necessary for this task
 
 	calculatePosCmdXYDifferentials();
 
 	// Pos X PID
-	pidVars.posX.setpoint = posCmd.x;
-	pidVars.posX.sensedVal = qc.posWorldEstimated.x;
+	pidVars.posX.setpoint = posCmd.x; // meters
+	pidVars.posX.sensedVal = qc.posWorldEstimated.x; // meters
 	pidVars.posX.setpointDiff = posCmdDiff.x;
-	pidVars.posX.sensedValDiff = qc.velWorldEstimated.x;
+	pidVars.posX.sensedValDiff = qc.velWorldEstimated.x; // m/s
 	pidPosX.Compute();
 
 	// Pos Y PID
-	pidVars.posY.setpoint = posCmd.y;
-	pidVars.posY.sensedVal = qc.posWorldEstimated.y;
+	pidVars.posY.setpoint = posCmd.y; // meters
+	pidVars.posY.sensedVal = qc.posWorldEstimated.y; // meters
 	pidVars.posY.setpointDiff = posCmdDiff.y;
-	pidVars.posY.sensedValDiff = qc.velWorldEstimated.y;
+	pidVars.posY.sensedValDiff = qc.velWorldEstimated.y; // m/s
 	pidPosY.Compute();
 
-	filterPosXYPIDoutputs();
+	// filterPosXYPIDoutputs(); // This filtering is not necessary
 
 	if ((cmdMotorPitch == 0) && posHoldAvailable) // Calculate Velocity X Command (When Auto Mode)
 	{
-		velCmd.x = pidVars.posX.outputFiltered;
+		velCmd.x = pidVars.posX.output; // Filtered output is not necessary
 	}
 	else
 	{
@@ -2006,7 +1995,7 @@ void processPID()
 
 	if ((cmdMotorRoll == 0) && posHoldAvailable) // Calculate Velocity Y Command (When Auto Mode)
 	{
-		velCmd.y = pidVars.posY.outputFiltered;
+		velCmd.y = pidVars.posY.output; // Filtered output is not necessary
 	}
 	else
 	{
@@ -2018,25 +2007,25 @@ void processPID()
 
 	// Vel X PID
 	pidVars.velX.setpoint = velCmd.x;
-	pidVars.velX.sensedVal = qc.velWorldEstimated.x * 100;  // cm/s will be changed to transformed variable
+	pidVars.velX.sensedVal = qc.velWorldEstimated.x * 100;  // cm/s
 	pidVars.velX.setpointDiff = velCmdDiff.x;
 	pidVars.velX.sensedValDiff = qc.accelWorldEstimated.x * 100;   // cm/s^2 
 	pidVelX.Compute();
 
 	// Vel Y PID
 	pidVars.velY.setpoint = velCmd.y;
-	pidVars.velY.sensedVal = qc.velWorldEstimated.y * 100;  // cm/s will be changed to transformed variable
+	pidVars.velY.sensedVal = qc.velWorldEstimated.y * 100;  // cm/s
 	pidVars.velY.setpointDiff = velCmdDiff.y;
 	pidVars.velY.sensedValDiff = qc.accelWorldEstimated.y * 100;   // cm/s^2 
 	pidVelY.Compute();
 
-	filterVelXYPIDoutputs();
+	// filterVelXYPIDoutputs(); // This filtering is not necessary
 
 	// Calculate Acceleration X and Y Commands (When Auto Mode)
-	accelCmd.x = pidVars.velX.outputFiltered;
-	accelCmd.y = pidVars.velY.outputFiltered;
+	accelCmd.x = pidVars.velX.output; // Filtered output is not necessary
+	accelCmd.y = pidVars.velY.output; // Filtered output is not necessary
 	
-	// Calculate Acceleration X and Y Commands (Temporary Mode)
+	// Calculate Acceleration X and Y Commands (If Acc Control Mode)
 	// accelCmd.x = -cmdMotorPitch * 20;  // negative added since rx pitch command is in the reverse direction of x-axis
 	// accelCmd.y = cmdMotorRoll * 20;
 	
@@ -2056,7 +2045,7 @@ void processPID()
 	pidVars.accY.sensedValDiff = qc.accelWorldDiff.y * 100;   // cm/s^3 
 	pidAccY.Compute();
 
-	filterAccXYPIDoutputs();
+	// filterAccXYPIDoutputs(); // This filtering is not necessary
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Pitch Roll Yaw Angle PID
@@ -2064,13 +2053,19 @@ void processPID()
 	if (velHoldAvailable)
 	{
 		// Calculate Angle Commands (When Auto Mode)
-		angleCmd.x = atan(pidVars.accY.outputFiltered / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;  // division by 0 should be avoided!!!
-		if (angleCmd.x > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = CMD_AUTO_PITCH_ROLL_MAX;
-		else if (angleCmd.x < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = -CMD_AUTO_PITCH_ROLL_MAX;
+		if (qc.accelWorld.z == GRAVITY_IN_METER_PER_SECOND2) { // Free-fall detection
+			angleCmd.x = 0;
+			angleCmd.y = 0;
+		}
+		else {
+			angleCmd.y = -atan(pidVars.accX.output / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;
+			if (angleCmd.y > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = CMD_AUTO_PITCH_ROLL_MAX;
+			else if (angleCmd.y < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = -CMD_AUTO_PITCH_ROLL_MAX;
 
-		angleCmd.y = -atan(pidVars.accX.outputFiltered / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;  // division by 0 should be avoided!!!
-		if (angleCmd.y > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = CMD_AUTO_PITCH_ROLL_MAX;
-		else if (angleCmd.y < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.y = -CMD_AUTO_PITCH_ROLL_MAX;
+			angleCmd.x = atan(pidVars.accY.output * cos(angleCmd.y * M_PI / 180) / ((GRAVITY_IN_METER_PER_SECOND2 - qc.accelWorld.z) * 100)) * 180 / M_PI;
+			if (angleCmd.x > CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = CMD_AUTO_PITCH_ROLL_MAX;
+			else if (angleCmd.x < -CMD_AUTO_PITCH_ROLL_MAX) angleCmd.x = -CMD_AUTO_PITCH_ROLL_MAX;	
+		}
 	}
 	else
 	{
@@ -2101,7 +2096,7 @@ void processPID()
 	pidVars.angleYaw.sensedValDiff = qc.gyro.z;
 	pidAngleYaw.Compute();
 
-	// filterAnglePIDoutputs(); // Need for function will be tested
+	// filterAnglePIDoutputs(); // This filtering is not necessary
 
 	// Rate Commands
 	rateCmd.x = pidVars.angleRoll.output;
@@ -2137,23 +2132,26 @@ void processPID()
 
 
 	//Position Altitude PID
-	//pidVars.posAlt.setpoint = double(cmdRx6thCh)/10.0 + autoModeStartAltitude; //meters
-	pidVars.posAlt.setpoint = autoModeStartAltitude; //meters
+
+	calculatePosCmdZDifferentials();
+
+	pidVars.posAlt.setpoint = posCmd.z; //meters
 	pidVars.posAlt.sensedVal = -qc.posWorldEstimated.z;  // meters                  // negative added since altitude vector is opposite of z-axis
+	pidVars.posAlt.setpointDiff = posCmdDiff.z;
 	pidVars.posAlt.sensedValDiff = -qc.velWorldEstimated.z;  // m/s                 // negative added since altitude vector is opposite of z-axis
 	pidPosAlt.Compute();
 
-	filterPosAltPIDoutputs();
+	// filterPosAltPIDoutputs(); // This filtering is not necessary
+	
 	// Velocity Commands
-	//velCmd.z = pidVars.posAlt.outputFiltered;
 	if (getAltVelCmd(cmdRxThr) == 0)
 	{
-		velCmd.z = pidVars.posAlt.outputFiltered;
+		velCmd.z = pidVars.posAlt.output; // Filtered output is not necessary
 	}
 	else
 	{
 		velCmd.z = getAltVelCmd(cmdRxThr);
-		autoModeStartAltitude = -qc.posWorldEstimated.z;   // negative added since altitude vector is opposite of z-axis
+		posCmd.z = -qc.posWorldEstimated.z;   // negative added since altitude vector is opposite of z-axis
 	}
 
 	calculateVelCmdZDifferentials();
@@ -2165,13 +2163,14 @@ void processPID()
 	pidVars.velAlt.sensedValDiff = -qc.accelWorldEstimated.z * 100;  // cm/second^2   // negative added since altitude vector is opposite of z-axis
 	pidVelAlt.Compute();
 
-	filterVelAltPIDoutputs();
+	// filterVelAltPIDoutputs(); // This filtering is not necessary
 
 	//Transform vel pid outputs to body coordinate axis in order to get correct acceleration wrt world
 	//transformVelPIDoutputsToBody();
 
 	// Acceleration Z Commands
-	accelCmd.z = pidVars.velAlt.outputFiltered;
+	accelCmd.z = pidVars.velAlt.output; // Filtered output is not necessary
+	
 	calculateAccelCmdZDifferentials();
 
 	// Acceleration Altitude PID
@@ -2390,7 +2389,7 @@ void postPIDprocesses()
 	}
 	else
 	{
-		autoModeStartAltitude = -qc.posWorldEstimated.z;   // negative added since altitude vector is opposite of z-axis
+		posCmd.z = -qc.posWorldEstimated.z;   // negative added since altitude vector is opposite of z-axis
 		cmdMotorThr = cmdRxThr;
 		pidAccAlt.Set_I_Result(cmdMotorThr);
 	}
@@ -3055,6 +3054,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.rxRoll				= cmdRxRollCalibrated;
 	MsgUdpR01.message.rxYaw					= cmdRxYaw;
 	MsgUdpR01.message.rx6thCh				= cmdRx6thCh;
+
 	MsgUdpR01.message.pidRatePitchKp		= pidVars.ratePitch.Kp / RESOLUTION_PID_RATE_KP;
 	MsgUdpR01.message.pidRatePitchKi		= pidVars.ratePitch.Ki / RESOLUTION_PID_RATE_KI;
 	MsgUdpR01.message.pidRatePitchKd		= pidVars.ratePitch.Kd / RESOLUTION_PID_RATE_KD;
@@ -3069,25 +3069,7 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidAnglePitchPresult	= pidAnglePitch.Get_P_Result();
 	MsgUdpR01.message.pidAnglePitchIresult	= pidAnglePitch.Get_I_Result();
 	MsgUdpR01.message.pidAnglePitchDresult	= pidAnglePitch.Get_D_Result();
-	//MsgUdpR01.message.pidRateRollKp			= pidVars.rateRoll.Kp / RESOLUTION_PID_RATE_KP;
-	//MsgUdpR01.message.pidRateRollKi			= pidVars.rateRoll.Ki / RESOLUTION_PID_RATE_KI;
-	//MsgUdpR01.message.pidRateRollKd			= pidVars.rateRoll.Kd / RESOLUTION_PID_RATE_KD;
-	//MsgUdpR01.message.pidRateRollOutput		= pidVars.rateRoll.output;
-	//MsgUdpR01.message.pidRateRollPresult	= pidRateRoll.Get_P_Result();
-	//MsgUdpR01.message.pidRateRollIresult	= pidRateRoll.Get_I_Result();
-	//MsgUdpR01.message.pidRateRollDresult	= pidRateRoll.Get_D_Result();
-	//MsgUdpR01.message.pidRateRollF1			= pidVars.rateRoll.f1 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidRateRollF2			= pidVars.rateRoll.f2 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAngleRollKp		= pidVars.angleRoll.Kp / RESOLUTION_PID_ANGLE_KP;
-	//MsgUdpR01.message.pidAngleRollKi		= pidVars.angleRoll.Ki / RESOLUTION_PID_ANGLE_KI;
-	//MsgUdpR01.message.pidAngleRollKd		= pidVars.angleRoll.Kd / RESOLUTION_PID_ANGLE_KD;
-	//MsgUdpR01.message.pidAngleRollOutput	= pidVars.angleRoll.output;
-	//MsgUdpR01.message.pidAngleRollPresult	= pidAngleRoll.Get_P_Result();
-	//MsgUdpR01.message.pidAngleRollIresult	= pidAngleRoll.Get_I_Result();
-	//MsgUdpR01.message.pidAngleRollDresult	= pidAngleRoll.Get_D_Result();
-	//MsgUdpR01.message.pidAngleRollF1		= pidVars.angleRoll.f1 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAngleRollF2		= pidVars.angleRoll.f2 / RESOLUTION_PID_F;
-	//MsgUdpR01.message.pidAngleRollOutFilter = pidVars.angleRoll.outputFilterConstant / RESOLUTION_PID_F;
+
 	MsgUdpR01.message.pidRateYawKp			= pidVars.rateYaw.Kp / RESOLUTION_PID_RATE_KP;
 	MsgUdpR01.message.pidRateYawKi			= pidVars.rateYaw.Ki / RESOLUTION_PID_RATE_KI;
 	MsgUdpR01.message.pidRateYawKd			= pidVars.rateYaw.Kd / RESOLUTION_PID_RATE_KD;
@@ -3112,20 +3094,13 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidPosAltIresult		= pidPosAlt.Get_I_Result();
 	MsgUdpR01.message.pidPosAltDresult		= pidPosAlt.Get_D_Result();
 
-	//MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
-	//MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
-	//MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
-	//MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
-	//MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
-	//MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
-	//MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
-	MsgUdpR01.message.pidVelAltKp			= pidVars.velX.Kp / RESOLUTION_PID_VEL_KP;
-	MsgUdpR01.message.pidVelAltKi			= pidVars.velX.Ki / RESOLUTION_PID_VEL_KI;
-	MsgUdpR01.message.pidVelAltKd			= pidVars.velX.Kd / RESOLUTION_PID_VEL_KD;
-	MsgUdpR01.message.pidVelAltOutput		= pidVars.velX.output;
-	MsgUdpR01.message.pidVelAltPresult		= pidVelX.Get_P_Result();
-	MsgUdpR01.message.pidVelAltIresult		= pidVelX.Get_I_Result();
-	MsgUdpR01.message.pidVelAltDresult		= pidVelX.Get_D_Result();
+	MsgUdpR01.message.pidVelAltKp			= pidVars.velAlt.Kp / RESOLUTION_PID_VEL_KP;
+	MsgUdpR01.message.pidVelAltKi			= pidVars.velAlt.Ki / RESOLUTION_PID_VEL_KI;
+	MsgUdpR01.message.pidVelAltKd			= pidVars.velAlt.Kd / RESOLUTION_PID_VEL_KD;
+	MsgUdpR01.message.pidVelAltOutput		= pidVars.velAlt.output;
+	MsgUdpR01.message.pidVelAltPresult		= pidVelAlt.Get_P_Result();
+	MsgUdpR01.message.pidVelAltIresult		= pidVelAlt.Get_I_Result();
+	MsgUdpR01.message.pidVelAltDresult		= pidVelAlt.Get_D_Result();
 
 	MsgUdpR01.message.pidAccAltKp			= pidVars.accAlt.Kp / RESOLUTION_PID_ACC_KP;
 	MsgUdpR01.message.pidAccAltKi			= pidVars.accAlt.Ki / RESOLUTION_PID_ACC_KI;
@@ -3135,21 +3110,29 @@ void prepareUDPmessages()
 	MsgUdpR01.message.pidAccAltIresult		= pidAccAlt.Get_I_Result();
 	MsgUdpR01.message.pidAccAltDresult		= pidAccAlt.Get_D_Result();
 
-	MsgUdpR01.message.pidAccPosXKp			= pidVars.accX.Kp / RESOLUTION_PID_ACC_KP;
-	MsgUdpR01.message.pidAccPosXKi			= pidVars.accX.Ki / RESOLUTION_PID_ACC_KI;
-	MsgUdpR01.message.pidAccPosXKd			= pidVars.accX.Kd / RESOLUTION_PID_ACC_KD;
-	MsgUdpR01.message.pidAccPosXOutput		= pidVars.accX.outputFiltered;
-	MsgUdpR01.message.pidAccPosXPresult		= pidAccX.Get_P_Result();
-	MsgUdpR01.message.pidAccPosXIresult		= pidAccX.Get_I_Result();
-	MsgUdpR01.message.pidAccPosXDresult		= pidAccX.Get_D_Result();
+	MsgUdpR01.message.pidPosXKp				= pidVars.posX.Kp / RESOLUTION_PID_POS_KP;
+	MsgUdpR01.message.pidPosXKi				= pidVars.posX.Ki / RESOLUTION_PID_POS_KI;
+	MsgUdpR01.message.pidPosXKd				= pidVars.posX.Kd / RESOLUTION_PID_POS_KD;
+	MsgUdpR01.message.pidPosXOutput			= pidVars.posX.output;
+	MsgUdpR01.message.pidPosXPresult		= pidPosX.Get_P_Result();
+	MsgUdpR01.message.pidPosXIresult		= pidPosX.Get_I_Result();
+	MsgUdpR01.message.pidPosXDresult		= pidPosX.Get_D_Result();
 
-	MsgUdpR01.message.pidAccPosYKp			= pidVars.accY.Kp / RESOLUTION_PID_ACC_KP;
-	MsgUdpR01.message.pidAccPosYKi			= pidVars.accY.Ki / RESOLUTION_PID_ACC_KI;
-	MsgUdpR01.message.pidAccPosYKd			= pidVars.accY.Kd / RESOLUTION_PID_ACC_KD;
-	MsgUdpR01.message.pidAccPosYOutput		= pidVars.accY.outputFiltered;
-	MsgUdpR01.message.pidAccPosYPresult		= pidAccY.Get_P_Result();
-	MsgUdpR01.message.pidAccPosYIresult		= pidAccY.Get_I_Result();
-	MsgUdpR01.message.pidAccPosYDresult		= pidAccY.Get_D_Result();
+	MsgUdpR01.message.pidVelXKp				= pidVars.velX.Kp / RESOLUTION_PID_VEL_KP;
+	MsgUdpR01.message.pidVelXKi				= pidVars.velX.Ki / RESOLUTION_PID_VEL_KI;
+	MsgUdpR01.message.pidVelXKd				= pidVars.velX.Kd / RESOLUTION_PID_VEL_KD;
+	MsgUdpR01.message.pidVelXOutput			= pidVars.velX.output;
+	MsgUdpR01.message.pidVelXPresult		= pidVelX.Get_P_Result();
+	MsgUdpR01.message.pidVelXIresult		= pidVelX.Get_I_Result();
+	MsgUdpR01.message.pidVelXDresult		= pidVelX.Get_D_Result();
+
+	MsgUdpR01.message.pidAccXKp				= pidVars.accX.Kp / RESOLUTION_PID_ACC_KP;
+	MsgUdpR01.message.pidAccXKi				= pidVars.accX.Ki / RESOLUTION_PID_ACC_KI;
+	MsgUdpR01.message.pidAccXKd				= pidVars.accX.Kd / RESOLUTION_PID_ACC_KD;
+	MsgUdpR01.message.pidAccXOutput			= pidVars.accX.output;
+	MsgUdpR01.message.pidAccXPresult		= pidAccX.Get_P_Result();
+	MsgUdpR01.message.pidAccXIresult		= pidAccX.Get_I_Result();
+	MsgUdpR01.message.pidAccXDresult		= pidAccX.Get_D_Result();
 
 	MsgUdpR01.message.gpsStatus				= qcGPS.gpsIsFix;
 	MsgUdpR01.message.gpsLat				= qcGPS.lat*1e7;
@@ -3164,7 +3147,10 @@ void prepareUDPmessages()
 	MsgUdpR01.message.gpsPosAccuracy		= qcGPS.posAccuracy;
 	MsgUdpR01.message.gpsVelAccuracy		= qcGPS.velAccuracy;
 
-	MsgUdpR01.message.lidar_distance		 = lidar_distance;
+	MsgUdpR01.message.posHoldAvailable		= posHoldAvailable;
+	MsgUdpR01.message.velHoldAvailable		= velHoldAvailable;
+
+	MsgUdpR01.message.lidar_distance		= lidar_distance;
 
 	MsgUdpR01.getPacket();
 }
@@ -3174,7 +3160,7 @@ void prepareAndroidUDPmessages()
 	MsgUdpRAndroid.message.timeStamp = millis();
 
 	MsgUdpRAndroid.message.modeQuad = modeQuad;
-	MsgUdpRAndroid.message.autoModeStatus = autoModeStatus;
+	MsgUdpRAndroid.message.autoModeStatus = qcGPS.gpsIsFix; // autoModeStatus; // qcGPS.gpsIsFix is being used temporarily
 	MsgUdpRAndroid.message.homePointSelected = homePointSelected;
 	MsgUdpRAndroid.message.posHoldAvailable = posHoldAvailable;
 
@@ -3337,25 +3323,25 @@ void WiFiEvent(WiFiEvent_t event) {
 	}
 }
 
-void filterAccXYPIDoutputs()
-{
-	// Filtering AccX and AccY PID Outputs by LPF
-	// Calculate Filter Output
-	pidVars.accX.outputFiltered = filtObjAccPIDoutX.filter(pidVars.accX.output, 0);
-	pidVars.accY.outputFiltered = filtObjAccPIDoutY.filter(pidVars.accY.output, 0);
+//void filterAccXYPIDoutputs() // This filter is not necessary
+//{
+//	// Filtering AccX and AccY PID Outputs by LPF
+//	// Calculate Filter Output
+//	pidVars.accX.outputFiltered = filtObjAccPIDoutX.filter(pidVars.accX.output, 0);
+//	pidVars.accY.outputFiltered = filtObjAccPIDoutY.filter(pidVars.accY.output, 0);
+//
+//}
 
-}
-
-void filterAnglePIDoutputs()
-{
-	// Filtering Angle PID Outputs by LPF
-	// Calculate Filter Output
-	pidVars.angleRoll.outputFiltered = filtObjAnglePIDoutX.filter(pidVars.angleRoll.output, 0);
-	pidVars.anglePitch.outputFiltered = filtObjAnglePIDoutY.filter(pidVars.anglePitch.output, 0);
-	pidVars.angleYaw.outputFiltered = filtObjAnglePIDoutZ.filter(pidVars.angleYaw.output, 0);
-
-	//Serial.println(pidVars.angleYaw.output);
-}
+//void filterAnglePIDoutputs() // This filter is not necessary
+//{
+//	// Filtering Angle PID Outputs by LPF
+//	// Calculate Filter Output
+//	pidVars.angleRoll.outputFiltered = filtObjAnglePIDoutX.filter(pidVars.angleRoll.output, 0);
+//	pidVars.anglePitch.outputFiltered = filtObjAnglePIDoutY.filter(pidVars.anglePitch.output, 0);
+//	pidVars.angleYaw.outputFiltered = filtObjAnglePIDoutZ.filter(pidVars.angleYaw.output, 0);
+//
+//	//Serial.println(pidVars.angleYaw.output);
+//}
 
 void calculateGyroDifferentials()
 {
@@ -3403,35 +3389,35 @@ void calculateAccelWorldZDifferentials()
 
 }
 
-void filterPosAltPIDoutputs()
-{
-	// Filtering Pos Altitude PID Outputs by LPF
-	// Calculate Filter Output
-	pidVars.posAlt.outputFiltered = filtObjPosPIDoutZ.filter(pidVars.posAlt.output, 0);
-}
+//void filterPosAltPIDoutputs() // This filter is not necessary
+//{
+//	// Filtering Pos Altitude PID Outputs by LPF
+//	// Calculate Filter Output
+//	pidVars.posAlt.outputFiltered = filtObjPosPIDoutZ.filter(pidVars.posAlt.output, 0);
+//}
 
-void filterPosXYPIDoutputs()
-{
-	// Filtering Position X and Y PID Outputs by LPF
-	// Calculate Filter Output
-	pidVars.posX.outputFiltered = filtObjPosPIDoutX.filter(pidVars.posX.output, 0);
-	pidVars.posY.outputFiltered = filtObjPosPIDoutY.filter(pidVars.posY.output, 0);
-}
+//void filterPosXYPIDoutputs() // This filter is not necessary
+//{
+//	// Filtering Position X and Y PID Outputs by LPF
+//	// Calculate Filter Output
+//	pidVars.posX.outputFiltered = filtObjPosPIDoutX.filter(pidVars.posX.output, 0);
+//	pidVars.posY.outputFiltered = filtObjPosPIDoutY.filter(pidVars.posY.output, 0);
+//}
 
-void filterVelXYPIDoutputs()
-{
-	// Filtering Velocity X and Y PID Outputs by LPF
-	// Calculate Filter Output
-	pidVars.velX.outputFiltered = filtObjVelPIDoutX.filter(pidVars.velX.output, 0);
-	pidVars.velY.outputFiltered = filtObjVelPIDoutY.filter(pidVars.velY.output, 0);
-}
+//void filterVelXYPIDoutputs() // This filter is not necessary
+//{
+//	// Filtering Velocity X and Y PID Outputs by LPF
+//	// Calculate Filter Output
+//	pidVars.velX.outputFiltered = filtObjVelPIDoutX.filter(pidVars.velX.output, 0);
+//	pidVars.velY.outputFiltered = filtObjVelPIDoutY.filter(pidVars.velY.output, 0);
+//}
 
-void filterVelAltPIDoutputs()
-{
-	// Filtering Velocity Altitude PID Outputs by LPF
-	// Calculate Filter Output
-	pidVars.velAlt.outputFiltered = filtObjVelPIDoutZ.filter(pidVars.velAlt.output, 0);
-}
+//void filterVelAltPIDoutputs() // This filter is not necessary
+//{
+//	// Filtering Velocity Altitude PID Outputs by LPF
+//	// Calculate Filter Output
+//	pidVars.velAlt.outputFiltered = filtObjVelPIDoutZ.filter(pidVars.velAlt.output, 0);
+//}
 
 void calculateAccelCmdXYDifferentials()
 {
@@ -3454,6 +3440,13 @@ void calculatePosCmdXYDifferentials()
 	// Calculate Filter Output
 	posCmdDiff.x = filtObjPosCmdDiffX.filter(posCmd.x, DELTATIME_POSCMD_DIFF);
 	posCmdDiff.y = filtObjPosCmdDiffY.filter(posCmd.y, DELTATIME_POSCMD_DIFF);
+}
+
+void calculatePosCmdZDifferentials()
+{
+	//// Differantiate Position Commands for Altitude PID Kd branch ////
+	// Calculate Filter Output
+	posCmdDiff.z = filtObjPosCmdDiffZ.filter(posCmd.z, DELTATIME_POSCMD_DIFF);
 }
 
 void calculateVelCmdXYDifferentials()
