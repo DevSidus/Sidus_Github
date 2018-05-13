@@ -63,9 +63,10 @@ bool barometer_initial_measurement = true;
 //Comment out one of the following defines which is your FCB and be sure corresponding offsets and constants are inserted in config file
 //#define SN_031001
 //#define SN_031002
-#define SN_031003
+//#define SN_031003
 //#define SN_031001US
 //#define SN_031002US
+#define SN_032001
 
 
 #ifdef SN_031001
@@ -145,6 +146,21 @@ bool barometer_initial_measurement = true;
 	double compassHdgYrange = 1017.00;
 	double compassHdgZrange = 1007.00;
 #endif // SN_031002US
+#ifdef SN_032001
+	#define mpuXAccelOffset				-4418
+	#define mpuYAccelOffset				2279
+	#define mpuZAccelOffset				1147
+	#define mpuXGyroOffset				-38
+	#define mpuYGyroOffset				-22
+	#define mpuZGyroOffset				81
+
+	double compassHdgXoffset = 92;
+	double compassHdgYoffset = 134;
+	double compassHdgZoffset = -191;
+	double compassHdgXrange = 1000;
+	double compassHdgYrange = 1006;
+	double compassHdgZrange = 907;
+#endif // SN_032001
 
 
 // Define gravity parameters
