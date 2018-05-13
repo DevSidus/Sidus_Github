@@ -175,7 +175,7 @@ bool barometer_initial_measurement = true;
 #define		UBOX
 
 //Pin Definitions
-#define		PIN_LED				5
+#define		PIN_LED				0
 #define		PIN_BATTERY			36
 
 #define		PIN_RX_ROLL			4
@@ -191,7 +191,7 @@ bool barometer_initial_measurement = true;
 #define		PIN_M_BL			14
 
 #define		PIN_BUZZER			12
-#define		PIN_SDCARD_CS		2
+#define		PIN_SDCARD_CS		5
 
 #define		PIN_MPU_POWER_ON	13
 #define		PIN_MCU_SDA			21

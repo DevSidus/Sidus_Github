@@ -136,15 +136,23 @@ void setup() {
 	pinMode(PIN_MPU_POWER_ON, OUTPUT);
 	pinMode(PIN_ULTSENS_TRIG, OUTPUT);
 	pinMode(PIN_ULTSENS_ECHO, INPUT);
+	pinMode(PIN_MCU_SCL, OUTPUT);
 	digitalWrite(PIN_MPU_POWER_ON, LOW);
 	digitalWrite(PIN_ULTSENS_TRIG, HIGH);
 
+	for (int i = 0; i < 40; i++)
+	{
+		digitalWrite(PIN_MCU_SCL, LOW);
+		delay(1);
+		digitalWrite(PIN_MCU_SCL, HIGH);
+		delay(1);
+	}
 	delay(100);
 	
 
 
 	Wire.begin(PIN_MCU_SDA, PIN_MCU_SCL);
-	Wire.setClock(800000L);
+	Wire.setClock(420000L);
 
 
 	if (xI2CSemaphore == NULL)  // Check to confirm that the Serial Semaphore has not already been created.
@@ -189,11 +197,11 @@ void setup() {
 
 	//Processor 1 Tasks
 	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 3072, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_compass, "task_compass", 1536, NULL, 10, NULL, 1);
-	xTaskCreatePinnedToCore(task_PID, "task_PID", 3072, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 1536, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_baro, "task_baro", 1536, NULL, 10, NULL, 1);
-	xTaskCreatePinnedToCore(task_lidar, "task_lidar", 1200, NULL, 20, NULL, 1);
+	xTaskCreatePinnedToCore(task_compass, "task_compass", 1536, NULL, 19, NULL, 1);
+	xTaskCreatePinnedToCore(task_PID, "task_PID", 3072, NULL, 15, NULL, 1);
+	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 1536, NULL, 18, NULL, 1);
+	//xTaskCreatePinnedToCore(task_baro, "task_baro", 1536, NULL, 12, NULL, 1);
+	//xTaskCreatePinnedToCore(task_lidar, "task_lidar", 1200, NULL, 0, NULL, 1);
 #ifndef USE_SD_CARD
 	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 1536, NULL, 10, NULL, 1);
 #endif // USE_SD_CARD
@@ -279,7 +287,7 @@ void task_test(void * parameter)
 void task_mpu(void * parameter)
 {
 	TickType_t xLastWakeTime;
-	const TickType_t xFrequency = 4;
+	const TickType_t xFrequency = 5;
 	// Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();
 
@@ -292,7 +300,7 @@ void task_mpu(void * parameter)
 
 	while (true)
 	{
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)2) == pdTRUE)
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)5) == pdTRUE)
 		{
 			processMpu();
 			xSemaphoreGive(xI2CSemaphore);
@@ -372,6 +380,7 @@ void task_ultrasonic(void * parameter)
 	vTaskDelete(NULL);
 	return;
 }
+
 
 void task_gps(void * parameter)
 {
@@ -580,7 +589,7 @@ void task_compass(void * parameter)
 
 	while (true)
 	{
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)0) == pdTRUE)
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)5) == pdTRUE)
 		{
 			processCompass();
 			xSemaphoreGive(xI2CSemaphore);
@@ -1699,7 +1708,6 @@ void processMpu()
 	}
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
-
 	// check for overflow (this should never happen unless our code is too inefficient)
 	if ((mpuIntStatus & 0x10) || fifoCount == 1024)
 	{
