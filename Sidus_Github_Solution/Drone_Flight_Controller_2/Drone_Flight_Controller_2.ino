@@ -2813,6 +2813,9 @@ void processCompass()
 	// If Compass Angle is requested in 0-360 Range 
 	// if (compassHdg < 0) compassHdg += 360;
 
+	// End of Normal Part
+	//--------------------------------------------------------------------------------
+
 }
 
 void initOTA()
