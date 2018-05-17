@@ -61,12 +61,21 @@ bool barometer_initial_measurement = true;
 #endif // BAROMETER_BMP180
 
 //Comment out one of the following defines which is your FCB and be sure corresponding offsets and constants are inserted in config file
+
+// FCB 3.1 Sensor Settings for TR Boards
 //#define SN_031001
 //#define SN_031002
 //#define SN_031003
+
+// FCB 3.1 Sensor Settings for US Boards
 //#define SN_031001US
 //#define SN_031002US
+
+// FCB 3.2 Sensor Settings for TR Boards
 #define SN_032001
+
+// FCB 3.2 Sensor Settings for US Boards
+//#define SN_032001US
 
 
 #ifdef SN_031001
@@ -113,31 +122,29 @@ bool barometer_initial_measurement = true;
 	double compassHdgXrange = 1243;
 	double compassHdgYrange = 1278;
 	double compassHdgZrange = 1117;
-
-
 #endif // SN_031003
 #ifdef SN_031001US
-	#define mpuXAccelOffset				1108
-	#define mpuYAccelOffset				1757
-	#define mpuZAccelOffset				1407
-	#define mpuXGyroOffset				40
-	#define mpuYGyroOffset				19
-	#define mpuZGyroOffset				21
+	#define mpuXAccelOffset				1671
+	#define mpuYAccelOffset				-287
+	#define mpuZAccelOffset				703
+	#define mpuXGyroOffset				1
+	#define mpuYGyroOffset				-73
+	#define mpuZGyroOffset				-14
 
-	double compassHdgXoffset = 20.24;
-	double compassHdgYoffset = 289.34;
-	double compassHdgZoffset = 90.62;
-	double compassHdgXrange = 969.68;
-	double compassHdgYrange = 911.72;
-	double compassHdgZrange = 863.88;
+	double compassHdgXoffset = -47.50;
+	double compassHdgYoffset = 196.50;
+	double compassHdgZoffset = -124.50;
+	double compassHdgXrange = 1065.00;
+	double compassHdgYrange = 1017.00;
+	double compassHdgZrange = 1007.00;
 #endif // SN_031001US
 #ifdef SN_031002US
-	#define mpuXAccelOffset				1701
-	#define mpuYAccelOffset				-259
-	#define mpuZAccelOffset				679
-	#define mpuXGyroOffset				-1
-	#define mpuYGyroOffset				-70
-	#define mpuZGyroOffset				-20
+	#define mpuXAccelOffset				1671
+	#define mpuYAccelOffset				-287
+	#define mpuZAccelOffset				703
+	#define mpuXGyroOffset				1
+	#define mpuYGyroOffset				-73
+	#define mpuZGyroOffset				-14
 
 	double compassHdgXoffset = -47.50;
 	double compassHdgYoffset = 196.50;
@@ -161,6 +168,21 @@ bool barometer_initial_measurement = true;
 	double compassHdgYrange = 1006;
 	double compassHdgZrange = 907;
 #endif // SN_032001
+#ifdef SN_032001US
+	#define mpuXAccelOffset				823
+	#define mpuYAccelOffset				-821
+	#define mpuZAccelOffset				1769
+	#define mpuXGyroOffset				-51
+	#define mpuYGyroOffset				70
+	#define mpuZGyroOffset				-28
+
+	double compassHdgXoffset = 43.00;
+	double compassHdgYoffset = 79.00;
+	double compassHdgZoffset = 5.00;
+	double compassHdgXrange = 834.00;
+	double compassHdgYrange = 672.00;
+	double compassHdgZrange = 1022.00;
+#endif // SN_032001US
 
 
 // Define gravity parameters
