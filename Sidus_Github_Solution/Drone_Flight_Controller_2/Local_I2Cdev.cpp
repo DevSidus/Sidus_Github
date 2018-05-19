@@ -280,7 +280,7 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
 		Wire.beginTransmission(devAddr);
 		Wire.requestFrom(devAddr, (uint8_t)min(length - k, BUFFER_LENGTH));
 
-		for (; Wire.available() && (timeout == 0 || millis() - t1 < timeout); count++) {
+		for (;(count < length) && Wire.available() && (timeout == 0 || millis() - t1 < timeout); count++) {  //aagca modified
 			data[count] = Wire.read();
 #ifdef I2CDEV_SERIAL_DEBUG
 			Serial.print(data[count], HEX);

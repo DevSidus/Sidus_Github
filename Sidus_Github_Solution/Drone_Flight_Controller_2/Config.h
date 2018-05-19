@@ -50,8 +50,9 @@ This header file define all the configurable variables including constants, pin 
 #define		USE_SD_CARD
 
 //Comment out one of the following barometer hardware selections
-#define		BAROMETER_MS5611
+//#define		BAROMETER_MS5611
 //#define		BAROMETER_BMP180
+#define		BAROMETER_BMP280
 
 #ifdef BAROMETER_BMP180
 #define		EXISTING_ALTITUDE			950    //in meters from sea-level
@@ -59,6 +60,9 @@ double sealevelPress = 1000;
 double computedAlt=0;
 bool barometer_initial_measurement = true;
 #endif // BAROMETER_BMP180
+#ifdef BAROMETER_BMP280
+#define		SEALEVEL_PRESS				1013.25
+#endif
 
 //Comment out one of the following defines which is your FCB and be sure corresponding offsets and constants are inserted in config file
 

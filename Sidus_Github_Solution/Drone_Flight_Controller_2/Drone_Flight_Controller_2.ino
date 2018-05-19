@@ -34,8 +34,12 @@ using namespace std;
 
 #ifdef BAROMETER_MS5611
 #include "Local_MS5611.h"
-#else
+#endif
+#ifdef BAROMETER_BMP180
 #include "Local_SFE_BMP180.h"
+#endif
+#ifdef BAROMETER_BMP280
+#include "Local_BMP280.h"
 #endif
 
 #include "LocalLidarLite.h"
@@ -52,8 +56,12 @@ MPU6050 mpu;
 
 #ifdef BAROMETER_MS5611
 MS5611 barometer;
-#else
+#endif 
+#ifdef BAROMETER_BMP180
 SFE_BMP180 barometer;
+#endif
+#ifdef BAROMETER_BMP280
+BMP280 barometer;
 #endif
 
 HMC5883L compass;
@@ -124,8 +132,8 @@ void setup() {
 
 	//Configure all PINs
 	pinMode(PIN_LED, OUTPUT);
-	//pinMode(PIN_SDCARD_CS, OUTPUT);
-	//pinMode(PIN_BATTERY, INPUT);
+	pinMode(PIN_SDCARD_CS, OUTPUT);
+	pinMode(PIN_BATTERY, INPUT);
 	pinMode(PIN_RX_ROLL, INPUT);
 	pinMode(PIN_RX_PITCH, INPUT);
 	pinMode(PIN_RX_THR, INPUT);
@@ -175,22 +183,22 @@ void setup() {
 
 	//Processor 0 Tasks
 	xTaskCreatePinnedToCore(task_test, "task_test", 1024, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_0, "task_rx_0", 1200, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_1, "task_rx_1", 1200, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_2, "task_rx_2", 1200, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 1200, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 1200, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 1200, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 3072, NULL, 20, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 1536, NULL, 5, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_0, "task_rx_0", 1200, NULL, 2, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_1, "task_rx_1", 1200, NULL, 3, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_2, "task_rx_2", 1200, NULL, 4, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 1200, NULL, 5, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 1200, NULL, 6, NULL, 0);
+	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 1200, NULL, 7, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 3072, NULL, 8, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 1536, NULL, 9, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 1024, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 1024, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 1024, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_melody, "task_melody", 1024, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 1280, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_position_kalman, "task_position_kalman", 3072, NULL, 10, NULL, 0);
-	xTaskCreatePinnedToCore(task_compass_kalman, "task_compass_kalman", 2048, NULL, 10, NULL, 0);
+	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 1024, NULL, 11, NULL, 0);
+	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 1024, NULL, 12, NULL, 0);
+	xTaskCreatePinnedToCore(task_melody, "task_melody", 1024, NULL, 13, NULL, 0);
+	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 1280, NULL, 14, NULL, 0);
+	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 15, NULL, 0);
+	xTaskCreatePinnedToCore(task_position_kalman, "task_position_kalman", 3072, NULL, 16, NULL, 0);
+	xTaskCreatePinnedToCore(task_compass_kalman, "task_compass_kalman", 2048, NULL, 17, NULL, 0);
 	//xTaskCreatePinnedToCore(task_OTA, "task_OTA", 3072, NULL, 20, NULL, 0);
 	//xTaskCreatePinnedToCore(task_IoT, "task_IoT", 2048, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_gps, "task_gps", 2048, NULL, 10, NULL, 0);
@@ -200,7 +208,7 @@ void setup() {
 	xTaskCreatePinnedToCore(task_compass, "task_compass", 1536, NULL, 19, NULL, 1);
 	xTaskCreatePinnedToCore(task_PID, "task_PID", 3072, NULL, 15, NULL, 1);
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 1536, NULL, 18, NULL, 1);
-	//xTaskCreatePinnedToCore(task_baro, "task_baro", 1536, NULL, 12, NULL, 1);
+	xTaskCreatePinnedToCore(task_baro, "task_baro", 1536, NULL, 17, NULL, 1);
 	//xTaskCreatePinnedToCore(task_lidar, "task_lidar", 1200, NULL, 0, NULL, 1);
 #ifndef USE_SD_CARD
 	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 1536, NULL, 10, NULL, 1);
@@ -300,7 +308,7 @@ void task_mpu(void * parameter)
 
 	while (true)
 	{
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)5) == pdTRUE)
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1) == pdTRUE)
 		{
 			processMpu();
 			xSemaphoreGive(xI2CSemaphore);
@@ -318,16 +326,13 @@ void task_baro(void * parameter)
 	{
 		delay(500);
 	}
-
 	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
 	{
-
 		initBarometer();
 		xSemaphoreGive(xI2CSemaphore);
 	}
 	while (true)
 	{
-
 		processBarometer();
 
 		#ifdef BAROMETER_MS5611
@@ -394,8 +399,8 @@ void task_gps(void * parameter)
 	delay(200);
 	//SerialGps.write(ubxPortConfigPacketPart2, 9);
 	//delay(1000);
-
-	SerialGps.changeBaud(SERIAL_GPS_SPEED);
+	
+	SerialGps.begin(SERIAL_GPS_SPEED);
 	delay(200);
 
 	// change frequency to 10 Hz
@@ -1767,7 +1772,7 @@ void processMpu()
 			qc.accelWorld.z = (qc.accel.z*cos(qc.euler.theta)*cos(qc.euler.phi) - qc.accel.x*sin(qc.euler.theta) + qc.accel.y*cos(qc.euler.theta)*sin(qc.euler.phi) + mpu_gravity_measurement_in_bits) * ACC_BITS_TO_M_SECOND2;
 
 			convertWorld2Ned(qc.accelWorld.x, qc.accelWorld.y, compassHdgEstimated, &qc.accelNED.N, &qc.accelNED.E);
-
+			//Serial.println(qc.gyro.x);
 		}
 
 	}
@@ -2590,9 +2595,13 @@ bool initBarometer()
 	
 #ifdef BAROMETER_MS5611
 	while (!barometer.begin(MS5611_HIGH_RES))
-#else
+#endif
+#ifdef BAROMETER_BMP180
 	while (!barometer.begin())
 #endif	
+#ifdef BAROMETER_BMP280
+	while(!barometer.begin())		
+#endif
 	{
 		if (millis() - initTime > BAROMETER_INIT_THRESHOLD)
 		{
@@ -2603,8 +2612,11 @@ bool initBarometer()
 		delay(200);
 	}
 	statusBaro = statusType_Normal;
-
+	
 	Serial.println("Baro init success");
+	#ifdef BAROMETER_BMP280
+	barometer.setOversampling(4);
+	#endif
 
 	// The pressure sensor returns abolute pressure, which varies with altitude.
 	// To remove the effects of altitude, use the sealevel function and your current altitude.
@@ -2631,8 +2643,8 @@ void processBarometer()
 	barometerTemp = barometer.readTemperature(true);
 	barometerPress = barometer.readPressure(true);
 	double value = barometer.getAltitude(barometerPress);
-#else
-
+#endif
+#ifdef BAROMETER_BMP180
 	char status = 0;
 	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
 	{
@@ -2702,6 +2714,43 @@ void processBarometer()
 	double value = computedAlt;
 #endif	
 
+#ifdef BAROMETER_BMP280
+	double value = 0;
+	double T = 0;
+	double P = SEALEVEL_PRESS;
+	char result=0;
+	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
+	{
+		result = barometer.startMeasurment();
+		xSemaphoreGive(xI2CSemaphore);
+	}
+	delay(50);   //this delay specifies the refresh rate of baro reading and it is dependent on the oversampling rate
+				//use a suitable delay value dependent on the oversampling rate of bmp280
+	if (result != 0) {
+		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
+		{
+			result = barometer.getTemperatureAndPressure(T, P);
+			xSemaphoreGive(xI2CSemaphore);
+		}
+
+		if (result != 0)
+		{
+			value = barometer.altitude(P, SEALEVEL_PRESS);
+			barometerPress = P;
+			barometerTemp = T;
+			//Serial.print("T = \t"); Serial.print(T, 2); Serial.print(" degC\t");
+			//Serial.print("P = \t"); Serial.print(P, 2); Serial.print(" mBar\t");
+			//Serial.print("A = \t"); Serial.print(value, 2); Serial.println(" m");
+		}
+		else {
+			Serial.println("Barometer Error 2");
+		}
+	}
+	else {
+		Serial.println("Barometer Error 1");
+	}
+#endif
+
 
 	if (!isnan(value))
 	{
@@ -2709,8 +2758,6 @@ void processBarometer()
 		baroReady = true;
 	}
 
-
-	//Serial.println(qc.posWorldEstimated.z);
 
 }
 

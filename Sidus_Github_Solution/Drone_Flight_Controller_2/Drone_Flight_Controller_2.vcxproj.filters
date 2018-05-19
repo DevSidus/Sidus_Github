@@ -99,6 +99,9 @@
     <ClInclude Include="LocalLidarLite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Local_BMP280.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cBuzzerMelody.cpp">
@@ -165,6 +168,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LocalLidarLite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Local_BMP280.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

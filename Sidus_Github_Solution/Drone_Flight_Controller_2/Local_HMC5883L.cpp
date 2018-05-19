@@ -224,6 +224,7 @@ uint8_t HMC5883L::fastRegister8(uint8_t reg)
 // Read byte from register
 uint8_t HMC5883L::readRegister8(uint8_t reg)
 {
+	uint32_t t1 = millis();
 	uint8_t value;
 	Wire.beginTransmission(HMC5883L_ADDRESS);
 #if ARDUINO >= 100
@@ -235,12 +236,10 @@ uint8_t HMC5883L::readRegister8(uint8_t reg)
 
 	Wire.beginTransmission(HMC5883L_ADDRESS);
 	Wire.requestFrom(HMC5883L_ADDRESS, 1);
-	while (!Wire.available()) {};
-#if ARDUINO >= 100
+
+	while (!Wire.available() && (millis() - t1 < 100)) {};
 	value = Wire.read();
-#else
-	value = Wire.receive();
-#endif;
+
 	Wire.endTransmission();
 
 	return value;
@@ -249,6 +248,8 @@ uint8_t HMC5883L::readRegister8(uint8_t reg)
 // Read word from register
 int16_t HMC5883L::readRegister16(uint8_t reg)
 {
+
+	uint32_t t1 = millis();
 	int16_t value;
 	Wire.beginTransmission(HMC5883L_ADDRESS);
 #if ARDUINO >= 100
@@ -260,14 +261,13 @@ int16_t HMC5883L::readRegister16(uint8_t reg)
 
 	Wire.beginTransmission(HMC5883L_ADDRESS);
 	Wire.requestFrom(HMC5883L_ADDRESS, 2);
-	while (!Wire.available()) {};
-#if ARDUINO >= 100
+
+	while (!Wire.available() && (millis() - t1 < 100)) {};
 	uint8_t vha = Wire.read();
+
+	while (!Wire.available() && (millis() - t1 < 100)) {};
 	uint8_t vla = Wire.read();
-#else
-	uint8_t vha = Wire.receive();
-	uint8_t vla = Wire.receive();
-#endif;
+
 	Wire.endTransmission();
 
 	value = vha << 8 | vla;
