@@ -103,9 +103,6 @@ cRxFilter filterRx5thCh(RX_MAX_PULSE_WIDTH), filterRx6thCh(RX_MAX_PULSE_WIDTH);
 
 HardwareSerial SerialGps(2);
 
-SemaphoreHandle_t xI2CSemaphore;
-SemaphoreHandle_t xUdpSemaphore;
-
 // The TinyGPS++ object
 TinyGPSPlus gps;
 uBloxGps gpsUbx;
@@ -161,25 +158,7 @@ void setup() {
 
 	Wire.begin(PIN_MCU_SDA, PIN_MCU_SCL);
 	Wire.setClock(420000L);
-
-
-	if (xI2CSemaphore == NULL)  // Check to confirm that the Serial Semaphore has not already been created.
-	{
-		xI2CSemaphore = xSemaphoreCreateMutex();  // Create a mutex semaphore we will use to manage the Serial Port
-		if ((xI2CSemaphore) != NULL)
-			xSemaphoreGive((xI2CSemaphore));  // Make the Serial Port available for use, by "Giving" the Semaphore.
-	}
-	
-
-	if (xUdpSemaphore == NULL)  // Check to confirm that the UDP Semaphore has not already been created.
-	{
-		xUdpSemaphore = xSemaphoreCreateMutex();  // Create a mutex semaphore we will use to manage the UDP
-		if ((xUdpSemaphore) != NULL)
-			xSemaphoreGive((xUdpSemaphore));  // Make the UDP available for use, by "Giving" the Semaphore.
-	}
-
-
-
+		
 
 	//Processor 0 Tasks
 	xTaskCreatePinnedToCore(task_test, "task_test", 1024, NULL, 1, NULL, 0);
@@ -189,13 +168,11 @@ void setup() {
 	xTaskCreatePinnedToCore(task_rx_3, "task_rx_3", 1200, NULL, 5, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_4, "task_rx_4", 1200, NULL, 6, NULL, 0);
 	xTaskCreatePinnedToCore(task_rx_5, "task_rx_5", 1200, NULL, 7, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 3072, NULL, 8, NULL, 0);
-	xTaskCreatePinnedToCore(task_UDPrx, "task_UDPrx", 1536, NULL, 9, NULL, 0);
+	xTaskCreatePinnedToCore(task_UDP, "task_UDP", 1600, NULL, 8, NULL, 0);
 	xTaskCreatePinnedToCore(task_mapCmd, "task_mapCmd", 1024, NULL, 10, NULL, 0);
 	xTaskCreatePinnedToCore(task_chkMode, "task_chkMode", 1024, NULL, 11, NULL, 0);
 	xTaskCreatePinnedToCore(task_ADC, "task_ADC", 1024, NULL, 12, NULL, 0);
 	xTaskCreatePinnedToCore(task_melody, "task_melody", 1024, NULL, 13, NULL, 0);
-	xTaskCreatePinnedToCore(task_2Hz, "task_2Hz", 1280, NULL, 14, NULL, 0);
 	xTaskCreatePinnedToCore(task_altitude_kalman, "task_altitude_kalman", 2048, NULL, 15, NULL, 0);
 	xTaskCreatePinnedToCore(task_position_kalman, "task_position_kalman", 3072, NULL, 16, NULL, 0);
 	xTaskCreatePinnedToCore(task_compass_kalman, "task_compass_kalman", 2048, NULL, 17, NULL, 0);
@@ -204,11 +181,9 @@ void setup() {
 	xTaskCreatePinnedToCore(task_gps, "task_gps", 2048, NULL, 10, NULL, 0);
 
 	//Processor 1 Tasks
-	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 3072, NULL, 20, NULL, 1);
-	xTaskCreatePinnedToCore(task_compass, "task_compass", 1536, NULL, 19, NULL, 1);
+	xTaskCreatePinnedToCore(task_mpu, "task_mpu", 2400, NULL, 20, NULL, 1);
 	xTaskCreatePinnedToCore(task_PID, "task_PID", 3072, NULL, 15, NULL, 1);
 	xTaskCreatePinnedToCore(task_Motor, "task_Motor", 1536, NULL, 18, NULL, 1);
-	xTaskCreatePinnedToCore(task_baro, "task_baro", 1536, NULL, 17, NULL, 1);
 	//xTaskCreatePinnedToCore(task_lidar, "task_lidar", 1200, NULL, 0, NULL, 1);
 #ifndef USE_SD_CARD
 	xTaskCreatePinnedToCore(task_ultrasonic, "task_ultrasonic", 1536, NULL, 10, NULL, 1);
@@ -294,50 +269,38 @@ void task_test(void * parameter)
 
 void task_mpu(void * parameter)
 {
+	int i2c_task_counter = 0;
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 5;
 	// Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();
-
 	statusMpu = statusType_NotInitiated;
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
-	{
-		initMPU();
-		xSemaphoreGive(xI2CSemaphore);
-	}
+
+	initMPU();
+	initCompass();
+	initBarometer();
+
 
 	while (true)
 	{
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1) == pdTRUE)
-		{
-			processMpu();
-			xSemaphoreGive(xI2CSemaphore);
-		}
+
+		processMpu();
+
+		if (i2c_task_counter % 6 == 0)
+			processCompass();
+
+		if (i2c_task_counter % 10 == 0)
+			processBarometer();
+
+		if(i2c_task_counter % 100 == 0)
+			checkMpuGSHealth();
+
+		i2c_task_counter++;
+
+		if (i2c_task_counter == 6000)
+			i2c_task_counter = 0;
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-	}
-	vTaskDelete(NULL);
-	return;
-}
-
-void task_baro(void * parameter)
-{
-	while (statusMpu != statusType_Normal)
-	{
-		delay(500);
-	}
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
-	{
-		initBarometer();
-		xSemaphoreGive(xI2CSemaphore);
-	}
-	while (true)
-	{
-		processBarometer();
-
-		#ifdef BAROMETER_MS5611
-				delay(9);
-		#endif
 	}
 	vTaskDelete(NULL);
 	return;
@@ -385,7 +348,6 @@ void task_ultrasonic(void * parameter)
 	vTaskDelete(NULL);
 	return;
 }
-
 
 void task_gps(void * parameter)
 {
@@ -582,27 +544,6 @@ void displayInfo()
 	}
 
 	Serial.println();
-}
-
-void task_compass(void * parameter)
-{
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
-	{
-		initCompass();
-		xSemaphoreGive(xI2CSemaphore);
-	}
-
-	while (true)
-	{
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)5) == pdTRUE)
-		{
-			processCompass();
-			xSemaphoreGive(xI2CSemaphore);
-		}
-		delay(30);
-	}
-	vTaskDelete(NULL);
-	return;
 }
 
 void task_rx_0(void * parameter)
@@ -953,6 +894,8 @@ void task_Motor(void * parameter)
 
 void task_UDP(void * parameter)
 {
+	int udp_task_counter = 0;
+
 
 	#ifdef USE_SD_CARD
 		delay(500);
@@ -970,6 +913,8 @@ void task_UDP(void * parameter)
 		qcMavlink.system_status = MAV_STATE_STANDBY;  ///< System ready for flight
 	#endif // MAVLINK_PROTOCOL
 
+	int mavlinkPacketSize;
+	char mavlinkPacketBuffer[MAVLINK_MAX_PACKET_LEN];
 
 	while (true)
 	{
@@ -984,68 +929,60 @@ void task_UDP(void * parameter)
 		{
 			if (udp_connected)
 			{
-				if (xSemaphoreTake(xUdpSemaphore, (TickType_t)10) == pdTRUE)
+				if (udp.beginPacket(DEFAULT_GROUND_STATION_IP, UDP_PORT) != 1)
 				{
-					if (udp.beginPacket(DEFAULT_GROUND_STATION_IP, UDP_PORT) != 1)
-					{
-						//Serial.println("Could not begin UDP packet");
-					}
-					else
-					{
-						#ifdef SIDUS_PROTOCOL
-							#ifdef SIDUS_ANDROID_PROTOCOL
-								udp.write(MsgUdpRAndroid.dataBytes, sizeof(MsgUdpRAndroid.dataBytes));
-							#else // SIDUS_PROTOCOL
-								udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
-							#endif // SIDUS_ANDROID_PROTOCOL
-
-						#else // MAVLINK_PROTOCOL	
-						
-							mavlink_msg_heartbeat_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
-								qcMavlink.custom_mode, qcMavlink.type, qcMavlink.autopilot, qcMavlink.base_mode, qcMavlink.system_status);
-							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
-							udp.write(mavlinkBuffer, mavlinkMessageLength);
-
-							/*mavlink_msg_sys_status_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
-								MAV_SYS_STATUS_SENSOR_3D_GYRO, MAV_SYS_STATUS_SENSOR_3D_GYRO, MAV_SYS_STATUS_SENSOR_3D_GYRO, 0, batteryVoltageInVolts, -1, 100, 0, 0, 0, 0, 0, 0);
-							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
-							udp.write(mavlinkBuffer, mavlinkMessageLength);
-
-							mavlink_msg_autopilot_version_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
-								MAV_PROTOCOL_CAPABILITY_MAVLINK2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
-							udp.write(mavlinkBuffer, mavlinkMessageLength);*/
-						
-							mavlink_msg_attitude_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
-								millis(), qc.euler.phi, qc.euler.theta, compassHdgEstimated *  M_PI / 180, qc.eulerRate.phi, qc.eulerRate.theta, qc.eulerRate.psi);
-							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
-							udp.write(mavlinkBuffer, mavlinkMessageLength);
-
-							mavlink_msg_gps_raw_int_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
-								micros(), qcGPS.gpsFixType, qcGPS.lat*1e7, qcGPS.lon*1e7, qcGPS.alt*1e3, 0, 0, qcGPS.nedVelocity.E, 0, qcGPS.satellites_visible, 0, qcGPS.posAccuracy, 0, qcGPS.velAccuracy, 0);
-							mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
-							udp.write(mavlinkBuffer, mavlinkMessageLength);
-
-						#endif // SIDUS_PROTOCOL
-						
-
-						if (udp.endPacket() != 1)
-						{
-							//Serial.println("UDP Packet could not send");
-							//connectUdp();
-						}
-						else
-						{
-							//Serial.println(millis());
-						}
-					}
-					//Serial.print("X");
-					xSemaphoreGive(xUdpSemaphore);
+					//Serial.println("Could not begin UDP packet");
 				}
 				else
 				{
-					//connectUdp();
+					#ifdef SIDUS_PROTOCOL
+						#ifdef SIDUS_ANDROID_PROTOCOL
+							udp.write(MsgUdpRAndroid.dataBytes, sizeof(MsgUdpRAndroid.dataBytes));
+						#else // SIDUS_PROTOCOL
+							udp.write(MsgUdpR01.dataBytes, sizeof(MsgUdpR01.dataBytes));
+						#endif // SIDUS_ANDROID_PROTOCOL
+
+					#else // MAVLINK_PROTOCOL	
+						
+						mavlink_msg_heartbeat_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
+							qcMavlink.custom_mode, qcMavlink.type, qcMavlink.autopilot, qcMavlink.base_mode, qcMavlink.system_status);
+						mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+						udp.write(mavlinkBuffer, mavlinkMessageLength);
+
+						/*mavlink_msg_sys_status_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
+							MAV_SYS_STATUS_SENSOR_3D_GYRO, MAV_SYS_STATUS_SENSOR_3D_GYRO, MAV_SYS_STATUS_SENSOR_3D_GYRO, 0, batteryVoltageInVolts, -1, 100, 0, 0, 0, 0, 0, 0);
+						mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+						udp.write(mavlinkBuffer, mavlinkMessageLength);
+
+						mavlink_msg_autopilot_version_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
+							MAV_PROTOCOL_CAPABILITY_MAVLINK2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+						mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+						udp.write(mavlinkBuffer, mavlinkMessageLength);*/
+						
+						mavlink_msg_attitude_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
+							millis(), qc.euler.phi, qc.euler.theta, compassHdgEstimated *  M_PI / 180, qc.eulerRate.phi, qc.eulerRate.theta, qc.eulerRate.psi);
+						mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+						udp.write(mavlinkBuffer, mavlinkMessageLength);
+
+						mavlink_msg_gps_raw_int_pack(mavlink_system.sysid, mavlink_system.compid, &mavlinkMessage,
+							micros(), qcGPS.gpsFixType, qcGPS.lat*1e7, qcGPS.lon*1e7, qcGPS.alt*1e3, 0, 0, qcGPS.nedVelocity.E, 0, qcGPS.satellites_visible, 0, qcGPS.posAccuracy, 0, qcGPS.velAccuracy, 0);
+						mavlinkMessageLength = mavlink_msg_to_send_buffer(mavlinkBuffer, &mavlinkMessage);
+						udp.write(mavlinkBuffer, mavlinkMessageLength);
+
+					#endif // SIDUS_PROTOCOL
+						
+
+					if (udp.endPacket() != 1)
+					{
+						//Serial.println("UDP Packet could not send");
+						//connectUdp();
+					}
+					else
+					{
+						//Serial.println(millis());
+					}
 				}
+				//Serial.print("X");
 			}			
 		}
 
@@ -1055,70 +992,65 @@ void task_UDP(void * parameter)
 
 		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 		//Serial.println("t_ok");
-		delay(10);
-	}
-	vTaskDelete(NULL);
-}
 
-void task_UDPrx(void * parameter)
-{
-	int mavlinkPacketSize;
-	char mavlinkPacketBuffer[MAVLINK_MAX_PACKET_LEN];
-	
-	while (true)
-	{
-		if (wifi_connected & udp_connected)
+
+		//UDP RX Operations
+		if (wifi_connected && udp_connected && (udp_task_counter % 15 == 0))
 		{
-			if (xSemaphoreTake(xUdpSemaphore, (TickType_t)10) == pdTRUE)
+
+			#ifdef SIDUS_PROTOCOL
+			#ifdef SIDUS_ANDROID_PROTOCOL
+			if (udp.parsePacket() >= sizeof(MsgUdpTAndroid.dataBytes))
 			{
-				#ifdef SIDUS_PROTOCOL
-					#ifdef SIDUS_ANDROID_PROTOCOL
-						if (udp.parsePacket() >= sizeof(MsgUdpTAndroid.dataBytes))
-						{
-							udp.read(MsgUdpTAndroid.dataBytes, sizeof(MsgUdpTAndroid.dataBytes));
-							MsgUdpTAndroid.setPacket();
+				udp.read(MsgUdpTAndroid.dataBytes, sizeof(MsgUdpTAndroid.dataBytes));
+				MsgUdpTAndroid.setPacket();
 
-							updateAndroidUdpMsgVars();
+				updateAndroidUdpMsgVars();
 
-							// Serial.print(setHomePoint);
+				// Serial.print(setHomePoint);
 
-							//Serial.println("udp message received");
-							//udpLastMessageTime = millis();
-						}
-					#else // SIDUS_PROTOCOL
-						if (udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
-						{
-							udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
-							MsgUdpT01.setPacket();
+				//Serial.println("udp message received");
+				//udpLastMessageTime = millis();
+			}
+			#else // SIDUS_PROTOCOL
+			if (udp.parsePacket() >= sizeof(MsgUdpT01.dataBytes))
+			{
+				udp.read(MsgUdpT01.dataBytes, sizeof(MsgUdpT01.dataBytes));
+				MsgUdpT01.setPacket();
 
-							updateUdpMsgVars();
+				updateUdpMsgVars();
 
-							//Serial.println("udp message received");
-							//udpLastMessageTime = millis();
-						}
-					#endif // SIDUS_ANDROID_PROTOCOL
-				
-				#else // MAVLINK_PROTOCOL
-					mavlinkPacketSize = udp.parsePacket();
+				//Serial.println("udp message received");
+				//udpLastMessageTime = millis();
+			}
+			#endif // SIDUS_ANDROID_PROTOCOL
 
-					if (mavlinkPacketSize)
-					{
-						udp.read(mavlinkPacketBuffer, MAVLINK_MAX_PACKET_LEN);
-						// Serial.println(mavlinkPacketBuffer);
-					}
+			#else // MAVLINK_PROTOCOL
+			mavlinkPacketSize = udp.parsePacket();
 
-					// This code part will be added when Mavlink Receive Channel is available
-
-				#endif // SIDUS_PROTOCOL
-				
-				xSemaphoreGive(xUdpSemaphore);
+			if (mavlinkPacketSize)
+			{
+				udp.read(mavlinkPacketBuffer, MAVLINK_MAX_PACKET_LEN);
+				// Serial.println(mavlinkPacketBuffer);
 			}
 
+			// This code part will be added when Mavlink Receive Channel is available
 
+			#endif // SIDUS_PROTOCOL
+
+			//Serial.println(uxTaskGetStackHighWaterMark(NULL));
 		}
-		//Serial.println(uxTaskGetStackHighWaterMark(NULL));
-		delay(150);
+
+		udp_task_counter++;
+
+		if (udp_task_counter == 6000)
+			udp_task_counter = 0;
+
+		delay(10);
+
 	}
+
+
 	vTaskDelete(NULL);
 }
 
@@ -1172,17 +1104,6 @@ void task_melody(void * parameter)
 	vTaskDelete(NULL);
 }
 
-void task_2Hz(void * parameter)
-{
-	statusMpu = statusType_NotInitiated;
-	mpuLastDataTime = millis();
-	while (true)
-	{
-		checkMpuGSHealth();
-		delay(500);
-	}
-	vTaskDelete(NULL);
-}
 
 void task_altitude_kalman(void * parameter)
 {
@@ -1569,14 +1490,11 @@ void task_lidar(void * parameter)
 		delay(700);
 	}
 
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
-	{
 
-		lidar.begin(0, true);
-		delay(10);
-		lidar_distance = lidar.distance();
-		xSemaphoreGive(xI2CSemaphore);
-	}
+	lidar.begin(0, true);
+	delay(10);
+	lidar_distance = lidar.distance();
+
 
 	if (lidar_distance > LIDAR_DISTANCE_MIN && lidar_distance < LIDAR_DISTANCE_MAX)
 		lidar_available = true;
@@ -1585,12 +1503,9 @@ void task_lidar(void * parameter)
 
 	while (lidar_available)
 	{
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)1000) == pdTRUE)
-		{
-			lidar_distance=lidar.distance();
-			xSemaphoreGive(xI2CSemaphore);
-		}
-		//Serial.println(lidar_distance);
+
+		lidar_distance=lidar.distance();
+
 
 		if (lidar_distance > LIDAR_DISTANCE_MIN && lidar_distance < LIDAR_DISTANCE_MAX)
 			lidar_available = true;
@@ -2719,35 +2634,19 @@ void processBarometer()
 	double T = 0;
 	double P = SEALEVEL_PRESS;
 	char result=0;
-	if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
-	{
-		result = barometer.startMeasurment();
-		xSemaphoreGive(xI2CSemaphore);
-	}
-	delay(50);   //this delay specifies the refresh rate of baro reading and it is dependent on the oversampling rate
-				//use a suitable delay value dependent on the oversampling rate of bmp280
-	if (result != 0) {
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)10) == pdTRUE)
-		{
-			result = barometer.getTemperatureAndPressure(T, P);
-			xSemaphoreGive(xI2CSemaphore);
-		}
 
-		if (result != 0)
-		{
-			value = barometer.altitude(P, SEALEVEL_PRESS);
-			barometerPress = P;
-			barometerTemp = T;
-			//Serial.print("T = \t"); Serial.print(T, 2); Serial.print(" degC\t");
-			//Serial.print("P = \t"); Serial.print(P, 2); Serial.print(" mBar\t");
-			//Serial.print("A = \t"); Serial.print(value, 2); Serial.println(" m");
-		}
-		else {
-			Serial.println("Barometer Error 2");
-		}
+	result = barometer.getTemperatureAndPressure(T, P);
+	if (result != 0)
+	{
+		value = barometer.altitude(P, SEALEVEL_PRESS);
+		barometerPress = P;
+		barometerTemp = T;
+		//Serial.print("T = \t"); Serial.print(T, 2); Serial.print(" degC\t");
+		//Serial.print("P = \t"); Serial.print(P, 2); Serial.print(" mBar\t");
+		//Serial.print("A = \t"); Serial.print(value, 2); Serial.println(" m");
 	}
 	else {
-		Serial.println("Barometer Error 1");
+		Serial.println("Barometer Error 2");
 	}
 #endif
 
@@ -2756,6 +2655,11 @@ void processBarometer()
 	{
 		barometerAlt = value;
 		baroReady = true;
+	}
+	result = barometer.startMeasurment();
+
+	if (result = 0) {
+		Serial.println("Barometer Error 1");
 	}
 
 
@@ -3256,11 +3160,7 @@ void checkMpuGSHealth()
 	{
 		statusMpu = statusType_Fail;
 		//try to restart MPU and check mpu status there again
-		if (xSemaphoreTake(xI2CSemaphore, (TickType_t)4000) == pdTRUE)
-		{
-			initMPU();
-			xSemaphoreGive(xI2CSemaphore);
-		}
+		initMPU();
 	}
 
 
