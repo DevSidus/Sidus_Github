@@ -76,7 +76,8 @@ bool barometer_initial_measurement = true;
 //#define SN_031002US
 
 // FCB 3.2 Sensor Settings for TR Boards
-#define SN_032001
+//#define SN_032001
+#define SN_032002
 
 // FCB 3.2 Sensor Settings for US Boards
 //#define SN_032001US
@@ -187,6 +188,22 @@ bool barometer_initial_measurement = true;
 	double compassHdgYrange = 672.00;
 	double compassHdgZrange = 1022.00;
 #endif // SN_032001US
+
+#ifdef SN_032002
+	#define mpuXAccelOffset				-2121
+	#define mpuYAccelOffset				1091
+	#define mpuZAccelOffset				1184
+	#define mpuXGyroOffset				38
+	#define mpuYGyroOffset				25
+	#define mpuZGyroOffset				15
+
+	double compassHdgXoffset = 23;
+	double compassHdgYoffset = 72;
+	double compassHdgZoffset = -198;
+	double compassHdgXrange = 1246;
+	double compassHdgYrange = 1225;
+	double compassHdgZrange = 1175;
+#endif // SN_032002
 
 
 // Define gravity parameters
