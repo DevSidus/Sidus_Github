@@ -1,2 +1,3 @@
 # Sidus_Github
-Sidus Creative Repo Whole Project
+
+Welcome to the Sidus_Github repo. Please visit wiki page for detailed information.
