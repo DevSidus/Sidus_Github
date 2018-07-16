@@ -15,6 +15,7 @@ These instructions will get you a copy of the project up and running the code fo
   ```
   Hints:
    - Basic step at this link is clone the repo at "https://github.com/espressif/arduino-esp32" to the folder "D:\Arduino\hardware\espressif\esp32"
+   - Install SmartGit for Git flow
    - To change directory at gitbash, use "cd /D/Arduino/hardware/espressif/esp32".
   ```
 * Install [Microsoft Visual Studio](https://visualstudio.microsoft.com/)
