@@ -3,7 +3,7 @@
 Welcome to our repo that includes both the flight control software running on Sidus Sigma Autopilot and ground station running on Windows environment. Please visit [Wiki](https://github.com/DevSidus/Sidus_Github/wiki) page for additional information.
 
 ## Getting Started
-These instructions will get you a copy of the project up and running on Sidus Sigma Autopilot for development and testing purposes.
+These instructions will get you a copy of the project up and running the code for development and testing purposes.
 
 ### Setting-Up the Toolset
 
