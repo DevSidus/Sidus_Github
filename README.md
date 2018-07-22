@@ -24,3 +24,4 @@ These instructions will get you a copy of the project up and running the code fo
   Hint: Don't forget to configure Arduino IDE location at Visual Studio. 
   ``` 
 * Clone [Mavlink](https://github.com/mavlink/c_library_v2.git) library to the "D:\Arduino\hardware\espressif\esp32\libraries" folder.
+* Add I2CDev and MPU6050 libraries to the "D:\Arduino\hardware\espressif\esp32\libraries" folder.
