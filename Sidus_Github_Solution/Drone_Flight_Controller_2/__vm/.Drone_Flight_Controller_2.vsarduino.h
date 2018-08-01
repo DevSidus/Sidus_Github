@@ -1,5 +1,5 @@
 /* 
-	Editor: http://www.visualmicro.com
+	Editor: https://www.visualmicro.com/
 			visual micro and the arduino ide ignore this code during compilation. this code is automatically maintained by visualmicro, manual changes to this file will be overwritten
 			the contents of the Visual Micro sketch sub folder can be deleted prior to publishing a project
 			all non-arduino files created by visual micro and all visual studio project or solution files can be freely deleted and are not required to compile a sketch (do not delete your own code!).
@@ -47,6 +47,8 @@
 #define _Lockit
 #define __CLR_OR_THIS_CALL
 #define C4005
+#define _NEW
+
 //
 //typedef int uint8_t;
 //#define __ARMCC_VERSION 400678
