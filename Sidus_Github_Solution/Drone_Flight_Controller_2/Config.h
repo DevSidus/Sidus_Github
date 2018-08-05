@@ -30,7 +30,7 @@ This header file define all the configurable variables including constants, pin 
 
 #define		UDP_PORT						8080
 
-#define		DRONE_WEIGHT					1200.0     //in grams
+#define		DRONE_WEIGHT					1500.0     //in grams
 
 //Comment out SIDUS_ANDROID_PROTOCOL to establish an Android connection
 #define		SIDUS_PROTOCOL
@@ -385,9 +385,9 @@ bool barometer_initial_measurement = true;
 #define		PID_VEL_ALT_OUTMIN		-500
 #define		PID_VEL_ALT_OUTMAX		500
 
-#define		PID_ACC_ALT_KP			0.357  // Shouldn't be increased than 0.8
-#define		PID_ACC_ALT_KI			0.057 // Helpful range is between 0.02 and 0.1
-#define		PID_ACC_ALT_KD			0.0071 // It shouldn't be greater than 0.02
+#define		PID_ACC_ALT_KP			0.22  // Shouldn't be increased than 0.8
+#define		PID_ACC_ALT_KI			0.035 // Helpful range is between 0.02 and 0.1
+#define		PID_ACC_ALT_KD			0.0044 // It shouldn't be greater than 0.02
 
 #define		PID_ACC_X_KP			1.0 
 #define		PID_ACC_X_KI			0.0    
@@ -459,7 +459,7 @@ bool barometer_initial_measurement = true;
 
 #define     BAT_VOLT_DIV_R1				51.0
 #define		BAT_VOLT_DIV_R2				10.0
-#define     ADC_ERROR_FACTOR			1.11
+#define     ADC_ERROR_FACTOR			1.04
 
 
 #define		RMT_CLK_DIV						80    /*!< RMT counter clock divider */
@@ -484,7 +484,7 @@ long lastTime = 0;
 long appendPacketCounter = 0;
 
 double		PID_THR_BATT_SCALE_FACTOR = 1.0;
-double		PID_BATT_VOLTAGE_SLOPE = -0.12;
+double		PID_BATT_VOLTAGE_SLOPE = -0.1;
 double		PID_BATT_MIDDLE_VOLTAGE = 11.5;
 float		batteryVoltageInVolts;
 

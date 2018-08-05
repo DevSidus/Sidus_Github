@@ -2478,7 +2478,7 @@ void calculate_pid_thr_batt_scale_factor()
 
 	//Use linear interpolation for battery voltage level compensation
 	//Make sure that voltage read is in valid range of operation
-	if (batteryVoltageInVolts > 9.0 && batteryVoltageInVolts < 13.2)
+	if (batteryVoltageInVolts > 9.0 && batteryVoltageInVolts < 20)
 	{		
 		PID_THR_BATT_SCALE_FACTOR = PID_THR_BATT_SCALE_FACTOR * (1.0 + (batteryVoltageInVolts - PID_BATT_MIDDLE_VOLTAGE)*PID_BATT_VOLTAGE_SLOPE);
 	}
