@@ -1,6 +1,8 @@
 # Sidus Sigma Smart Drone Project.
 
-Welcome to our repo that includes both the flight control software running on Sidus Sigma Autopilot and ground station running on Windows environment. Please visit [Wiki](https://github.com/DevSidus/Sidus_Github/wiki) page for additional information.
+Welcome to our fully functional flight control software running on freeRTOS. This safe and robust software is designed for ESP32 based Sidus Sigma Autopilot and optimized for Sidus Sigma Smart Drone. Our repo also includes the ground station software running on Windows environment.
+
+Please visit [Wiki](https://github.com/DevSidus/Sidus_Github/wiki) page for additional information.
 
 ## Getting Started
 These instructions will get you a copy of the project up and running the code for development and testing purposes.
