@@ -20,10 +20,16 @@ These instructions will get you a copy of the project up and running the code fo
    - Install SmartGit or TortoiseGit for Git flow
    - To change directory at Git Bash, use "cd /D/Arduino/hardware/espressif/esp32".
   ```
-* Install [Microsoft Visual Studio](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/)
-* Install [Arduino for Visual Studio (Visual Micro)](https://www.visualmicro.com/) or [Arduiono for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
+* Install [Microsoft Visual Studio](https://visualstudio.microsoft.com/)
+* Install [Arduino for Visual Studio (Visual Micro)](https://www.visualmicro.com/)
   ```
   Hint: Don't forget to configure Arduino IDE location at Microsoft Visual Studio. 
   ``` 
 * Clone [Mavlink](https://github.com/mavlink/c_library_v2.git) library to the "D:\Arduino\hardware\espressif\esp32\libraries" folder.
 * Add [I2CDev](https://github.com/DevSidus/Wiki_Documents/blob/master/Global_Arduino_Libraries/I2Cdev.zip) and [MPU6050](https://github.com/DevSidus/Wiki_Documents/blob/master/Global_Arduino_Libraries/MPU6050.zip) libraries to the "D:\Arduino\hardware\espressif\esp32\libraries" folder.
+
+### Build and upload the code
+* Open the Sidus_Github_Solution.sln in Microsoft Visual Studio
+* The Ground_Station code may not be loaded because of the .Net Framework version mismatch. Install the targeted .NET Framework version (Developer Pack).
+* Select the "ESP32 Dev Module" and the COM port.
+* Click the "Build and Upload" button.
