@@ -7,7 +7,7 @@ Please visit [Wiki](https://github.com/DevSidus/Sidus_Github/wiki) page for addi
 ## Getting Started
 These instructions will get you a copy of the project up and running the code for development and testing purposes.
 
-### Setting-Up the Toolset
+### Setting-up the toolset
 
 * Install [Arduino IDE](https://www.arduino.cc/en/Main/Software)
   ```
