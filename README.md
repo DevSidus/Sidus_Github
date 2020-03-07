@@ -11,22 +11,22 @@ These instructions will get you a copy of the project up and running the code fo
 
 * Install [Arduino IDE](https://www.arduino.cc/en/Main/Software)
   ```
-  Suggestion: It is better to install Arduino IDE to the folder "D:\Arduino" to follow the next steps easily. 
+  Suggestion: It is better to install Arduino IDE to the folder "C:\Arduino" to follow the next steps easily. 
   ``` 
 * Install [Arduino Core for ESP32](https://github.com/espressif/arduino-esp32)
   ```
   Hints:
-   - Basic step at this link is clone the repo at "https://github.com/espressif/arduino-esp32" to the folder "D:\Arduino\hardware\espressif\esp32"
+   - Basic step at this link is clone the repo at "https://github.com/espressif/arduino-esp32" to the folder "C:\Arduino\hardware\espressif\esp32"
    - Install SmartGit or TortoiseGit for Git flow
-   - To change directory at Git Bash, use "cd /D/Arduino/hardware/espressif/esp32".
+   - To change directory at Git Bash, use "cd /C/Arduino/hardware/espressif/esp32".
   ```
 * Install [Microsoft Visual Studio](https://visualstudio.microsoft.com/)
 * Install [Arduino for Visual Studio (Visual Micro)](https://www.visualmicro.com/)
   ```
   Hint: Don't forget to configure Arduino IDE location at Microsoft Visual Studio. 
   ``` 
-* Clone [Mavlink](https://github.com/mavlink/c_library_v2.git) library to the "D:\Arduino\hardware\espressif\esp32\libraries" folder.
-* Add [I2CDev](https://github.com/DevSidus/Wiki_Documents/blob/master/Global_Arduino_Libraries/I2Cdev.zip) and [MPU6050](https://github.com/DevSidus/Wiki_Documents/blob/master/Global_Arduino_Libraries/MPU6050.zip) libraries to the "D:\Arduino\hardware\espressif\esp32\libraries" folder.
+* Clone [Mavlink](https://github.com/mavlink/c_library_v2.git) library to the "C:\Arduino\hardware\espressif\esp32\libraries" folder.
+* Add [I2CDev](https://github.com/DevSidus/Wiki_Documents/blob/master/Global_Arduino_Libraries/I2Cdev.zip) and [MPU6050](https://github.com/DevSidus/Wiki_Documents/blob/master/Global_Arduino_Libraries/MPU6050.zip) libraries to the "C:\Arduino\hardware\espressif\esp32\libraries" folder.
 
 ### Build and upload the code
 * Open the Sidus_Github_Solution.sln in Microsoft Visual Studio
