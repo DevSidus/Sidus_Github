@@ -78,10 +78,11 @@ bool barometer_initial_measurement = true;
 // FCB 3.2 Sensor Settings for TR Boards
 //#define SN_032001
 //#define SN_032002
-#define SN_032003
+//#define SN_032003
 
 // FCB 3.2 Sensor Settings for US Boards
-//#define SN_032001US
+//#define SN_032001US	// The board on the drone
+#define SN_032002US		// The board with two jumper cables
 
 
 #ifdef SN_031001
@@ -189,6 +190,22 @@ bool barometer_initial_measurement = true;
 	double compassHdgYrange = 672.00;
 	double compassHdgZrange = 1022.00;
 #endif // SN_032001US
+
+#ifdef SN_032002US
+	#define mpuXAccelOffset		-679
+	#define mpuYAccelOffset		2759
+	#define mpuZAccelOffset		1707
+	#define mpuXGyroOffset		-30
+	#define mpuYGyroOffset		32
+	#define mpuZGyroOffset		57
+
+	double compassHdgXoffset = 43.00;
+	double compassHdgYoffset = 79.00;
+	double compassHdgZoffset = 5.00;
+	double compassHdgXrange = 834.00;
+	double compassHdgYrange = 672.00;
+	double compassHdgZrange = 1022.00;
+#endif // SN_032002US
 
 #ifdef SN_032002
 	#define mpuXAccelOffset				-2121
