@@ -13,7 +13,7 @@ These instructions will get you a copy of the project up and running the code fo
   ```
   Suggestion: It is better to install Arduino IDE to the folder "C:\Arduino" to follow the next steps easily. 
   ``` 
-* Install [Arduino Core for ESP32](https://github.com/espressif/arduino-esp32)
+* Install [Arduino Core for ESP32](https://github.com/espressif/arduino-esp32) (Note: idf-release/v3.3 is currently supported)
   ```
   Hints:
    - Basic step at this link is clone the repo at "https://github.com/espressif/arduino-esp32" to the folder "C:\Arduino\hardware\espressif\esp32"
