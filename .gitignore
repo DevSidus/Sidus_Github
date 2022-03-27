@@ -22,8 +22,15 @@ bld/
 [Bb]in/
 [Oo]bj/
 
-# Visual Studio 2015 cache/options directory
+# Visual Studio cache/options directory
 .vs/
+.vscode/
+
+# Arduino core folder
+arduino-esp32/
+
+# ESP-IDF SDK config file
+Sigma_Autopilot/sdkconfig
 
 # MSTest test Results
 [Tt]est[Rr]esult*/

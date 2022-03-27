@@ -215,7 +215,7 @@ uint8_t HMC5883L::fastRegister8(uint8_t reg)
 	value = Wire.read();
 #else
 	value = Wire.receive();
-#endif;
+#endif
 	Wire.endTransmission();
 
 	return value;
